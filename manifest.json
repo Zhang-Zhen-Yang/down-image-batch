@@ -1,0 +1,56 @@
+{
+    "author": "zzy",
+    "background": {
+        "page": "background.html",
+        "persistent": true
+    },
+    "browser_action": {
+        "default_icon": {
+            "16": "img/icon.png"
+        },
+        "default_title": "旺店宝-宝贝复制Chrome插件",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "js/jq.js",
+                "js/content-script.js"
+            ],
+            "css": [
+                "css/custom.css"
+            ],
+            "run_at": "document_start",
+            "all_frames": true
+        }
+    ],
+    "default_locale": "zh_CN",
+    "description": "wonbao_goods_copy_plugin",
+    "devtools_page": "devtools.html",
+    "homepage_url": "https://wdb.wonbao.net/main",
+    "icons": {
+        "16": "img/icon.png",
+        "48": "img/icon.png",
+        "128": "img/icon.png"
+    },
+    "manifest_version": 2,
+    "name": "wonbao宝贝复制",
+    "permissions": [
+        "downloads",
+        "contextMenus",
+        "tabs",
+        "notifications",
+        "webRequest",
+        "webRequestBlocking",
+        "storage",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "version": "1.0.0",
+    "web_accessible_resources": [
+        "js/inject.js"
+    ]
+}

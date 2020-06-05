@@ -1,0 +1,54 @@
+{
+    "author": "zzy",
+    "background": {
+        "page": "background.html",
+        "persistent": true
+    },
+    "browser_action": {
+        "default_icon": {
+            "16": "img/icon.png"
+        },
+        "default_title": "fotis的扩展工具箱"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "js/jq.js",
+                "js/content-script.js"
+            ],
+            "css": [
+                "css/custom.css"
+            ],
+            "run_at": "document_start",
+            "all_frames": true
+        }
+    ],
+    "default_locale": "zh_CN",
+    "description": "fotis_toolbox_extension",
+    "homepage_url": "https://github.com/Zhang-Zhen-Yang",
+    "icons": {
+        "16": "img/icon.png",
+        "48": "img/icon.png",
+        "128": "img/icon.png"
+    },
+    "manifest_version": 2,
+    "name": "wonbao-toolbox",
+    "permissions": [
+        "contextMenus",
+        "downloads",
+        "tabs",
+        "notifications",
+        "webRequest",
+        "webRequestBlocking",
+        "storage",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "version": "1.0.0",
+    "web_accessible_resources": [
+        "js/inject.js"
+    ]
+}
