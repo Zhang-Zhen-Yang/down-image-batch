@@ -1,6 +1,6 @@
 import main from './client/main.js';
 window.plugEffective = true; // 给宿主网页判断插件是否有效
-var wonbaoInjectedObj =  wonbaoInjectedObj || {};
+window.wonbaoInjectedObj = {};
 
 // 通过postMessage调用content-script
 function invokeContentScript(code)
@@ -208,7 +208,7 @@ function sendMessageToContentScriptByPostMessage(data)
 		}
 	}
 
-	if(window.$) {
+	if(window.jQuery) {
 		//
 		var getUUID = function() {
 			var s = [];
@@ -224,8 +224,8 @@ function sendMessageToContentScriptByPostMessage(data)
 			return uuid;
 		}
 
-		$(function() {
-			var iframeWrap = $('<div id="wb-iframe-wrap"></div>');
+		jQuery(function() {
+			var iframeWrap = jQuery('<div id="wb-iframe-wrap"></div>');
 			iframeWrap.css({
 				width: '100px',
 				height: '10px',
@@ -243,15 +243,15 @@ function sendMessageToContentScriptByPostMessage(data)
 				(location.href.indexOf('file:')>-1) ||
 				location.href.indexOf('192.168') > -1
 			) {
-				$('body').append(iframeWrap);
+				jQuery('body').append(iframeWrap);
 			}
-			/* var copyBtn = $('#wb-copy');
+			/* var copyBtn = jQuery('#wb-copy');
 			copyBtn.addClass('hasplug');
 			copyBtn.on('click', function(){
 				var list = window.myscript();
 				// alert(list);
 				list.forEach(function(item, index){
-					var iframe = $('<iframe src="'+item+'&v='+Date.now()+'&from=wbExtensions" width="100" height="500">');
+					var iframe = jQuery('<iframe src="'+item+'&v='+Date.now()+'&from=wbExtensions" width="100" height="500">');
 					iframeWrap.append(iframe);
 				})
 			}) */
@@ -276,7 +276,7 @@ function sendMessageToContentScriptByPostMessage(data)
 				} else {
 					src.search = '?v='+Date.now()+'&from=wbExtensions&uuid='+uuid;
 				}
-				var iframe = $('<iframe id="'+uuid+'" src="'+src.href+'" width="100" height="10" sandbox="allow-scripts allow-same-origin allow-popups">');
+				var iframe = jQuery('<iframe id="'+uuid+'" src="'+src.href+'" width="100" height="10" sandbox="allow-scripts allow-same-origin allow-popups">');
 				// 没有onerror事件，在onload 后5s
 				iframe.get(0).onload = function() {
 					setTimeout(function() {
@@ -323,7 +323,7 @@ function sendMessageToContentScriptByPostMessage(data)
 							url: taskList[uuid].url
 						});
 						delete taskList[uuid];
-						$('#'+uuid).remove();
+						jQuery('#'+uuid).remove();
 					}
 				}
 			}
@@ -363,8 +363,10 @@ function sendMessageToContentScriptByPostMessage(data)
 					callback: callback,
 					url: url
 				}
+				console.log({cmd: 'fetchData', url: url, timeout: timeout, uuid: uuid});
 				window.postMessage({cmd: 'fetchData', url: url, timeout: timeout, uuid: uuid}, '*');
 			}
+
 			window.wonbaoInjectedObj.receiveFetchDataTaskResult = function(result) {
 				var uuid = result.uuid;
 				if(fetchDataTaskList[uuid]) {
@@ -414,7 +416,7 @@ function sendMessageToContentScriptByPostMessage(data)
 		
 		if(origin == 'https://www.baidu.com') {
 			// 下载弹窗
-			var dialog = $('<div style="width:600px;height:400px;background-color:white;position:fixed;left:50%;top:50%;transform: translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,0.3);z-index:100;">\
+			var dialog = jQuery('<div style="width:600px;height:400px;background-color:white;position:fixed;left:50%;top:50%;transform: translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,0.3);z-index:100;">\
 				<div style="height: 30px;">\
 					<div style="float:right;cursor:pointer;color:red;font-size: 30px;margin: 0px 6px 0 0;" class="e-dialog-diss">&times;</div>\
 				</div>\
@@ -453,8 +455,8 @@ function sendMessageToContentScriptByPostMessage(data)
 			<div>');
 			
 			// 右侧开始下载按钮
-			var downloadBtn = $('<div style="width: 30px;height:35px;line-height:35px;color:white;border-radius:3px 0 0 3px;background-color:rgb(0,122,204);position:fixed;right:0;top:200px;cursor:pointer;" title="下载">&darr;</div>');
-			$('body').append(downloadBtn)
+			var downloadBtn = jQuery('<div style="width: 30px;height:35px;line-height:35px;color:white;border-radius:3px 0 0 3px;background-color:rgb(0,122,204);position:fixed;right:0;top:200px;cursor:pointer;" title="下载">&darr;</div>');
+			jQuery('body').append(downloadBtn)
 			dialog.hide().appendTo('body');
 	
 			downloadBtn.on('click', function(){

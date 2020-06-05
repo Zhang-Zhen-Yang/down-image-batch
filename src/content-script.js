@@ -1,4 +1,4 @@
-﻿// console.log('这是content script!');
+﻿console.log('这是content script!');
 // 注意，必须设置了run_at=document_start 此段代码才会生效
 document.addEventListener('DOMContentLoaded', function()
 {	
@@ -48,7 +48,7 @@ function injectCustomJs(jsPath, additional)
 // 接收来自后台的消息
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 {
-	// console.log('收到来自 ' + (sender.tab ? "content-script(" + sender.tab.url + ")" : "popup或者background") + ' 的消息：', request);
+	console.log('收到来自 ' + (sender.tab ? "content-script(" + sender.tab.url + ")" : "popup或者background") + ' 的消息：', request);
 	if(request.cmd == 'update_font_size') {
 		var ele = document.createElement('style');
 		ele.innerHTML = ('* {font-size: '+request.size+'px !important;}');
@@ -131,6 +131,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 		)
 		injectCustomJs(codeURL, true);
 	} else if (request.cmd == 'reveiveFetchData') { // 向 page 通知接收到的跨域请求到的数据
+		alert('ddd');
 		var result = {
 			url: request.url,
 			res: (request.res || '').replace(/'/mig, 'a1562723483981KJZvFoxt').replace(/"/mig, 'b1562723483981KJZvFoxt' ),
@@ -173,7 +174,7 @@ function sendMessageToBackground(message) {
 
 // 监听长连接
 chrome.runtime.onConnect.addListener(function(port) {
-	// console.log(port);
+	console.log(port);
 	if(port.name == 'test-connect') {
 		port.onMessage.addListener(function(msg) {
 			//console.log('收到长连接消息：', msg);
@@ -185,7 +186,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 
 window.addEventListener("message", function(e)
 {
-	// console.log('收到消息：', e.data);
+	console.log('收到消息：', e.data);
 	if(e.data && e.data.cmd == 'invoke') {
 		eval('('+e.data.code+')');
 	}
@@ -211,6 +212,7 @@ window.addEventListener("message", function(e)
 			
 		});
 	} else if(e.data.cmd == 'fetchData') {
+		alert('fetchData----');
 		chrome.runtime.sendMessage({cmd:'fetchData', url: e.data.url, timeout: e.data.timeout, uuid: e.data.uuid, blob: e.data.blob}, function(response) {
 			// console.log('fetchHttpContent', response);
 			// alert('fetchHttpContent');

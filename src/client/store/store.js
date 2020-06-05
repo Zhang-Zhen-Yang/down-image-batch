@@ -13,11 +13,13 @@ const store = {
         currentPage: 1,
 
         imgMapTag: {},
-        url: [],
-        successUrl: [],
-        errorUrl: [],
+        imgMapThumbnail: {},
+        list: [],
+        successList: [],
+        errorList: [],
         fetchingList: [],
         parallelNum: 2,
+        pageDataSuccess: false,
 	},
 	// ---------------------------------------------------------------------------------------------------------
 	getters: {
@@ -40,92 +42,151 @@ const store = {
             let origin = location.origin;
             let search = location.search;
             let queryString = util.getQueryString(search);
-
+            // alert(origin);
             if(origin.indexOf('danbooru') > -1 ) {
-                state.urlType == 'danbooru';
+                state.urlType = 'danbooru';
             } else if(origin.indexOf('yande.re') > -1 ) {
-                state.urlType == 'yande.re';
+                state.urlType = 'yande.re';
             }
+            state.origin = origin;
             state.tags = queryString.tags;
+            state.pathname = location.pathname;
+
+          
+           
+
+
+            /* setTimeout(()=>{
+               
+                let u = 'https://yande.re/post?page=1&tags=dishwasher1910';
+                window.fetchData && window.fetchData(u, 1000000, function(res) {
+                    console.log(res);
+                })
+            }, 1000) */
         },
         startDown(){
 
         },
         // 将失败列表添加到待获取列表里
-        addToList() {
+        addToList({state}) {
             state.errorList.forEach((i)=>{
-                list.splice(0,0,i);
+                state.list.splice(0,0,i);
             })
             state.errorList = [];
         },
         // 开始获取页面数据
         startFetchPageData({state,commit,dispatch}) {
-            this.fetchPageCount();
+            console.log('startFetchPageData');
+            dispatch('fetchPageCount');
             dispatch('fetchPageData', {pageNo: 1});
         },
         fetchPageCount({state, commit, dispatch, getters}) {
-            let dom = $('<div>'+$('body').html()+'</div>');
+            // alert(state.urlType);
+            let dom = jQuery('<div>'+jQuery('body').html()+'</div>');
+            let pageNo = 0;
             let pageTotal = 0;
             if(state.urlType == 'danbooru') {
                 let numberedPage = dom.find('.numbered-page a');
                 numberedPage.each((index, pItem)=>{
                     console.log(index, pItem);
                     console.log(pItem);
-                    let p = parseInt($(pItem).html());
+                    let p = parseInt(jQuery(pItem).html());
                     if(p > pageNo) {
                         pageTotal = p
                     }
                 });
 
             } else if(state.urlType == 'yande.re') {
-
+                let numberedPage = dom.find('#paginator a');
+                // alert(numberedPage.length);
+                pageTotal = 1;
+                numberedPage.each((index, pItem)=>{
+                    console.log(pItem);
+                    let p = parseInt(jQuery(pItem).html());
+                    if(p > pageNo) {
+                        pageTotal = p
+                    }
+                });
             }
+            
             state.pageTotal = pageTotal;
         },
         fetchPageData({state, commit,dispatch}, {pageNo}) {
-            state.list = [];
-            state.fetchingList = [];
-            state.errorList = [];
-            state.imgMapTag = {};
+            if(pageNo == 1) {
+                state.list = [];
+                state.fetchingList = [];
+                state.errorList = [];
+                state.imgMapTag = {};
+                state.imgMapThumbnail = {};
+                state.pageDataSuccess = false;
+            }
+            console.log([pageNo, state.pageTotal]);
             if(pageNo <= state.pageTotal) {
                 state.currentPage = pageNo;
+                let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
+                console.log('url', url);
                 window.fetchData && window.fetchData(url, 1000000, function(res) {
+                    // console.log(res);
                     let text = res.res.replace(/\n/mig, ' ');
                     let bodyCotent = util.getBodyContent(text);
-                    dispatch('fetchPageImageUrl', {content: bodyCotent}).then(()=>{
+                    console.log('bodyCotent');
+                    // console.log(bodyCotent);
+                    dispatch('fetchPageImageUrl', {content: bodyCotent, pageNo}).then(()=>{
                         dispatch('fetchPageData', {pageNo: pageNo + 1});
                     })
                 })
+            } else {
+                state.pageDataSuccess = true;
             }
         },
-        fetchPageImageUrl({state}, {content}) {
+        fetchPageImageUrl({state}, {content, pageNo}) {
+            console.log(/* fetchPageImageUrl */);
             return new Promise((resolve, reject)=>{
-                let dom = $('<div>'+content+'</div>');
+                let dom = jQuery('<div>'+content+'</div>');
+               
                 if(state.urlType == 'danboru') {
                     let articles = dom.find('#posts-container article');
                     let currentPageImage = [];
                     articles.each((index, a) => {
-                        let dataFileUrl = $(a).attr('data-file-url');
+                        let dataFileUrl = jQuery(a).attr('data-file-url');
                         if(dataFileUrl.indexOf('/') == 0) {
                             dataFileUrl = 'https://danbooru.me' + dataFileUrl;
                         }
                         state.imgMapTag[dataFileUrl] = pageNo +'-'+ index;
+                        state.imgMapThumbnail[dataFileUrl] = pageNo +'-'+ index;
                         state.list.push(dataFileUrl);
             
                     })
 
                 } else if(state.urlType == 'yande.re'){
+                    // alert(state.urlType);
+                    let articles = dom.find('#post-list-posts .largeimg,.smallimg');
+                    console.log('articles');
+                    console.log(articles);
+                    
 
+                    articles.each((index, a)=>{
+                        let dataFileUrl = jQuery(a).attr('href');
+                        if(dataFileUrl.indexOf('/') == 0) {
+                            dataFileUrl = 'https://danbooru.me' + dataFileUrl;
+                        }
+                        console.log(dataFileUrl);
+                        state.list.push(dataFileUrl);
+                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ index;
+                        state.imgMapThumbnail[dataFileUrl] = jQuery(a).prev().find('img').attr('src');
+                    })
                 }
                 resolve();
             })
         },
-        fetchImageData({state}, {start} = {start: false}) {
+        fetchImageData({state, dispatch}, {start} = {start: false}) {
+            // alert('ddd');
             if(start) {
                 for(let i =0; i < state.parallelNum; i ++) {
                     dispatch('fetchImageData');
                 }
             } else {
+                console.log('ddddd');
                 if(state.fetchingList.length < state.parallelNum) {
                     let url = state.list.splice(0, 1);
                     if(url && url[0]) {
@@ -143,10 +204,10 @@ const store = {
                                 })
                                 
                                 state.successList.push(url);
-                                let blob = convertBase64ToBlob(res.res);
+                                /* let blob = util.convertBase64ToBlob(res.res);
                                 console.log('blob', blob);
                                 let urlLink = URL.createObjectURL(blob);
-                                urlMap[url] = urlLink;
+                                urlMap[url] = urlLink; */
                                 // URL.revokeObjectURL(urlLink);
                                 
                                 // 添加下一个任务
