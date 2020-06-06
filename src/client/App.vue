@@ -3,6 +3,7 @@
   <div>
     <div class="download-btn" style="" title="下载" @click="showDialog">&darr;</div>
     <download-dialog></download-dialog>
+    <snackbar ref="snackbar"></snackbar>
   </div>
 </template>
 
@@ -18,7 +19,9 @@ export default {
     }
   },
   computed:{
-
+    snackbar(){
+      return this.$store.state.snackbar;
+    },
   },
   methods: {
     dragover(ev) {
@@ -37,7 +40,15 @@ export default {
   mounted(){
   },
   watch:{
-    
+    snackbar:{
+      handler(e){
+        if(e.show){
+          this.$refs.snackbar.show(this.snackbar.text, this.snackbar.timeout);
+          this.$store.state.snackbar.show=false;
+        }
+      },
+      deep: true,
+    }
   }
 }
 </script>

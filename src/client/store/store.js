@@ -7,17 +7,24 @@
 import util from '../util.js';
 const store = {
 	state: {
+        snackbar: {
+            show: false,
+            text: '',
+            timeout:2000,
+        },
         showDialog: true,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
+        tags: 'tags',
 
-        imgMapTag: {},
+        imgMapTag: {},//{list1: 'tag1', list2: 'tag2', list3: 'tag3', list4: 'tag4'},
         imgMapThumbnail: {},
-        list: [],
+        list: [],// ['list1', 'list2', 'list3'],
         successList: [],
         errorList: [],
         fetchingList: [],
+        isfetching: false,
         parallelNum: 2,
         pageDataSuccess: false,
 	},
@@ -31,6 +38,11 @@ const store = {
 	mutations: {
 		setActiveIndex(state, {activeIndex}) {
 			
+        },
+        showSnackbar(state,{text,timeout=2000}) {
+			state.snackbar.text = text;
+			state.snackbar.timeout = timeout;
+			state.snackbar.show = true;
 		},
 		
 	},
@@ -53,9 +65,6 @@ const store = {
             state.pathname = location.pathname;
 
           
-           
-
-
             /* setTimeout(()=>{
                
                 let u = 'https://yande.re/post?page=1&tags=dishwasher1910';
@@ -63,6 +72,50 @@ const store = {
                     console.log(res);
                 })
             }, 1000) */
+            document.body.addEventListener('drop', (e)=>{
+                e.preventDefault();
+                // console.log(e);
+                let file = e.dataTransfer.files;
+                console.log(file);
+                if(file && file[0]) {
+                    if(util.endWidth(file[0].name, '.json')) {
+                        let fileReader = new FileReader();
+                        fileReader.readAsText(file[0]);
+                        fileReader.onload = ()=>{
+                            let jsonText = fileReader.result;
+                            console.log(jsonText);
+                            try{
+                                let json = JSON.parse(jsonText);
+                                state.tags = json.tags;
+                                state.list = [];
+                                state.errorList = [];
+                                state.successList = [];
+                                state.fetchingList = [];
+                                state.imgMapTag = {};
+
+                                let toSetList = [];
+                                let toSetMap = {};
+                                json.list.forEach((item,index) => {
+                                    let key = Object.keys(item)[0]
+                                    toSetList.push(key);
+                                    toSetMap[key] = item[key];
+                                })
+                                state.list = toSetList;
+                                state.imgMapTag = toSetMap;
+                                console.log(toSetList);
+                                console.log(toSetMap);
+                            }catch(e){
+                                console.error(e);
+                            }
+                        }
+                    }
+                }
+            })
+            document.body.addEventListener('dragover', (e)=>{
+                e.preventDefault();
+                // console.log(e);
+            })
+            commit('showSnackbar', {text: '53333333333333333333333'})
         },
         startDown(){
 
@@ -80,6 +133,7 @@ const store = {
             dispatch('fetchPageCount');
             dispatch('fetchPageData', {pageNo: 1});
         },
+        // 获取共有多少页
         fetchPageCount({state, commit, dispatch, getters}) {
             // alert(state.urlType);
             let dom = jQuery('<div>'+jQuery('body').html()+'</div>');
@@ -111,6 +165,7 @@ const store = {
             
             state.pageTotal = pageTotal;
         },
+        // 获取页面数据
         fetchPageData({state, commit,dispatch}, {pageNo}) {
             if(pageNo == 1) {
                 state.list = [];
@@ -139,6 +194,7 @@ const store = {
                 state.pageDataSuccess = true;
             }
         },
+        // 通过html解析页面img
         fetchPageImageUrl({state}, {content, pageNo}) {
             console.log(/* fetchPageImageUrl */);
             return new Promise((resolve, reject)=>{
@@ -179,7 +235,11 @@ const store = {
                 resolve();
             })
         },
+        // 获取图片数据
         fetchImageData({state, dispatch}, {start} = {start: false}) {
+            if(!state.isfetching){
+                return;
+            }
             // alert('ddd');
             if(start) {
                 for(let i =0; i < state.parallelNum; i ++) {
@@ -233,14 +293,41 @@ const store = {
                             }
                         });
                     } else {
-                        alert('获取完成');
+                        // alert('获取完成');
+                        window.notify('success', '', '获取完成', `user:${state.tags}`);
                     }
+                    dispatch('fetchImageData');
                 } else {
+
                     console.log('no f');
                 }
             }
-        }
+        },
+        // 保存未获取成功的列表
+        saveUnfetchList({state}){
+            let distList = state.fetchingList.concat(state.list).concat(state.errorList);
+            // console.log(distList);
 
+            let toSaveList = [];
+            distList.forEach((item)=>{
+                let listItem = {};
+                listItem[item] = state.imgMapTag[item] || '';
+                toSaveList.push(listItem);
+            })
+            let toSaveJson = {
+                tags: state.tags,
+                list: toSaveList
+            }
+            let blob = new Blob([JSON.stringify(toSaveJson)], {type : 'application/json'});
+            /* console.log(toSaveList);
+            console.log(blob); */
+            let file = new FileReader();
+            file.readAsDataURL(blob);
+            file.onload = ()=>{
+                console.log(file.result);
+                window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
+            }
+        }
 	
 	},
 	modules: {

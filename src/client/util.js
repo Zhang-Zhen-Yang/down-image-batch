@@ -56,6 +56,28 @@ export default {
         let bodyContent = text.slice(text.indexOf('>', bodyStart) + 1, bodyEnd);
         console.log(bodyContent);
         return bodyContent;
+    },
+    shouldInjectDom() {
+        let href = location.href;
+        if(href.indexOf('danbooru') > -1 || href.indexOf('yande.re') > -1 || href.indexOf('baidu.com') > -1) {
+            return true;
+        }
+        return false;
+    },
+    notifyStatus(status) {
+        let title = document.title;
+        title = title.replace(/^(↓|√)/, '');
+        if(status == 'progress') {
+            document.title = '↓' + title;
+        } else if(status == 'success') {
+            document.title = '√' + title;
+        }
+    },
+    endWidth(text, v) {
+        if(  text && v && (text.indexOf(v) + v.length)==text.length) {
+            return true;
+        }
+        return false;
     }
 
 }

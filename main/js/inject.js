@@ -95,6 +95,95 @@ module.exports = g;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = ({
+    // 获取链接的查询字符
+    getQueryString(url) {
+        let result = {};
+        let href = window.location.toString();
+        let queryString;
+        if (url) {
+            queryString = url.split('?')[1];
+        } else {
+            queryString = href.split('?')[1];
+        }
+
+        if (queryString) {
+            let queryStringList = queryString.split('&');
+            if (queryStringList) {
+                queryStringList.forEach(item => {
+                    let queryPairing = item.split('=');
+                    result[queryPairing[0]] = queryPairing[1];
+                });
+            }
+        }
+        return result;
+    },
+    // 将base64转成blob
+    convertBase64ToBlob(base64, type) {
+        var base64Arr = base64.split(',');
+        var imgtype = '';
+        var base64String = '';
+        if (base64Arr.length > 1) {
+            //如果是图片base64，去掉头信息
+            base64String = base64Arr[1];
+            imgtype = base64Arr[0].substring(base64Arr[0].indexOf(':') + 1, base64Arr[0].indexOf(';'));
+        }
+        // 将base64解码
+        var bytes = atob(base64String);
+        //var bytes = base64;
+        var bytesCode = new ArrayBuffer(bytes.length);
+        // 转换为类型化数组
+        var byteArray = new Uint8Array(bytesCode);
+
+        // 将base64转换为ascii码
+        for (var i = 0; i < bytes.length; i++) {
+            byteArray[i] = bytes.charCodeAt(i);
+        }
+        if (type == 'byteArray') {
+            return byteArray;
+        }
+        // 生成Blob对象（文件对象）
+        return new Blob([bytesCode], { type: imgtype });
+    },
+    // 获取html页面body的内容
+    getBodyContent(text) {
+        let bodyStart = text.indexOf('<body');
+        console.log(text.indexOf('>', bodyStart));
+        let bodyEnd = text.indexOf('</body');
+        let bodyContent = text.slice(text.indexOf('>', bodyStart) + 1, bodyEnd);
+        console.log(bodyContent);
+        return bodyContent;
+    },
+    shouldInjectDom() {
+        let href = location.href;
+        if (href.indexOf('danbooru') > -1 || href.indexOf('yande.re') > -1 || href.indexOf('baidu.com') > -1) {
+            return true;
+        }
+        return false;
+    },
+    notifyStatus(status) {
+        let title = document.title;
+        title = title.replace(/^(↓|√)/, '');
+        if (status == 'progress') {
+            document.title = '↓' + title;
+        } else if (status == 'success') {
+            document.title = '√' + title;
+        }
+    },
+    endWidth(text, v) {
+        if (text && v && text.indexOf(v) + v.length == text.length) {
+            return true;
+        }
+        return false;
+    }
+
+});
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports) {
 
 /*
@@ -150,7 +239,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 module.exports = function normalizeComponent (
@@ -203,7 +292,7 @@ module.exports = function normalizeComponent (
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -424,7 +513,7 @@ function applyToTag (styleElement, obj) {
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -432,34 +521,57 @@ function applyToTag (styleElement, obj) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__App_vue__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__App_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__App_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store_store_js__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store_store_js__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_vuex__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__widgets_widgets__ = __webpack_require__(31);
+/*
+ * @Author: zhangzhenyang 
+ * @Date: 2020-06-06 08:46:27 
+ * @Last Modified by: zhangzhenyang
+ * @Last Modified time: 2020-06-06 15:44:04
+ */
 
 
 
 
-__WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_3_vuex__["a" /* default */]);
 
-const store = new __WEBPACK_IMPORTED_MODULE_3_vuex__["a" /* default */].Store(__WEBPACK_IMPORTED_MODULE_2__store_store_js__["a" /* default */]);
 
-let hostView = document.createElement('div');
-hostView.setAttribute('id', 'app');
-document.body.appendChild(hostView);
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_5__widgets_widgets__["a" /* default */]);
 
-window.project = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
-  el: '#app',
-  store,
-  render: h => h(__WEBPACK_IMPORTED_MODULE_1__App_vue___default.a)
-});
+// 只有在相关的网站才显示下载界面
+if (__WEBPACK_IMPORTED_MODULE_4__util__["a" /* default */].shouldInjectDom()) {
+  __WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_3_vuex__["a" /* default */]);
+  const store = new __WEBPACK_IMPORTED_MODULE_3_vuex__["a" /* default */].Store(__WEBPACK_IMPORTED_MODULE_2__store_store_js__["a" /* default */]);
+
+  let hostView = document.createElement('div');
+  hostView.setAttribute('id', 'app');
+  document.body.appendChild(hostView);
+
+  window.project = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
+    el: '#app',
+    store,
+    render: h => h(__WEBPACK_IMPORTED_MODULE_1__App_vue___default.a)
+  });
+  console.log('2020-06-06 08:46:27');
+}
+
+/* util.notifyStatus('progress');
+setTimeout(()=>{
+  util.notifyStatus('success');
+  window.notify('', '', '获取完成', `user:ohisashiburi`);       
+}, 2000) 
+ */
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dialog_vue__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dialog_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__dialog_vue__);
+//
 //
 //
 //
@@ -478,7 +590,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   data() {
     return {};
   },
-  computed: {},
+  computed: {
+    snackbar() {
+      return this.$store.state.snackbar;
+    }
+  },
   methods: {
     dragover(ev) {
       ev.preventDefault();
@@ -494,15 +610,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     this.$store.dispatch('init');
   },
   mounted() {},
-  watch: {}
+  watch: {
+    snackbar: {
+      handler(e) {
+        if (e.show) {
+          this.$refs.snackbar.show(this.snackbar.text, this.snackbar.timeout);
+          this.$store.state.snackbar.show = false;
+        }
+      },
+      deep: true
+    }
+  }
 });
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
 //
 //
 //
@@ -594,6 +725,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     imgMapThumbnail() {
       return this.$store.state.imgMapThumbnail;
+    },
+    parallelNum: {
+      get() {
+        return this.$store.state.parallelNum;
+      },
+      set(val) {
+        this.$store.state.parallelNum = val;
+      }
+    },
+    isfetching() {
+      return this.$store.state.isfetching;
     }
   },
   methods: {
@@ -604,26 +746,32 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.$store.dispatch('startFetchPageData');
     },
     fetchImageData() {
-      this.$store.dispatch('fetchImageData', { start: true });
+      if (this.isfetching) {
+        this.$store.state.isfetching = false;
+      } else {
+        this.$store.state.isfetching = true;
+        this.$store.dispatch('fetchImageData', { start: true });
+      }
     },
     addToList() {
       this.$store.dispatch('addToList');
+    },
+    saveUnfetchList() {
+      this.$store.dispatch('saveUnfetchList');
     }
   },
-  created() {
-    this.$store.dispatch('init');
-  },
+  created() {},
   mounted() {},
   watch: {}
 });
 
 /***/ }),
-/* 7 */,
-/* 8 */
+/* 8 */,
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_js__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_js__ = __webpack_require__(1);
 /*
  * @Author: zhangzhenyang 
  * @Date: 2018-10-31 15:34:02 
@@ -633,17 +781,24 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 const store = {
     state: {
+        snackbar: {
+            show: false,
+            text: '',
+            timeout: 2000
+        },
         showDialog: true,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
+        tags: 'tags',
 
-        imgMapTag: {},
+        imgMapTag: {}, //{list1: 'tag1', list2: 'tag2', list3: 'tag3', list4: 'tag4'},
         imgMapThumbnail: {},
-        list: [],
+        list: [], // ['list1', 'list2', 'list3'],
         successList: [],
         errorList: [],
         fetchingList: [],
+        isfetching: false,
         parallelNum: 2,
         pageDataSuccess: false
     },
@@ -655,7 +810,12 @@ const store = {
     },
     // -----------------------------------------------------------------------------------------------------------
     mutations: {
-        setActiveIndex(state, { activeIndex }) {}
+        setActiveIndex(state, { activeIndex }) {},
+        showSnackbar(state, { text, timeout = 2000 }) {
+            state.snackbar.text = text;
+            state.snackbar.timeout = timeout;
+            state.snackbar.show = true;
+        }
 
     },
     // -------------------------------------------------------------------------------------------------------------
@@ -683,6 +843,50 @@ const store = {
                     console.log(res);
                 })
             }, 1000) */
+            document.body.addEventListener('drop', e => {
+                e.preventDefault();
+                // console.log(e);
+                let file = e.dataTransfer.files;
+                console.log(file);
+                if (file && file[0]) {
+                    if (__WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].endWidth(file[0].name, '.json')) {
+                        let fileReader = new FileReader();
+                        fileReader.readAsText(file[0]);
+                        fileReader.onload = () => {
+                            let jsonText = fileReader.result;
+                            console.log(jsonText);
+                            try {
+                                let json = JSON.parse(jsonText);
+                                state.tags = json.tags;
+                                state.list = [];
+                                state.errorList = [];
+                                state.successList = [];
+                                state.fetchingList = [];
+                                state.imgMapTag = {};
+
+                                let toSetList = [];
+                                let toSetMap = {};
+                                json.list.forEach((item, index) => {
+                                    let key = Object.keys(item)[0];
+                                    toSetList.push(key);
+                                    toSetMap[key] = item[key];
+                                });
+                                state.list = toSetList;
+                                state.imgMapTag = toSetMap;
+                                console.log(toSetList);
+                                console.log(toSetMap);
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        };
+                    }
+                }
+            });
+            document.body.addEventListener('dragover', e => {
+                e.preventDefault();
+                // console.log(e);
+            });
+            commit('showSnackbar', { text: '53333333333333333333333' });
         },
         startDown() {},
         // 将失败列表添加到待获取列表里
@@ -698,6 +902,7 @@ const store = {
             dispatch('fetchPageCount');
             dispatch('fetchPageData', { pageNo: 1 });
         },
+        // 获取共有多少页
         fetchPageCount({ state, commit, dispatch, getters }) {
             // alert(state.urlType);
             let dom = jQuery('<div>' + jQuery('body').html() + '</div>');
@@ -728,6 +933,7 @@ const store = {
 
             state.pageTotal = pageTotal;
         },
+        // 获取页面数据
         fetchPageData({ state, commit, dispatch }, { pageNo }) {
             if (pageNo == 1) {
                 state.list = [];
@@ -756,6 +962,7 @@ const store = {
                 state.pageDataSuccess = true;
             }
         },
+        // 通过html解析页面img
         fetchPageImageUrl({ state }, { content, pageNo }) {
             console.log();
             return new Promise((resolve, reject) => {
@@ -793,7 +1000,11 @@ const store = {
                 resolve();
             });
         },
+        // 获取图片数据
         fetchImageData({ state, dispatch }, { start } = { start: false }) {
+            if (!state.isfetching) {
+                return;
+            }
             // alert('ddd');
             if (start) {
                 for (let i = 0; i < state.parallelNum; i++) {
@@ -847,12 +1058,40 @@ const store = {
                             }
                         });
                     } else {
-                        alert('获取完成');
+                        // alert('获取完成');
+                        window.notify('success', '', '获取完成', `user:${state.tags}`);
                     }
+                    dispatch('fetchImageData');
                 } else {
+
                     console.log('no f');
                 }
             }
+        },
+        // 保存未获取成功的列表
+        saveUnfetchList({ state }) {
+            let distList = state.fetchingList.concat(state.list).concat(state.errorList);
+            // console.log(distList);
+
+            let toSaveList = [];
+            distList.forEach(item => {
+                let listItem = {};
+                listItem[item] = state.imgMapTag[item] || '';
+                toSaveList.push(listItem);
+            });
+            let toSaveJson = {
+                tags: state.tags,
+                list: toSaveList
+            };
+            let blob = new Blob([JSON.stringify(toSaveJson)], { type: 'application/json' });
+            /* console.log(toSaveList);
+            console.log(blob); */
+            let file = new FileReader();
+            file.readAsDataURL(blob);
+            file.onload = () => {
+                console.log(file.result);
+                window.sendDownload && window.sendDownload({ url: file.result, fileName: `${state.tags || 'unknow'}.json` });
+            };
         }
 
     },
@@ -861,80 +1100,13 @@ const store = {
 /* harmony default export */ __webpack_exports__["a"] = (store);
 
 /***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ __webpack_exports__["a"] = ({
-    // 获取链接的查询字符
-    getQueryString(url) {
-        let result = {};
-        let href = window.location.toString();
-        let queryString;
-        if (url) {
-            queryString = url.split('?')[1];
-        } else {
-            queryString = href.split('?')[1];
-        }
-
-        if (queryString) {
-            let queryStringList = queryString.split('&');
-            if (queryStringList) {
-                queryStringList.forEach(item => {
-                    let queryPairing = item.split('=');
-                    result[queryPairing[0]] = queryPairing[1];
-                });
-            }
-        }
-        return result;
-    },
-    // 将base64转成blob
-    convertBase64ToBlob(base64, type) {
-        var base64Arr = base64.split(',');
-        var imgtype = '';
-        var base64String = '';
-        if (base64Arr.length > 1) {
-            //如果是图片base64，去掉头信息
-            base64String = base64Arr[1];
-            imgtype = base64Arr[0].substring(base64Arr[0].indexOf(':') + 1, base64Arr[0].indexOf(';'));
-        }
-        // 将base64解码
-        var bytes = atob(base64String);
-        //var bytes = base64;
-        var bytesCode = new ArrayBuffer(bytes.length);
-        // 转换为类型化数组
-        var byteArray = new Uint8Array(bytesCode);
-
-        // 将base64转换为ascii码
-        for (var i = 0; i < bytes.length; i++) {
-            byteArray[i] = bytes.charCodeAt(i);
-        }
-        if (type == 'byteArray') {
-            return byteArray;
-        }
-        // 生成Blob对象（文件对象）
-        return new Blob([bytesCode], { type: imgtype });
-    },
-    // 获取html页面body的内容
-    getBodyContent(text) {
-        let bodyStart = text.indexOf('<body');
-        console.log(text.indexOf('>', bodyStart));
-        let bodyEnd = text.indexOf('</body');
-        let bodyContent = text.slice(text.indexOf('>', bodyStart) + 1, bodyEnd);
-        console.log(bodyContent);
-        return bodyContent;
-    }
-
-});
-
-/***/ }),
 /* 10 */,
 /* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__client_main_js__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__client_main_js__ = __webpack_require__(5);
 
 window.plugEffective = true; // 给宿主网页判断插件是否有效
 window.wonbaoInjectedObj = {};
@@ -1398,7 +1570,7 @@ function sendMessageToContentScriptByPostMessage(data) {
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(1)();
+exports = module.exports = __webpack_require__(2)();
 // imports
 
 
@@ -1412,12 +1584,12 @@ exports.push([module.i, ".download-btn{width:30px;height:35px;line-height:35px;c
 /* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(1)();
+exports = module.exports = __webpack_require__(2)();
 // imports
 
 
 // module
-exports.push([module.i, ".download-dialog{width:780px;height:500px;background-color:#fff;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,.3);border-radius:3px;z-index:100}.e-dialog-diss{float:right;cursor:pointer;color:red;font-size:30px;margin:0 6px 0 0}.download-dialog div,.download-dialog h3,.download-dialog span{color:rgba(0,0,0,.9)}.list-block{min-height:20px;max-height:100px;overflow:auto;border:1px solid #eee;word-break:keep-all}.success-thumbnial{width:100px;height:100px;border:1px solid #efefef;object-fit:contain;object-position:center;margin:10px}", ""]);
+exports.push([module.i, ".download-dialog{width:780px;height:500px;position:fixed;left:50%;top:50%;text-align:left;background-color:#fff;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,.3);border-radius:3px;z-index:100}.e-dialog-diss{float:right;cursor:pointer;font-size:30px;margin:0 6px 0 0}.e-dialog-diss:hover{color:red}.download-dialog div,.download-dialog h3,.download-dialog span{color:rgba(0,0,0,.9)}.list-block{min-height:20px;max-height:100px;overflow:auto;border:1px solid #eee;word-break:keep-all}.success-thumbnial{width:100px;height:100px;border:1px solid #efefef;object-fit:contain;object-position:center;margin:10px}.download-dialog button{border:none;outline:none;background-color:#007acc;padding:5px 10px;color:#fff}.download-dialog input{line-height:2.2em;border:1px solid #aaa;height:29px}", ""]);
 
 // exports
 
@@ -1883,9 +2055,9 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 /* styles */
 __webpack_require__(23)
 
-var Component = __webpack_require__(2)(
+var Component = __webpack_require__(3)(
   /* script */
-  __webpack_require__(5),
+  __webpack_require__(6),
   /* template */
   __webpack_require__(21),
   /* scopeId */
@@ -1905,9 +2077,9 @@ module.exports = Component.exports
 /* styles */
 __webpack_require__(24)
 
-var Component = __webpack_require__(2)(
+var Component = __webpack_require__(3)(
   /* script */
-  __webpack_require__(6),
+  __webpack_require__(7),
   /* template */
   __webpack_require__(22),
   /* scopeId */
@@ -1932,133 +2104,16 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     on: {
       "click": _vm.showDialog
     }
-  }, [_vm._v("↓")]), _vm._v(" "), _c('download-dialog')], 1)
+  }, [_vm._v("↓")]), _vm._v(" "), _c('download-dialog'), _vm._v(" "), _c('snackbar', {
+    ref: "snackbar"
+  })], 1)
 },staticRenderFns: []}
 
 /***/ }),
 /* 22 */
 /***/ (function(module, exports) {
 
-module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('div', {
-    directives: [{
-      name: "show",
-      rawName: "v-show",
-      value: (_vm.showDialog),
-      expression: "showDialog"
-    }],
-    staticClass: "download-dialog"
-  }, [_c('div', {
-    staticStyle: {
-      "height": "30px"
-    }
-  }, [_c('div', {
-    staticClass: "e-dialog-diss",
-    on: {
-      "click": _vm.hideDialog
-    }
-  }, [_vm._v("×")])]), _vm._v(" "), _c('div', {
-    staticStyle: {
-      "height": "320px",
-      "overflow": "auto",
-      "box-sizing": "border-box",
-      "padding": "10px 0 10px 10px",
-      "width": "99%"
-    }
-  }, [_c('h3', [_vm._v("1.通过httpRequest 获取 图片")]), _vm._v(" "), _c('input', {
-    attrs: {
-      "id": "pddurl",
-      "type": "text",
-      "placeholder": "请输入danbooru链接",
-      "value": "https://danbooru.donmai.us/posts?page=1&tags=ameyame"
-    }
-  }), _vm._v(" "), _c('button', {
-    staticClass: "btn",
-    attrs: {
-      "id": "btn-fetch-data"
-    },
-    on: {
-      "click": _vm.startFetchPageData
-    }
-  }, [_vm._v("获取")]), _vm._v(" "), _c('br'), _vm._v(" "), _c('div', [_vm._v("\n        过程："), (!_vm.pageDataSuccess) ? _c('span', [_vm._v("共" + _vm._s(_vm.pageTotal) + "页 正在获取第" + _vm._s(_vm.currentPage) + "页")]) : _vm._e(), _vm._v(" "), (_vm.pageDataSuccess) ? _c('span', [_vm._v("获取完成")]) : _vm._e()]), _vm._v(" "), _c('br'), _vm._v(" "), _vm._m(0), _vm._v(" "), _c('br'), _vm._v(" "), _c('button', {
-    staticClass: "btn",
-    attrs: {
-      "id": "fetImage"
-    },
-    on: {
-      "click": _vm.fetchImageData
-    }
-  }, [_vm._v("获取以下图片")]), _vm._v(" "), _c('input', {
-    attrs: {
-      "id": "parallel-num",
-      "type": "number",
-      "min": "1",
-      "value": "1"
-    }
-  }), _vm._v(" "), _c('div', {
-    staticClass: "list-block",
-    attrs: {
-      "id": "fetching-list"
-    }
-  }, [_vm._v("\n      " + _vm._s(_vm.fetchingList.join('\n')) + "\n    ")]), _vm._v(" "), _c('br'), _vm._v(" "), _c('div', [_vm._v("未获取的图片")]), _vm._v(" "), _c('span', {
-    attrs: {
-      "id": "fetch-list-length"
-    }
-  }, [_vm._v(_vm._s(_vm.list.length))]), _vm._v(" "), _c('div', {
-    staticClass: "list-block",
-    attrs: {
-      "id": "fetched-list"
-    }
-  }, [_vm._v("\n      " + _vm._s(_vm.list.join('\n')) + "\n    ")]), _vm._v(" "), _c('div', [_c('br'), _vm._v(" "), _c('div', [_vm._v("获取失败的图片")]), _vm._v(" "), _c('span', {
-    attrs: {
-      "id": "fetch-error-list-length"
-    }
-  }, [_vm._v(_vm._s(_vm.errorList.length))]), _vm._v(" "), _c('button', {
-    staticClass: "btn",
-    attrs: {
-      "id": "btn-add-to-unfetch"
-    },
-    on: {
-      "click": _vm.addToList
-    }
-  }, [_vm._v("添加到未获取列表")]), _vm._v(" "), _c('div', {
-    staticClass: "list-block",
-    attrs: {
-      "id": "fetch-error-list"
-    }
-  }, [_vm._v("\n      " + _vm._s(_vm.errorList.join('\n')) + "\n    ")]), _vm._v(" "), _c('br'), _vm._v(" "), _c('div', [_vm._v("获取完成的图片")]), _c('span', {
-    attrs: {
-      "id": "fetch-success-list-length"
-    }
-  }, [_vm._v(_vm._s(_vm.successList.length))]), _vm._v(" "), _c('div', {
-    staticClass: "list-block",
-    staticStyle: {
-      "max-height": "500px"
-    },
-    attrs: {
-      "id": "fetch-success-list"
-    }
-  }, _vm._l((_vm.successList), function(item, index) {
-    return _c('img', {
-      staticClass: "success-thumbnial",
-      attrs: {
-        "src": _vm.imgMapThumbnail[item]
-      }
-    })
-  }), 0), _vm._v(" "), _c('p', [_vm._v("\n            示例:https://danbooru.donmai.us/posts?page=1&tags=mossi\n        ")])])]), _vm._v(" "), _c('div')])
-},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('div', [_c('button', {
-    staticClass: "btn",
-    attrs: {
-      "id": "btn-save-storage"
-    }
-  }, [_vm._v("保存未获取列表")]), _vm._v(" "), _c('button', {
-    staticClass: "btn",
-    attrs: {
-      "id": "btn-get-storage"
-    }
-  }, [_vm._v("获取未获取列表")])])
-}]}
+throw new Error("Module build failed: SyntaxError: Unexpected token (113:8)\n    at Parser.pp$4.raise (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2757:13)\n    at Parser.pp.unexpected (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:647:8)\n    at Parser.pp$3.parseIdent (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2712:10)\n    at Parser.pp$3.parsePropertyName (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2496:105)\n    at Parser.pp$3.parseProperty (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2426:8)\n    at Parser.pp$3.parseObj (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2380:23)\n    at Parser.pp$3.parseExprAtom (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2179:17)\n    at Parser.<anonymous> (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:6003:24)\n    at Parser.parseExprAtom (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:6129:31)\n    at Parser.pp$3.parseExprSubscripts (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2047:19)\n    at Parser.pp$3.parseMaybeUnary (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2024:17)\n    at Parser.pp$3.parseExprOps (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:1966:19)\n    at Parser.pp$3.parseMaybeConditional (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:1949:19)\n    at Parser.pp$3.parseMaybeAssign (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:1925:19)\n    at Parser.pp$3.parsePropertyValue (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2443:87)\n    at Parser.pp$3.parseProperty (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2434:8)\n    at Parser.pp$3.parseObj (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2380:23)\n    at Parser.pp$3.parseExprAtom (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2179:17)\n    at Parser.<anonymous> (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:6003:24)\n    at Parser.parseExprAtom (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:6129:31)\n    at Parser.pp$3.parseExprSubscripts (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2047:19)\n    at Parser.pp$3.parseMaybeUnary (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2024:17)\n    at Parser.pp$3.parseExprOps (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:1966:19)\n    at Parser.pp$3.parseMaybeConditional (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:1949:19)\n    at Parser.pp$3.parseMaybeAssign (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:1925:19)\n    at Parser.pp$3.parseExprList (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2663:20)\n    at Parser.pp$3.parseSubscripts (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2075:29)\n    at Parser.pp$3.parseExprSubscripts (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2050:21)\n    at Parser.pp$3.parseMaybeUnary (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:2024:17)\n    at Parser.pp$3.parseExprOps (H:\\code\\a\\down-image-batch\\node_modules\\vue-template-es2015-compiler\\buble.js:1966:19)");
 
 /***/ }),
 /* 23 */
@@ -2071,7 +2126,7 @@ var content = __webpack_require__(14);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("d1308c88", content, true);
+var update = __webpack_require__(4)("d1308c88", content, true);
 
 /***/ }),
 /* 24 */
@@ -2084,7 +2139,7 @@ var content = __webpack_require__(15);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("49085c1b", content, true);
+var update = __webpack_require__(4)("49085c1b", content, true);
 
 /***/ }),
 /* 25 */
@@ -3086,6 +3141,158 @@ var index_esm = {
 
 /* harmony default export */ __webpack_exports__["a"] = (index_esm);
 
+
+/***/ }),
+/* 29 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'snackbar',
+  data() {
+    return {
+      msg: 'snackbar',
+      isShow: false,
+      text: '',
+      show(text, timeout) {
+        if (this.timeout) {
+          clearTimeout(this.timeout);
+        }
+        this.isShow = true;
+        this.text = text;
+        this.timeout = setTimeout(() => {
+          this.isShow = false;
+        }, timeout);
+      }
+    };
+  },
+  computed: {},
+  methods: {},
+  mounted() {}
+});
+
+/***/ }),
+/* 30 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = install;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__snackbar_vue__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__snackbar_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__snackbar_vue__);
+
+function install(Vue) {
+	Vue.component('snackbar', __WEBPACK_IMPORTED_MODULE_0__snackbar_vue___default.a);
+}
+
+/***/ }),
+/* 31 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__snackbar_snackbar__ = __webpack_require__(30);
+
+
+
+const options = {
+    snackbar: __WEBPACK_IMPORTED_MODULE_0__snackbar_snackbar__["a" /* default */]
+};
+options.install = Vue => {
+    for (let component in options) {
+        const componentInstaller = options[component];
+        if (componentInstaller && component !== 'install') {
+            Vue.use(componentInstaller);
+        }
+    }
+};
+/* harmony default export */ __webpack_exports__["a"] = (options);
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(2)();
+// imports
+
+
+// module
+exports.push([module.i, ".v-snackbar{position:fixed;display:inline-block;color:#fff;padding:8px 10px 8px 20px;font-size:14px;top:50%;left:50%;transform:translate(-50%);background-color:#2c3e50;z-index:100;opacity:1}.v-snackbar button{margin-left:50px;border:none;outline:none;background-color:transparent;cursor:pointer;font-size:16px;padding:5px 10px;color:#ffeb3b;border-radius:3px}.v-snackbar button:hover{background-color:hsla(0,0%,100%,.1);opacity:1}.fade-enter-active,.fade-leave-active{transition:all .3s ease-out}.fade-enter,.fade-leave-to{top:45%;opacity:0}", ""]);
+
+// exports
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/* styles */
+__webpack_require__(35)
+
+var Component = __webpack_require__(3)(
+  /* script */
+  __webpack_require__(29),
+  /* template */
+  __webpack_require__(34),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('transition', {
+    attrs: {
+      "name": "fade"
+    }
+  }, [(_vm.isShow) ? _c('div', {
+    staticClass: "v-snackbar"
+  }, [_vm._v("\n    " + _vm._s(_vm.text) + "\n    "), _c('button', {
+    on: {
+      "click": function($event) {
+        _vm.isShow = false
+      }
+    }
+  }, [_vm._v("\n    OK\n    ")])]) : _vm._e()])
+},staticRenderFns: []}
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(32);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(4)("8fe1d4f0", content, true);
 
 /***/ })
 /******/ ]);
