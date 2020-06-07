@@ -1111,7 +1111,7 @@ const store = {
                                 });
                                 state.errorList.push(url);
                                 // 添加下一个任务
-                                // dispatch('fetchImageData');
+                                dispatch('fetchImageData');
                             }
                         });
                     } else {
@@ -1141,7 +1141,7 @@ const store = {
                 toSaveList.push(listItem);
             });
             let toSaveJson = {
-                href: loaction.href,
+                href: location.href,
                 tags: state.tags,
                 list: toSaveList
             };
