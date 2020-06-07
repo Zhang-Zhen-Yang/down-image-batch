@@ -6,6 +6,7 @@ var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 module.exports = {
     entry: {
         'background': './src/background.js',
+        'content-script': './src/content-script.js',
         'devtools': './src/devtools.js',
         'inject': './src/inject.js',
         'mypanel': './src/mypanel.js',

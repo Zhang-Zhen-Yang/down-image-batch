@@ -5,6 +5,7 @@
  * @Last Modified time: yyyy-11-dd 13:50:52
  */
 import util from '../util.js';
+
 const store = {
 	state: {
         snackbar: {
@@ -12,7 +13,7 @@ const store = {
             text: '',
             timeout:2000,
         },
-        showDialog: true,
+        showDialog: false,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
@@ -97,7 +98,9 @@ const store = {
                                 let toSetMap = {};
                                 json.list.forEach((item,index) => {
                                     let key = Object.keys(item)[0]
-                                    toSetList.push(key);
+                                    //if(u.indexOf(key) > -1) {
+                                        toSetList.push(key);
+                                    //}
                                     toSetMap[key] = item[key];
                                 })
                                 state.list = toSetList;
@@ -115,7 +118,7 @@ const store = {
                 e.preventDefault();
                 // console.log(e);
             })
-            commit('showSnackbar', {text: '53333333333333333333333'})
+            // commit('showSnackbar', {text: '53333333333333333333333'})
         },
         startDown(){
 
@@ -208,7 +211,7 @@ const store = {
                         if(dataFileUrl.indexOf('/') == 0) {
                             dataFileUrl = 'https://danbooru.me' + dataFileUrl;
                         }
-                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ index;
+                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1);
                         state.imgMapThumbnail[dataFileUrl] = pageNo +'-'+ index;
                         state.list.push(dataFileUrl);
             
@@ -245,6 +248,7 @@ const store = {
                 for(let i =0; i < state.parallelNum; i ++) {
                     dispatch('fetchImageData');
                 }
+                util.notifyStatus('progress');
             } else {
                 console.log('ddddd');
                 if(state.fetchingList.length < state.parallelNum) {
@@ -278,6 +282,7 @@ const store = {
                                 fileName = state.tags +'-'+ (state.imgMapTag[url] || '')+ fileName;
                                 // url:为base64格式
                                 // 下载图片
+                                console.log(state.imgMapTag[url]);
                                 window.sendDownload && window.sendDownload({url: res.res, fileName: fileName});
                             } else {
                                 // console.log('errorList', errorList);
@@ -289,16 +294,20 @@ const store = {
                                 })
                                 state.errorList.push(url);
                             // 添加下一个任务
-                            dispatch('fetchImageData');
+                            // dispatch('fetchImageData');
                             }
                         });
                     } else {
-                        // alert('获取完成');
-                        window.notify('success', '', '获取完成', `user:${state.tags}`);
+                        if(state.fetchingList.length == 0) {
+                            // alert('获取完成');
+                            util.notifyStatus('success');
+                            window.notify('success', '', '获取完成', `user:${state.tags}`);
+                        }
                     }
-                    dispatch('fetchImageData');
+                    if(state.list.length > 0) {
+                        dispatch('fetchImageData');
+                    }
                 } else {
-
                     console.log('no f');
                 }
             }
@@ -315,8 +324,9 @@ const store = {
                 toSaveList.push(listItem);
             })
             let toSaveJson = {
+                href: loaction.href,
                 tags: state.tags,
-                list: toSaveList
+                list: toSaveList,
             }
             let blob = new Blob([JSON.stringify(toSaveJson)], {type : 'application/json'});
             /* console.log(toSaveList);

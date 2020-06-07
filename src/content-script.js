@@ -131,7 +131,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 		)
 		injectCustomJs(codeURL, true);
 	} else if (request.cmd == 'reveiveFetchData') { // 向 page 通知接收到的跨域请求到的数据
-		alert('ddd');
 		var result = {
 			url: request.url,
 			res: (request.res || '').replace(/'/mig, 'a1562723483981KJZvFoxt').replace(/"/mig, 'b1562723483981KJZvFoxt' ),
@@ -212,7 +211,7 @@ window.addEventListener("message", function(e)
 			
 		});
 	} else if(e.data.cmd == 'fetchData') {
-		alert('fetchData----');
+		// alert('fetchData----');
 		chrome.runtime.sendMessage({cmd:'fetchData', url: e.data.url, timeout: e.data.timeout, uuid: e.data.uuid, blob: e.data.blob}, function(response) {
 			// console.log('fetchHttpContent', response);
 			// alert('fetchHttpContent');

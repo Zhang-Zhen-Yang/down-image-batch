@@ -46,15 +46,14 @@
         <div>获取完成的图片<span id="fetch-success-list-length">{{successList.length}}</span></div>
         <div id="fetch-success-list" class="list-block" style="max-height:500px;">
           <!-- {{ successList.join('\n') }} -->
-          <img class="success-thumbnial" v-for="item,index in successList" :src="imgMapThumbnail[item]" >
-
+          <img class="success-thumbnial" v-for="item, index in successList" :src="imgMapThumbnail[item] || ''" :key="{{imgMapThumbnail[item] || ''}}" >
         </div>
             <p>
                 示例:https://danbooru.donmai.us/posts?page=1&tags=mossi
             </p>
         </div>
       </div>
-     <div style="height:50px;box-sizing: border-box;border-top:1px solid #ddd;padding: 10px 0 0 10px;">
+      <div style="height:50px;box-sizing: border-box;border-top:1px solid #ddd;padding: 10px 0 0 10px;">
         <button class="e-start-fetch" @click="saveUnfetchList">保存未获取列表</button>
       </div> 
     <div>
@@ -123,7 +122,7 @@ export default {
         this.$store.state.isfetching = false;
       } else {
         this.$store.state.isfetching = true;
-        this.$store.dispatch('fetchImageData', {start: true});
+        //this.$store.dispatch('fetchImageData', {start: true});
         // this.$store.dispatch('fetchImageData', {});
       }
     },
@@ -135,7 +134,6 @@ export default {
     }
   },
   created() {
-    this.$store.dispatch('init');
   },
   mounted(){
    
@@ -149,7 +147,6 @@ export default {
   .download-dialog{
     width: 780px;
     height: 500px;
-    background-color:white;
     position: fixed;
     left: 50%;
     top: 50%;
@@ -161,10 +158,10 @@ export default {
     z-index: 100;
   }
   .e-dialog-diss{
-    float:right;
+    /*float:right;
     cursor:pointer;
     font-size: 30px;
-    margin: 0px 6px 0 0;
+    margin: 0px 6px 0 0;*/
   }
   .e-dialog-diss:hover{
     color:red;

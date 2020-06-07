@@ -59,7 +59,7 @@ export default {
     },
     shouldInjectDom() {
         let href = location.href;
-        if(href.indexOf('danbooru') > -1 || href.indexOf('yande.re') > -1 || href.indexOf('baidu.com') > -1) {
+        if(href.indexOf('danbooru') > -1 || href.indexOf('yande.re') > -1/*  || href.indexOf('baidu.com') > -1 */) {
             return true;
         }
         return false;
