@@ -59,10 +59,45 @@ export default {
     },
     shouldInjectDom() {
         let href = location.href;
-        if(href.indexOf('danbooru') > -1 || href.indexOf('yande.re') > -1/*  || href.indexOf('baidu.com') > -1 */) {
+        let list = [
+            /danbooru/,
+            /yande.re/,
+            /baidu.com/,
+            /bilibili.com/,
+            /www.acfun.cn\/a\//,
+            /localhost/
+        ]
+        let should = false;
+        list.forEach((item)=>{
+            console.log(href.match(item));
+            if(href.match(item)) {
+                should = true;
+            }
+        })
+        return should;
+        /* if(href.indexOf('danbooru') > -1 || href.indexOf('yande.re') > -1|| href.indexOf('baidu.com') > -1 || href.indexOf('bilibili.com') > -1) {
             return true;
         }
-        return false;
+        return false; */
+    },
+    getUrlType() {
+        let list = [
+            {match: /danbooru/, type: 'danbooru'},
+            {match:/yande.re/, type: 'yande.re'},
+            {match:/baidu.com/, type: 'baidu'},
+            {match:/bilibili.com/, type: 'bilibili'},
+            {match:/www.acfun.cn\/a\//, type: 'acfun'},
+            {match:/localhost/, type: 'localhost'},
+        ]
+        let href = location.href;
+        let urlType = '';
+        list.forEach((item)=>{
+            console.log(href.match(item.match));
+            if(href.match(item.match)) {
+                urlType = item.type;
+            }
+        })
+        return urlType;
     },
     notifyStatus(status) {
         let title = document.title;

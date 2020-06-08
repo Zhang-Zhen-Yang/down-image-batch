@@ -16,7 +16,6 @@
                 "<all_urls>"
             ],
             "js": [
-                "js/jq.js",
                 "js/content-script.js"
             ],
             "css": [
@@ -49,6 +48,7 @@
     ],
     "version": "1.0.0",
     "web_accessible_resources": [
+        "js/jq.js",
         "js/inject.js"
     ]
 }

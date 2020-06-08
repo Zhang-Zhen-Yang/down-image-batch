@@ -1,13 +1,9 @@
 
 <template>
     <div class="download-dialog" v-show="showDialog">
-      <div style="height: 30px;">
-        <div class="e-dialog-diss" @click="hideDialog">&times;</div>
-      </div>
       <!--内容区-->
       <div style="height: 420px;overflow:auto;box-sizing: border-box;padding:10px 0 10px 10px;width: 99%;">
         <h3>1.通过httpRequest 获取 图片</h3>
-        <!-- <input id="pddurl" type="text" placeholder="请输入链接" value="https://danbooru.donmai.us/posts?page=1&tags=ameyame"> -->
         <button class="btn" id="btn-fetch-data" @click="startFetchPageData">获取</button>
         <br>
         <div>
@@ -15,49 +11,39 @@
             <span v-if="pageDataSuccess">获取完成</span>
         </div>
         <br>
-       <!--  <div>
-          <button class="btn" id="btn-save-storage">保存未获取列表</button>
-          <button class="btn"  id="btn-get-storage">获取未获取列表</button>
-        </div>
-        <br> -->
         <!-- 获取到的列表 -->
-        <button class="btn" id="fetImage" @click="fetchImageData">{{ isfetching ? '停止下载' : '开始下载'}}</button>
+        <button :class="'btn ' + (isfetching ? 'btn-fetching' : 'btn-stoped')" id="fetImage" @click="fetchImageData">{{ isfetching ? '停止下载' : '开始下载'}}</button>
         <input id="parallel-num" type="number" min="1" v-model="parallelNum" style="margin-left: 50px;">
 
-        <div>下载中图片</div>
+        <div>下载中的图片</div>
         <div id="fetching-list" class="list-block" >
-          {{ fetchingList.join('\n') }}
+          <taskitem v-for="item,index in fetchingList" :url="item"></taskitem>
         </div>
         <br>
        <!--  未获取 -->
         <div>未获取的图片<span id="fetch-list-length">{{ list.length }}</span></div> 
         <div id="fetched-list" class="list-block">
-          {{ list.join('\n') }}
+          <taskitem v-for="item,index in list" :url="item"></taskitem>
         </div>
-        <div>
         <br>
+
         <!-- 失败 -->
         <div>获取失败的图片 <span id="fetch-error-list-length">{{ errorList.length }}</span></div> <button class="btn" id="btn-add-to-unfetch" @click="addToList">添加到未获取列表</button>
         <div id="fetch-error-list" class="list-block">
-          {{ errorList.join('\n') }}
+          <taskitem v-for="item,index in errorList" :url="item"></taskitem>
         </div>
         <br>
+
         <!-- 成功 -->
         <div>获取完成的图片<span id="fetch-success-list-length">{{successList.length}}</span></div>
         <div id="fetch-success-list" class="list-block" style="max-height:500px;">
-          <!-- {{ successList.join('\n') }} -->
-          <img class="success-thumbnial" v-for="item,index in successList" :src="imgMapThumbnail[item]" >
-
+          <img class="success-thumbnial" v-for="item,index in successList" :src="imgMapThumbnail[item]">
         </div>
-            <p>
-                示例:https://danbooru.donmai.us/posts?page=1&tags=mossi
-            </p>
-        </div>
+        <p>
+            示例:https://danbooru.donmai.us/posts?page=1&tags=mossi
+        </p>
       </div>
-     <div style="height:50px;box-sizing: border-box;border-top:1px solid #ddd;padding: 10px 0 0 10px;">
-        <button class="e-start-fetch" @click="saveUnfetchList">保存未获取列表</button>
-      </div> 
-    <div>
+    </div>
 </template>
 
 <script>
@@ -124,7 +110,6 @@ export default {
       } else {
         this.$store.state.isfetching = true;
         this.$store.dispatch('fetchImageData', {start: true});
-        // this.$store.dispatch('fetchImageData', {});
       }
     },
     addToList(){
@@ -135,7 +120,6 @@ export default {
     }
   },
   created() {
-    this.$store.dispatch('init');
   },
   mounted(){
    
@@ -199,4 +183,12 @@ export default {
    border: 1px solid #aaaaaa;
    height: 29px;
   }
+  .download-dialog .btn-fetching{
+    background-color: rgb(45,203,111);
+  }
+  .download-dialog .btn-stoped{
+    background-color:#ffa000
+  }
+
+
 </style>

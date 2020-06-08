@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', function()
 {	
 	// var hostNames = ['item.taobao.com', 'detail.tmall.com', 'detail.1688.com']
 	// 注入自定义JS
+	injectCustomJs('js/jq.js');
 	injectCustomJs();
+
 });
 
 /* function initCustomPanel()

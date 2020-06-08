@@ -51,6 +51,7 @@
     ],
     "version": "1.0.0",
     "web_accessible_resources": [
-        "js/inject.js"
+        "js/inject.js",
+        ""
     ]
 }

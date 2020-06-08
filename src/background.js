@@ -1,5 +1,23 @@
 //-------------------- 右键菜单演示 ------------------------//
+function shouldSendToTab(url) {
+	// tab.url.indexOf('danbooru') > -1 || tab.url.indexOf('yande.re') > -1  ||tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:') > -1 || tab.url.indexOf('192.168') > -1
+	let list = [
+		/danbooru/,
+		/yande.re/,
+		/baidu.com/,
+		/bilibili.com/,
+		/www.acfun.cn\/a\//,
+		/localhost/
+	]
+	let should = false;
+	list.forEach((item)=>{
+		if(url.match(item)) {
+			should = true;
+		}
+	})
+	return should;
 
+}
 var bgUtil = {
 	ver: '1.0.0',
 	// 删除右键菜单（未使用）
@@ -308,7 +326,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 function sendFetchDataToContentScript(data, cmd) {
 	chrome.tabs.query({}, function(tabs){
 		tabs.forEach(function(tab, index) {
-			if(tab.url.indexOf('danbooru') > -1 || tab.url.indexOf('yande.re') > -1  ||tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:') > -1 || tab.url.indexOf('192.168') > -1) {
+			if( shouldSendToTab(tab.url) ) {
 				chrome.tabs.sendMessage(
 					tabs[index].id, 
 					{

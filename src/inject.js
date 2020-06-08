@@ -207,9 +207,10 @@ function sendMessageToContentScriptByPostMessage(data)
 			}
 		}
 	}
-
+	// alert('dddd');
 	if(window.jQuery) {
 		//
+		// alert('bbbbbbbbbbbbbb');
 		var getUUID = function() {
 			var s = [];
 			var hexDigits = "0123456789abcdef";
@@ -355,7 +356,6 @@ function sendMessageToContentScriptByPostMessage(data)
 
 			// 任务列表
 			var fetchDataTaskList = {};
-
 			// 4.fetchData (网页可用)
 			window.fetchData = window.fetchData || function(url, timeout, callback) {
 				var uuid = getUUID();

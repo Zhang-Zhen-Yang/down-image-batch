@@ -1,10 +1,13 @@
 /*
  * @Author: zhangzhenyang 
- * @Date: 2018-10-31 15:34:02 
+ * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: yyyy-11-dd 13:50:52
+ * @Last Modified time: 2020-06-08 17:51:15
  */
+
 import util from '../util.js';
+import data from '../data.js';
+
 
 const store = {
 	state: {
@@ -13,7 +16,7 @@ const store = {
             text: '',
             timeout:2000,
         },
-        showDialog: false,
+        showDialog: true,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
@@ -21,9 +24,9 @@ const store = {
 
         imgMapTag: {},//{list1: 'tag1', list2: 'tag2', list3: 'tag3', list4: 'tag4'},
         imgMapThumbnail: {},
-        list: [],// ['list1', 'list2', 'list3'],
-        successList: [],
-        errorList: [],
+        list: ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK'], // data.list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
+        successList: [],//data.successList,
+        errorList: [],// data.errorList,
         fetchingList: [],
         isfetching: false,
         parallelNum: 2,
@@ -56,23 +59,24 @@ const store = {
             let search = location.search;
             let queryString = util.getQueryString(search);
             // alert(origin);
-            if(origin.indexOf('danbooru') > -1 ) {
+            state.urlType = util.getUrlType();
+            /* if(origin.indexOf('danbooru') > -1 ) {
                 state.urlType = 'danbooru';
             } else if(origin.indexOf('yande.re') > -1 ) {
                 state.urlType = 'yande.re';
-            }
+            } */
             state.origin = origin;
             state.tags = queryString.tags;
             state.pathname = location.pathname;
 
           
-            /* setTimeout(()=>{
-               
-                let u = 'https://yande.re/post?page=1&tags=dishwasher1910';
+            setTimeout(()=>{
+                /* let u = 'https://yande.re/post?page=1&tags=dishwasher1910';
                 window.fetchData && window.fetchData(u, 1000000, function(res) {
                     console.log(res);
-                })
-            }, 1000) */
+                }) */
+                // window.notify('basic', '', '获取完成', `user:${state.tags}`);
+            }, 2000)
             document.body.addEventListener('drop', (e)=>{
                 e.preventDefault();
                 // console.log(e);
@@ -164,6 +168,8 @@ const store = {
                         pageTotal = p
                     }
                 });
+            } else if(state.urlType == 'acfun') {
+                pageTotal = 1;
             }
             
             state.pageTotal = pageTotal;
@@ -181,18 +187,24 @@ const store = {
             console.log([pageNo, state.pageTotal]);
             if(pageNo <= state.pageTotal) {
                 state.currentPage = pageNo;
-                let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
-                console.log('url', url);
-                window.fetchData && window.fetchData(url, 1000000, function(res) {
-                    // console.log(res);
-                    let text = res.res.replace(/\n/mig, ' ');
-                    let bodyCotent = util.getBodyContent(text);
-                    console.log('bodyCotent');
-                    // console.log(bodyCotent);
-                    dispatch('fetchPageImageUrl', {content: bodyCotent, pageNo}).then(()=>{
+                if(state.urlType == 'acfun'){
+                    dispatch('fetchPageImageUrl', {content: jQuery('body').html(), pageNo}).then(()=>{
                         dispatch('fetchPageData', {pageNo: pageNo + 1});
                     })
-                })
+                } else {
+                    let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
+                    console.log('url', url);
+                    window.fetchData && window.fetchData(url, 1000000, function(res) {
+                        // console.log(res);
+                        let text = res.res.replace(/\n/mig, ' ');
+                        let bodyCotent = util.getBodyContent(text);
+                        console.log('bodyCotent');
+                        // console.log(bodyCotent);
+                        dispatch('fetchPageImageUrl', {content: bodyCotent, pageNo}).then(()=>{
+                            dispatch('fetchPageData', {pageNo: pageNo + 1});
+                        })
+                    })
+                }
             } else {
                 state.pageDataSuccess = true;
             }
@@ -231,8 +243,15 @@ const store = {
                         }
                         console.log(dataFileUrl);
                         state.list.push(dataFileUrl);
-                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ index;
+                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1);
                         state.imgMapThumbnail[dataFileUrl] = jQuery(a).prev().find('img').attr('src');
+                    })
+                } else if(state.urlType == 'acfun') {
+                    let articles = dom.find('.article-content img').not('.ubb-emotion');
+                    articles.each((index, a)=>{
+                        let dataFileUrl = jQuery(a).attr('src');
+                        state.list.push(dataFileUrl);
+                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1);
                     })
                 }
                 resolve();
@@ -252,56 +271,58 @@ const store = {
             } else {
                 console.log('ddddd');
                 if(state.fetchingList.length < state.parallelNum) {
-                    let url = state.list.splice(0, 1);
-                    if(url && url[0]) {
-                        url = url[0]
-                        state.fetchingList.push(url);
-                        
-                        window.httpRequest && window.httpRequest(url, 'blob', (res)=>{
-                            console.log(res);
-                            if(res.res) {
-                                state.list = state.list.filter((i)=>{
-                                    return i != url;
-                                })
-                                state.fetchingList = state.fetchingList.filter((i)=>{
-                                    return i != url;
-                                })
-                                
-                                state.successList.push(url);
-                                /* let blob = util.convertBase64ToBlob(res.res);
-                                console.log('blob', blob);
-                                let urlLink = URL.createObjectURL(blob);
-                                urlMap[url] = urlLink; */
-                                // URL.revokeObjectURL(urlLink);
-                                
-                                // 添加下一个任务
-                                dispatch('fetchImageData');
-
-                                let fileName = url.split('/');
-                                fileName = fileName[fileName.length - 1];
-                                fileName = state.tags +'-'+ (state.imgMapTag[url] || '')+ fileName;
-                                // url:为base64格式
-                                // 下载图片
-                                console.log(state.imgMapTag[url]);
-                                window.sendDownload && window.sendDownload({url: res.res, fileName: fileName});
-                            } else {
-                                // console.log('errorList', errorList);
-                                state.list = state.list.filter((i)=>{
-                                    return i != url;
-                                })
-                                state.fetchingList = state.fetchingList.filter((i)=>{
-                                    return i != url;
-                                })
-                                state.errorList.push(url);
-                                // 添加下一个任务
-                                dispatch('fetchImageData');
-                            }
-                        });
+                    if(state.list.length > 0) {
+                        try{
+                            console.log(state.list[0]);
+                            let url = state.list.splice(0, 1);
+                            url = url[0];
+                            console.log('88888');
+                            state.fetchingList.push(url);
+                            console.log(window.httpRequest);
+                            window.httpRequest && window.httpRequest(url, 'blob', (res)=>{
+                                console.log(res);
+                                if(res.res) {
+                                    state.list = state.list.filter((i)=>{
+                                        return i != url;
+                                    })
+                                    state.fetchingList = state.fetchingList.filter((i)=>{
+                                        return i != url;
+                                    })
+                                    state.successList.push(url);
+                                    // 添加下一个任务
+                                    dispatch('fetchImageData');
+    
+                                    let fileName = url.split('/');
+                                    fileName = fileName[fileName.length - 1];
+                                    fileName = state.tags +'-'+ (state.imgMapTag[url] || '')+ fileName;
+                                    if(fileName.indexOf('.') < 0){
+                                        fileName += '.jpg';
+                                    }
+                                  
+                                    // 下载图片
+                                    console.log(state.imgMapTag[url]);
+                                    window.sendDownload && window.sendDownload({url: res.res, fileName: fileName});
+                                } else {
+                                    // console.log('errorList', errorList);
+                                    state.list = state.list.filter((i)=>{
+                                        return i != url;
+                                    })
+                                    state.fetchingList = state.fetchingList.filter((i)=>{
+                                        return i != url;
+                                    })
+                                    state.errorList.push(url);
+                                    // 添加下一个任务
+                                    dispatch('fetchImageData');
+                                }
+                            });
+                        } catch(e){
+                            console.warn(e);
+                        } 
                     } else {
                         if(state.fetchingList.length == 0) {
                             // alert('获取完成');
                             util.notifyStatus('success');
-                            window.notify('success', '', '获取完成', `user:${state.tags}`);
+                            window.notify('basic', '', '获取完成', `user:${state.tags}`);
                         }
                     }
                     if(state.list.length > 0) {
