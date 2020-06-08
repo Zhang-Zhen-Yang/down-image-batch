@@ -489,7 +489,7 @@ module.exports = g;
     },
     shouldInjectDom() {
         let href = location.href;
-        let list = [/danbooru/, /yande.re/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/];
+        let list = [/danbooru/, /yande.re\/post/, /yande.re\/pool/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/];
         let should = false;
         list.forEach(item => {
             console.log(href.match(item));
@@ -504,7 +504,7 @@ module.exports = g;
         return false; */
     },
     getUrlType() {
-        let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re/, type: 'yande.re' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }];
+        let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }];
         let href = location.href;
         let urlType = '';
         list.forEach(item => {
@@ -650,6 +650,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -923,7 +929,7 @@ const store = {
             text: '',
             timeout: 2000
         },
-        showDialog: true,
+        showDialog: false,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
@@ -1071,6 +1077,13 @@ const store = {
                 });
             } else if (state.urlType == 'acfun') {
                 pageTotal = 1;
+            } else if (state.urlType == 'yande.re.pool') {
+                pageTotal = $('body').find('#post-list-posts li').length;
+                let title = $('body').find('h4').html();;
+                let splitTitle = title.split(' ');
+                title = splitTitle[splitTitle.length - 1];
+                state.tags = title;
+                // console.log(state.tags);
             }
 
             state.pageTotal = pageTotal;
@@ -1092,6 +1105,19 @@ const store = {
                     dispatch('fetchPageImageUrl', { content: jQuery('body').html(), pageNo }).then(() => {
                         dispatch('fetchPageData', { pageNo: pageNo + 1 });
                     });
+                } else if (state.urlType == 'yande.re.pool') {
+                    let url = jQuery('body').find('#post-list-posts li').eq(pageNo - 1).find('a').attr('href');
+                    let thumbnail = jQuery('body').find('#post-list-posts li').eq(pageNo - 1).find('img').attr('src');
+                    window.fetchData && window.fetchData('https://yande.re' + url, 1000000, function (res) {
+                        let bodyCotent = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getBodyContent(res.res);
+                        let imageUrl = jQuery('<div>' + bodyCotent + '</div>').find('.highres-show').attr('href');
+                        // console.log(imageUrl);
+                        state.list.push(imageUrl);
+                        state.imgMapTag[imageUrl] = pageNo;
+                        state.imgMapThumbnail[imageUrl] = thumbnail;
+                        dispatch('fetchPageData', { pageNo: pageNo + 1 });
+                    });
+                    // console.log(url);
                 } else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
                     console.log('url', url);
@@ -1196,9 +1222,14 @@ const store = {
                                     if (fileName.indexOf('.') < 0) {
                                         fileName += '.jpg';
                                     }
+                                    if (fileName.indexOf(' ') > -1) {
+                                        let splitFileName = fileName.split(' ');
+                                        fileName = splitFileName[splitFileName.length - 1];
+                                    }
 
                                     // 下载图片
                                     console.log(state.imgMapTag[url]);
+                                    console.log('fileName', fileName);
                                     window.sendDownload && window.sendDownload({ url: res.res, fileName: fileName });
                                 } else {
                                     // console.log('errorList', errorList);
@@ -1210,7 +1241,13 @@ const store = {
                                     });
                                     state.errorList.push(url);
                                     // 添加下一个任务
-                                    dispatch('fetchImageData');
+                                    if (state.urlType == 'yade.re.pool') {
+                                        setTimeout(() => {
+                                            dispatch('fetchImageData');
+                                        }, 2000);
+                                    } else {
+                                        dispatch('fetchImageData');
+                                    }
                                 }
                             });
                         } catch (e) {
@@ -1221,6 +1258,7 @@ const store = {
                             // alert('获取完成');
                             __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].notifyStatus('success');
                             window.notify('basic', '', '获取完成', `user:${state.tags}`);
+                            state.isfetching = false;
                         }
                     }
                     if (state.list.length > 0) {
@@ -2783,7 +2821,7 @@ exports = module.exports = __webpack_require__(0)();
 
 
 // module
-exports.push([module.i, ".download-dialog{width:780px;height:500px;position:fixed;left:50%;top:50%;text-align:left;background-color:#fff;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,.3);border-radius:3px;z-index:100}.e-dialog-diss{float:right;cursor:pointer;font-size:30px;margin:0 6px 0 0}.e-dialog-diss:hover{color:red}.download-dialog div,.download-dialog h3,.download-dialog span{color:rgba(0,0,0,.9)}.list-block{min-height:20px;max-height:100px;overflow:auto;border:1px solid #eee;word-break:keep-all}.success-thumbnial{width:100px;height:100px;border:1px solid #efefef;object-fit:contain;object-position:center;margin:10px}.download-dialog button{border:none;outline:none;background-color:#007acc;padding:5px 10px;color:#fff}.download-dialog input{line-height:2.2em;border:1px solid #aaa;height:29px}.download-dialog .btn-fetching{background-color:#2dcb6f}.download-dialog .btn-stoped{background-color:#ffa000}", ""]);
+exports.push([module.i, ".download-dialog{width:780px;height:500px;position:fixed;left:50%;top:50%;text-align:left;background-color:#fff;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,.3);border-radius:3px;z-index:100}.e-dialog-diss{float:right;cursor:pointer;font-size:30px;margin:0 6px 0 0}.e-dialog-diss:hover{color:red}.download-dialog div,.download-dialog h3,.download-dialog span{color:rgba(0,0,0,.9)}.list-block{min-height:20px;max-height:100px;overflow:auto;border:1px solid #eee;word-break:keep-all}.success-thumbnial{width:100px;height:100px;border:1px solid #efefef;object-fit:contain;object-position:center;margin:10px}.download-dialog button{border:none;outline:none;background-color:#007acc;padding:5px 10px;color:#fff;cursor:pointer}.download-dialog input{line-height:2.2em;border:1px solid #aaa;height:29px}.download-dialog .btn-fetching{background-color:#2dcb6f}.download-dialog .btn-stoped{background-color:#ffa000}", ""]);
 
 // exports
 
@@ -3388,7 +3426,12 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       expression: "showDialog"
     }],
     staticClass: "download-dialog"
-  }, [_c('div', {
+  }, [_c('div', [_c('div', {
+    staticClass: "e-dialog-diss",
+    on: {
+      "click": _vm.hideDialog
+    }
+  }, [_vm._v("×")])]), _vm._v(" "), _c('div', {
     staticStyle: {
       "height": "420px",
       "overflow": "auto",
@@ -3504,7 +3547,21 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
         "src": _vm.imgMapThumbnail[item]
       }
     })
-  }), 0), _vm._v(" "), _c('p', [_vm._v("\n        示例:https://danbooru.donmai.us/posts?page=1&tags=mossi\n    ")])])])
+  }), 0), _vm._v(" "), _c('p', [_vm._v("\n        示例:https://danbooru.donmai.us/posts?page=1&tags=mossi\n    ")])]), _vm._v(" "), _c('div', {
+    staticStyle: {
+      "height": "50px",
+      "padding": "10px 0 0 10px",
+      "border-top": "1px solid #efefef"
+    }
+  }, [_c('button', {
+    staticClass: "btn",
+    attrs: {
+      "id": ""
+    },
+    on: {
+      "click": _vm.saveUnfetchList
+    }
+  }, [_vm._v("保存")])])])
 },staticRenderFns: []}
 
 /***/ }),

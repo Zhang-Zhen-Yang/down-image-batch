@@ -61,7 +61,8 @@ export default {
         let href = location.href;
         let list = [
             /danbooru/,
-            /yande.re/,
+            /yande.re\/post/,
+            /yande.re\/pool/,
             /baidu.com/,
             /bilibili.com/,
             /www.acfun.cn\/a\//,
@@ -83,7 +84,8 @@ export default {
     getUrlType() {
         let list = [
             {match: /danbooru/, type: 'danbooru'},
-            {match:/yande.re/, type: 'yande.re'},
+            {match:/yande.re\/post/, type: 'yande.re'},
+            {match:/yande.re\/pool/, type: 'yande.re.pool'},
             {match:/baidu.com/, type: 'baidu'},
             {match:/bilibili.com/, type: 'bilibili'},
             {match:/www.acfun.cn\/a\//, type: 'acfun'},

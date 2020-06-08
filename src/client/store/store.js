@@ -16,7 +16,7 @@ const store = {
             text: '',
             timeout:2000,
         },
-        showDialog: true,
+        showDialog: false,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
@@ -170,6 +170,13 @@ const store = {
                 });
             } else if(state.urlType == 'acfun') {
                 pageTotal = 1;
+            } else if(state.urlType == 'yande.re.pool'){
+                pageTotal = $('body').find('#post-list-posts li').length;
+                let title = $('body').find('h4').html();;
+                let splitTitle = title.split(' ');
+                title = splitTitle[splitTitle.length - 1];
+                state.tags = title;
+                // console.log(state.tags);
             }
             
             state.pageTotal = pageTotal;
@@ -191,7 +198,20 @@ const store = {
                     dispatch('fetchPageImageUrl', {content: jQuery('body').html(), pageNo}).then(()=>{
                         dispatch('fetchPageData', {pageNo: pageNo + 1});
                     })
-                } else {
+                } else if(state.urlType == 'yande.re.pool') {
+                    let url = jQuery('body').find('#post-list-posts li').eq(pageNo - 1).find('a').attr('href');
+                    let thumbnail = jQuery('body').find('#post-list-posts li').eq(pageNo - 1).find('img').attr('src');
+                    window.fetchData && window.fetchData('https://yande.re'+url, 1000000, function(res) {
+                        let bodyCotent = util.getBodyContent(res.res);
+                        let imageUrl =  jQuery('<div>'+bodyCotent+'</div>').find('.highres-show').attr('href');
+                        // console.log(imageUrl);
+                        state.list.push(imageUrl);
+                        state.imgMapTag[imageUrl] = pageNo;
+                        state.imgMapThumbnail[imageUrl] = thumbnail;
+                        dispatch('fetchPageData', {pageNo: pageNo + 1});
+                    });
+                    // console.log(url);
+                }else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
                     console.log('url', url);
                     window.fetchData && window.fetchData(url, 1000000, function(res) {
@@ -298,9 +318,14 @@ const store = {
                                     if(fileName.indexOf('.') < 0){
                                         fileName += '.jpg';
                                     }
+                                    if(fileName.indexOf(' ') > -1) {
+                                        let splitFileName = fileName.split(' ');
+                                        fileName = splitFileName[splitFileName.length - 1];
+                                    }
                                   
                                     // 下载图片
                                     console.log(state.imgMapTag[url]);
+                                    console.log('fileName', fileName);
                                     window.sendDownload && window.sendDownload({url: res.res, fileName: fileName});
                                 } else {
                                     // console.log('errorList', errorList);
@@ -312,7 +337,13 @@ const store = {
                                     })
                                     state.errorList.push(url);
                                     // 添加下一个任务
-                                    dispatch('fetchImageData');
+                                    if(state.urlType == 'yade.re.pool') {
+                                        setTimeout(()=>{
+                                            dispatch('fetchImageData');
+                                        }, 2000)
+                                    } else {
+                                        dispatch('fetchImageData');
+                                    }
                                 }
                             });
                         } catch(e){
@@ -323,6 +354,7 @@ const store = {
                             // alert('获取完成');
                             util.notifyStatus('success');
                             window.notify('basic', '', '获取完成', `user:${state.tags}`);
+                            state.isfetching = false;
                         }
                     }
                     if(state.list.length > 0) {

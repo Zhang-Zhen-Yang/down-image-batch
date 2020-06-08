@@ -1,6 +1,9 @@
 
 <template>
     <div class="download-dialog" v-show="showDialog">
+      <div>
+        <div class="e-dialog-diss" @click="hideDialog">&times;</div>
+      </div>
       <!--内容区-->
       <div style="height: 420px;overflow:auto;box-sizing: border-box;padding:10px 0 10px 10px;width: 99%;">
         <h3>1.通过httpRequest 获取 图片</h3>
@@ -42,6 +45,9 @@
         <p>
             示例:https://danbooru.donmai.us/posts?page=1&tags=mossi
         </p>
+      </div>
+      <div style="height:50px;padding:10px 0 0 10px;border-top:1px solid #efefef;">
+        <button class="btn" id="" @click="saveUnfetchList">保存</button>
       </div>
     </div>
 </template>
@@ -177,6 +183,7 @@ export default {
     background-color: rgb(0, 122, 204);
     padding: 5px 10px;
     color: white;
+    cursor: pointer;
   }
   .download-dialog input{
    line-height:2.2em;
