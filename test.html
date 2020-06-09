@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .block{
+            width: 500px;
+            height: 200px;
+            border:1px solid #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <table>
+            <tr>
+                <td>
+                    <div class="block" id="b1">
+                        55555555555
+                    </div>
+                </td>
+                <td>
+                    <div class="block" id="b2">
+
+                    </div>
+                </td>
+                <td>
+                    <button id="btn-clear">
+                        清除
+                    </button>
+                    <button id="btn-confirm">
+                        确定
+                    </button>
+                    <button id="btn-save">保存</button>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+    <script src="./main/js/jq.js"></script>
+    <script>
+        let list = [
+            {
+                user: '',
+                path: '',
+                link: '',
+            }
+        ]
+        $(function(){
+            let b1 = $('#b1');
+            let b2 = $('#b2');
+
+            let user = '';
+            let path = [];
+            function render() {
+                console.log('render', user);
+                b1.html(user);
+                b2.html(path.join('/'));
+            }
+            $('#b1,#b2').on('dragover', (e)=>{
+                e.preventDefault();
+            }).on('drop',(e)=>{
+                /* e.stopPropagation(); */
+                e.preventDefault();
+                let files = e.originalEvent.dataTransfer.files;
+                let name = files[0].name;
+                console.log(files);
+                if($(e.target).is('#b1')) {
+                    user = name;
+                } else {
+                    path.push(name);
+                }
+                render();
+            })
+            $('#btn-clear').on('click', ()=>{
+                user = '';
+                path = [];
+                render();
+            })
+            $('#btn-confirm').on('click', ()=>{
+                list.push({
+                    user: user,
+                    path: path.join('/'),
+                    link: ''
+                })
+                user = '';
+                path = [];
+                render();
+            })
+            $('#btn-save').on('click', ()=>{
+                let listStr = list.map((item)=>{
+                    return ` {
+    user: '${item.user}',
+    path: '${item.path}',
+    link: '${item.link}',
+}`
+                })
+            let distJsStr = 
+`[
+    ${listStr.join(',\n')}
+]`
+                console.log(distJsStr);
+                let blob = new Blob([distJsStr], {type : 'application/js'});
+                let file = new FileReader();
+                file.readAsDataURL(blob);
+                file.onload = ()=>{
+                    console.log(file.result);
+                    window.sendDownload && window.sendDownload({url: file.result, fileName: 'list.js'});
+                }
+            })
+
+        })
+
+    </script>
+    
+</body>
+</html>

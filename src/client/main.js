@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-06 08:46:27 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-06 15:44:04
+ * @Last Modified time: 2020-06-09 10:01:02
  */
 import Vue from 'vue'
 import App from './App.vue'
@@ -18,16 +18,21 @@ if(util.shouldInjectDom()) {
   const store = new Vuex.Store(rootStore);
   
   let hostView = document.createElement('div');
-  hostView.setAttribute('id', 'app');
-  document.body.appendChild(hostView);
+  hostView.setAttribute('id', 'e-app');
+
+  // alert('https://ichi-up.net/2016/006'.match(/ichi\-up\.net\//)); 
+
+  setTimeout(()=>{
+    document.body.appendChild(hostView);
+    window.project = new Vue({
+      el: '#e-app',
+      store,
+      render: h => h(App)
+    })
+    console.log('2020-06-06 08:46:27');
+  }, 1000)
   
   
-  window.project = new Vue({
-    el: '#app',
-    store,
-    render: h => h(App)
-  })
-  console.log('2020-06-06 08:46:27');
 
 }
 

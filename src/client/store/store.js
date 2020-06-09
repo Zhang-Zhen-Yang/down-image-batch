@@ -2,11 +2,13 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-08 17:51:15
+ * @Last Modified time: 2020-06-09 17:51:19
  */
 
 import util from '../util.js';
 import data from '../data.js';
+import html2canvas from 'html2canvas';
+import { arch } from 'os';
 
 
 const store = {
@@ -16,7 +18,7 @@ const store = {
             text: '',
             timeout:2000,
         },
-        showDialog: false,
+        showDialog: true,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
@@ -24,12 +26,12 @@ const store = {
 
         imgMapTag: {},//{list1: 'tag1', list2: 'tag2', list3: 'tag3', list4: 'tag4'},
         imgMapThumbnail: {},
-        list: ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK'], // data.list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
+        list: data.list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
         successList: [],//data.successList,
         errorList: [],// data.errorList,
         fetchingList: [],
         isfetching: false,
-        parallelNum: 2,
+        parallelNum: 2, // localStorage.getItem('parallelNum'),
         pageDataSuccess: false,
 	},
 	// ---------------------------------------------------------------------------------------------------------
@@ -390,6 +392,35 @@ const store = {
                 console.log(file.result);
                 window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
             }
+        },
+        // ichi-up获取页面教程截图
+        saveScreenshot(){
+            let article = $('article.single-post');
+            // 去除广告等多余节点
+            article.find('ins').remove();
+            console.warn('=====================================');
+            console.log(article[0]);
+            html2canvas(article[0]).then(function(canvas) {
+                document.body.appendChild(canvas);
+                let dataUrl = canvas.toDataURL();
+
+                let checkFun = ()=>{
+                    // alert(window.sendDownload);
+                    // イラストにも流行がある！プロイラストレーターが意識する絵柄のトレンド | いちあっぷ.png
+                    let distFileName = document.title + '.png';
+                    distFileName = distFileName.replace(/\|/mig, '——');// 去除特殊字符
+                    if(window.sendDownload) {
+                        window.sendDownload({url: dataUrl, fileName: distFileName});
+                    } else {
+                        setTimeout(()=>{
+                            console.log('timeout');
+                            checkFun();
+                        }, 500)
+                    }
+
+                } 
+                checkFun();
+            });
         }
 	
 	},

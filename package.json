@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "clipboard": "^2.0.6",
+    "html2canvas": "^1.0.0-rc.5",
     "jsbarcode": "^3.8.0",
     "vue": "^2.1.0"
   },

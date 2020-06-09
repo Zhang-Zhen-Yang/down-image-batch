@@ -1,6 +1,6 @@
 
 <template>
-  <div>
+  <div id="host-e-view">
     <div class="download-btn" style="" title="下载" @click="showDialog">&darr;</div>
     <download-dialog></download-dialog>
     <snackbar ref="snackbar"></snackbar>
@@ -54,6 +54,15 @@ export default {
 </script>
 
 <style>
+  #host-e-view{
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 0;
+    top: 0;
+    position: absolute;
+    z-index: 100000;
+  }
   .download-btn {
     width: 30px;
     height: 35px;

@@ -66,7 +66,8 @@ export default {
             /baidu.com/,
             /bilibili.com/,
             /www.acfun.cn\/a\//,
-            /localhost/
+            /localhost/,
+            /ichi\-up\.net\//,
         ]
         let should = false;
         list.forEach((item)=>{
@@ -90,6 +91,7 @@ export default {
             {match:/bilibili.com/, type: 'bilibili'},
             {match:/www.acfun.cn\/a\//, type: 'acfun'},
             {match:/localhost/, type: 'localhost'},
+            {match:/ichi\-up\.net\//, type: 'ichi-up'},
         ]
         let href = location.href;
         let urlType = '';

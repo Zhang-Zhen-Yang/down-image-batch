@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', function()
 {	
 	// var hostNames = ['item.taobao.com', 'detail.tmall.com', 'detail.1688.com']
 	// 注入自定义JS
-	injectCustomJs('js/jq.js');
+	if(!window.jQuery) {
+		injectCustomJs('js/jq.js');
+	}
 	injectCustomJs();
 
 });
@@ -187,7 +189,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 
 window.addEventListener("message", function(e)
 {
-	console.log('收到消息：', e.data);
+	// console.log('收到消息：', e.data);
 	if(e.data && e.data.cmd == 'invoke') {
 		eval('('+e.data.code+')');
 	}

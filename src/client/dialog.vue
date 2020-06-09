@@ -1,6 +1,7 @@
 
 <template>
     <div class="download-dialog" v-show="showDialog">
+      
       <div>
         <div class="e-dialog-diss" @click="hideDialog">&times;</div>
       </div>
@@ -48,6 +49,7 @@
       </div>
       <div style="height:50px;padding:10px 0 0 10px;border-top:1px solid #efefef;">
         <button class="btn" id="" @click="saveUnfetchList">保存</button>
+        <button class="btn" id="" @click="saveScreenshot"> 保存ichi-up教程</button>
       </div>
     </div>
 </template>
@@ -96,6 +98,7 @@ export default {
         return this.$store.state.parallelNum;
       },
       set(val) {
+        localStorage.setItem('parallelNum', val);
         this.$store.state.parallelNum = val;
       }
     },
@@ -123,6 +126,9 @@ export default {
     },
     saveUnfetchList() {
       this.$store.dispatch('saveUnfetchList');
+    },
+    saveScreenshot() {
+      this.$store.dispatch('saveScreenshot');
     }
   },
   created() {
