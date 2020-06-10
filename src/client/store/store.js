@@ -18,7 +18,7 @@ const store = {
             text: '',
             timeout:2000,
         },
-        showDialog: true,
+        showDialog: false,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
@@ -124,6 +124,8 @@ const store = {
                 e.preventDefault();
                 // console.log(e);
             })
+
+            $('.javascript-hide').removeClass('javascript-hide').css({outline: '1px solid red'})
             // commit('showSnackbar', {text: '53333333333333333333333'})
         },
         startDown(){
@@ -233,11 +235,11 @@ const store = {
         },
         // 通过html解析页面img
         fetchPageImageUrl({state}, {content, pageNo}) {
-            console.log(/* fetchPageImageUrl */);
+            console.log('fetchPageImageUrl');
             return new Promise((resolve, reject)=>{
                 let dom = jQuery('<div>'+content+'</div>');
                
-                if(state.urlType == 'danboru') {
+                if(state.urlType == 'danbooru') {
                     let articles = dom.find('#posts-container article');
                     let currentPageImage = [];
                     articles.each((index, a) => {
@@ -245,8 +247,8 @@ const store = {
                         if(dataFileUrl.indexOf('/') == 0) {
                             dataFileUrl = 'https://danbooru.me' + dataFileUrl;
                         }
-                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1);
-                        state.imgMapThumbnail[dataFileUrl] = pageNo +'-'+ index;
+                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1) + '-';
+                        state.imgMapThumbnail[dataFileUrl] = jQuery(a).find('img').attr('src');
                         state.list.push(dataFileUrl);
             
                     })
@@ -316,7 +318,7 @@ const store = {
     
                                     let fileName = url.split('/');
                                     fileName = fileName[fileName.length - 1];
-                                    fileName = state.tags +'-'+ (state.imgMapTag[url] || '')+ fileName;
+                                    fileName = state.tags +'-'+ (state.imgMapTag[url] || '')+ '.' + util.getExt(fileName);
                                     if(fileName.indexOf('.') < 0){
                                         fileName += '.jpg';
                                     }
@@ -423,9 +425,12 @@ const store = {
                         // alert(window.sendDownload);
                         // イラストにも流行がある！プロイラストレーターが意識する絵柄のトレンド | いちあっぷ.png
                         let distFileName = document.title + '.png';
-                        distFileName = distFileName.replace(/\|/mig, '——');// 去除特殊字符
+                        let date = location.pathname.split('/');
+                        date = newDom.find('.date').html();
+                        distFileName = date+'-' + distFileName.replace(/\|/mig, '——');// 去除特殊字符
                         if(window.sendDownload) {
                             window.sendDownload({url: dataUrl, fileName: distFileName});
+                            util.notifyStatus('success');
                         } else {
                             setTimeout(()=>{
                                 console.log('timeout');

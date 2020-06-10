@@ -117,6 +117,10 @@ export default {
             return true;
         }
         return false;
+    },
+    getExt(name) {
+        let nameList = name.split('.');
+        return nameList[nameList.length -1]
     }
 
 }
