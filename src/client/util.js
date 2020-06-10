@@ -71,7 +71,7 @@ export default {
         ]
         let should = false;
         list.forEach((item)=>{
-            console.log(href.match(item));
+            // console.log(href.match(item));
             if(href.match(item)) {
                 should = true;
             }
@@ -96,7 +96,7 @@ export default {
         let href = location.href;
         let urlType = '';
         list.forEach((item)=>{
-            console.log(href.match(item.match));
+            // console.log(href.match(item.match));
             if(href.match(item.match)) {
                 urlType = item.type;
             }
