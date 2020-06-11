@@ -530,9 +530,23 @@ module.exports = g;
         }
         return false;
     },
+    // 获取后缀名
     getExt(name) {
         let nameList = name.split('.');
-        return nameList[nameList.length - 1];
+        return nameList[nameList.length - 1] || '';
+    },
+    getTitle() {
+        return document.title.replace(/^(↓|√)/, '');
+    },
+    getSaveName(newDom) {
+        let distFileName = document.title.replace(/^(↓|√)/, ''); //  + '.png';
+        let date = location.pathname.split('/');
+        date = newDom.find('.date').html();
+
+        console.log(distFileName);
+        distFileName = date + '-' + distFileName.replace(/\|/mig, '——'); // 去除特殊字符
+        console.log(distFileName);
+        return distFileName;
     }
 
 });
@@ -934,7 +948,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-10 15:36:27
+ * @Last Modified time: 2020-06-11 15:42:34
  */
 
 
@@ -949,7 +963,7 @@ const store = {
             text: '',
             timeout: 2000
         },
-        showDialog: false,
+        showDialog: true,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
@@ -1323,6 +1337,7 @@ const store = {
             let article = $('article.single-post');
 
             let newDom;
+
             if ($('.article-copied').length > 0) {
                 newDom = $('.article-copied');
             } else {
@@ -1331,26 +1346,32 @@ const store = {
                 newDom.find('.post-inner-link,.single-post-banner,.post-footer').remove();
                 console.log(2);
                 setTimeout(() => {
+                    // dispatch('saveIchiUpHtml');
                     dispatch('saveScreenshot');
                 }, 200);
                 $('body').prepend(newDom);
             }
             console.log('3');
-
             setTimeout(() => {
                 document.documentElement.scrollTop = 0;
+                document.documentElement.scrollLeft = 0;
                 __WEBPACK_IMPORTED_MODULE_2_html2canvas___default()(newDom[0]).then(function (canvas) {
                     let dataUrl = canvas.toDataURL();
 
                     let checkFun = () => {
                         // alert(window.sendDownload);
                         // イラストにも流行がある！プロイラストレーターが意識する絵柄のトレンド | いちあっぷ.png
-                        let distFileName = document.title + '.png';
+                        /* let distFileName = document.title + '.png';
                         let date = location.pathname.split('/');
                         date = newDom.find('.date').html();
-                        distFileName = date + '-' + distFileName.replace(/\|/mig, '——'); // 去除特殊字符
+                        distFileName = date+'-' + distFileName.replace(/\|/mig, '——');// 去除特殊字符 */
                         if (window.sendDownload) {
-                            window.sendDownload({ url: dataUrl, fileName: distFileName });
+
+                            dispatch('saveIchiUpHtml');
+                            // return;
+                            // 下载截图
+                            window.sendDownload({ url: dataUrl, fileName: __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom) + '.png' });
+
                             __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].notifyStatus('success');
                         } else {
                             setTimeout(() => {
@@ -1402,6 +1423,80 @@ const store = {
                     }
                 };
                 checkFun();
+            });
+        },
+        saveIchiUpHtml() {
+            // 生成html页面
+            let newDom = $('.article-copied');
+            let newDom2 = $('<div class="article-copied" style="margin:0 auto;background-color:white;border:0px solid red;width:624px">' + newDom.html() + '</div>');
+            let newDom2Imgs = newDom2.find('img');
+            let newDomImgs = newDom.find('img');
+
+            let imgs = [];
+            //
+            newDomImgs.each((index, item) => {
+                let currentImage = $(item);
+                console.log(currentImage);
+                let imgW = currentImage.width();
+                let imgH = currentImage.height();
+                let imgL = currentImage.position().left;
+                let imgT = currentImage.position().top;
+                imgs.push(currentImage.attr('src'));
+                // newDom2Imgs.eq(index).replaceWith(`<div class="bg-sprit" style="display:inline-block;width:${imgW}px;height:${imgH}px;background-position:${-imgL}px ${-imgT}px;"></div>`)
+            });
+            console.log('imgs===================================================');
+            console.log(imgs);
+            let imgPromises = imgs.map(imgUrl => {
+                let requestImgUrl = imgUrl.indexOf('//ichi-up') == 0 ? 'https:' + imgUrl : imgUrl;
+                return new Promise((resolve, reject) => {
+                    window.httpRequest && window.httpRequest(requestImgUrl, 'blob', res => {
+                        console.log(res);
+                        if (res.res) {
+                            resolve(res.res);
+                        }
+                    });
+                });
+            });
+            // 所有图片加载完成
+            Promise.all(imgPromises).then(res => {
+                console.log(res);
+                res.forEach((url, index) => {
+                    newDom2Imgs.eq(index).attr({
+                        src: url
+                    });
+                });
+                let bgName = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom) + '.png';
+                let domW = newDom.width();
+                let domH = newDom.height();
+                let totalHtml = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+                    <title>${__WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getTitle()}</title>
+                    <link href="./application.css" media="all" rel="stylesheet">
+                    <link href="../application.css" media="all" rel="stylesheet">
+                    <style>
+                        .bg-sprit{
+                            background-image:url("./${bgName}");
+                            background-size:${domW}px ${domH}px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${newDom2[0].outerHTML}
+                </body>
+                </html>
+                `;
+                let blob = new Blob([totalHtml], { type: 'text/html' });
+                let file = new FileReader();
+                file.readAsDataURL(blob);
+                file.onload = () => {
+                    // 下截html
+                    window.sendDownload && window.sendDownload({ url: file.result, fileName: __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom) + '.json' });
+                };
             });
         }
 

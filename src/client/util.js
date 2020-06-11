@@ -118,9 +118,23 @@ export default {
         }
         return false;
     },
+    // 获取后缀名
     getExt(name) {
         let nameList = name.split('.');
-        return nameList[nameList.length -1]
+        return nameList[nameList.length -1] || ''
+    },
+    getTitle() {
+        return document.title.replace(/^(↓|√)/, '');
+    },
+    getSaveName(newDom){
+        let distFileName = document.title.replace(/^(↓|√)/, '');//  + '.png';
+        let date = location.pathname.split('/');
+        date = newDom.find('.date').html();
+
+        console.log(distFileName);
+        distFileName = date+'-' + distFileName.replace(/\|/mig, '——');// 去除特殊字符
+        console.log(distFileName);
+        return distFileName;
     }
 
 }
