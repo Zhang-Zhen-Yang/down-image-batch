@@ -68,6 +68,7 @@ export default {
             /www.acfun.cn\/a\//,
             /localhost/,
             /ichi\-up\.net\//,
+            /bing\.ioliu\.cn/,
         ]
         let should = false;
         list.forEach((item)=>{
@@ -92,6 +93,7 @@ export default {
             {match:/www.acfun.cn\/a\//, type: 'acfun'},
             {match:/localhost/, type: 'localhost'},
             {match:/ichi\-up\.net\//, type: 'ichi-up'},
+            {match:/bing\.ioliu\.cn/, type: 'bing'},
         ]
         let href = location.href;
         let urlType = '';

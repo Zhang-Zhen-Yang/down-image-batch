@@ -489,7 +489,7 @@ module.exports = g;
     },
     shouldInjectDom() {
         let href = location.href;
-        let list = [/danbooru/, /yande.re\/post/, /yande.re\/pool/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//];
+        let list = [/danbooru/, /yande.re\/post/, /yande.re\/pool/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/];
         let should = false;
         list.forEach(item => {
             // console.log(href.match(item));
@@ -504,7 +504,7 @@ module.exports = g;
         return false; */
     },
     getUrlType() {
-        let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }, { match: /ichi\-up\.net\//, type: 'ichi-up' }];
+        let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }, { match: /ichi\-up\.net\//, type: 'ichi-up' }, { match: /bing\.ioliu\.cn/, type: 'bing' }];
         let href = location.href;
         let urlType = '';
         list.forEach(item => {
@@ -1111,6 +1111,9 @@ const store = {
                         pageTotal = p;
                     }
                 });
+            } else if (state.urlType == 'bing') {
+                pageTotal = 130;
+                state.tags = 'bing';
             } else if (state.urlType == 'acfun') {
                 pageTotal = 1;
             } else if (state.urlType == 'yande.re.pool') {
@@ -1154,6 +1157,23 @@ const store = {
                         dispatch('fetchPageData', { pageNo: pageNo + 1 });
                     });
                     // console.log(url);
+                } else if (state.urlType == 'bing') {
+                    let url = `https://bing.ioliu.cn/?p=${pageNo}`;
+                    window.fetchData && window.fetchData(url, 1000000, function (res) {
+                        let bodyCotent = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getBodyContent(res.res);
+                        let dom = jQuery('<div>' + bodyCotent + '</div>').find('.card ');
+                        dom.each((index, item) => {
+                            let currentItem = $(item);
+                            let href = currentItem.find('a').attr('href');
+                            href = ' http://h1.ioliu.cn' + href.split('?')[0].replace('photo', 'bing') + '_1920x1080.jpg?imageslim'; // http://h1.ioliu.cn/bing/MarleyBeach_ZH-CN0404372814_1920x1080.jpg?imageslim
+                            let title = currentItem.find('h3').html();
+
+                            state.list.push(href);
+                            state.imgMapTag[href] = pageNo + '-' + (index + 1) + '-' + title.replace(/\\\:\*\?\"\<\>\|/mig, '-');
+                            // state.imgMapThumbnail[imageUrl] = thumbnail;
+                        });
+                        dispatch('fetchPageData', { pageNo: pageNo + 1 });
+                    });
                 } else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
                     console.log('url', url);
@@ -1265,6 +1285,11 @@ const store = {
 
                                     // 下载图片
                                     console.log(state.imgMapTag[url]);
+                                    if (state.urlType == 'bing') {
+                                        fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(fileName);
+                                        fileName = fileName.replace('?imageslim', '');
+                                        fileName = fileName.replace(/\//mig, ' ');
+                                    }
                                     console.log('fileName', fileName);
                                     window.sendDownload && window.sendDownload({ url: res.res, fileName: fileName });
                                 } else {
@@ -1281,6 +1306,10 @@ const store = {
                                         setTimeout(() => {
                                             dispatch('fetchImageData');
                                         }, 2000);
+                                    } else if (state.urlType == 'bing') {
+                                        setTimeout(() => {
+                                            dispatch('fetchImageData');
+                                        }, 1000);
                                     } else {
                                         dispatch('fetchImageData');
                                     }

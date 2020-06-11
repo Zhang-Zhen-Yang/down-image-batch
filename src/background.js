@@ -8,7 +8,8 @@ function shouldSendToTab(url) {
 		/bilibili.com/,
 		/www.acfun.cn\/a\//,
 		/localhost/,
-		/ichi\-up\.net\//
+		/ichi\-up\.net\//,
+		/bing\.ioliu\.cn/
 	]
 	let should = false;
 	list.forEach((item)=>{

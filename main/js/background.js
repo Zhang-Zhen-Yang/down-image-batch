@@ -74,7 +74,7 @@
 //-------------------- 右键菜单演示 ------------------------//
 function shouldSendToTab(url) {
 	// tab.url.indexOf('danbooru') > -1 || tab.url.indexOf('yande.re') > -1  ||tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:') > -1 || tab.url.indexOf('192.168') > -1
-	let list = [/danbooru/, /yande.re/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//];
+	let list = [/danbooru/, /yande.re/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/];
 	let should = false;
 	list.forEach(item => {
 		if (url.match(item)) {
