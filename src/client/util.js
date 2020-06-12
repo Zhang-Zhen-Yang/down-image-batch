@@ -57,13 +57,14 @@ export default {
         console.log(bodyContent);
         return bodyContent;
     },
+    // 是否显示界面
     shouldInjectDom() {
         let href = location.href;
         let list = [
+        //    /baidu.com/,
             /danbooru/,
             /yande.re\/post/,
             /yande.re\/pool/,
-            /baidu.com/,
             /bilibili.com/,
             /www.acfun.cn\/a\//,
             /localhost/,

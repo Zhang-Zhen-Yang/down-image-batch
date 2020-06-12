@@ -487,9 +487,12 @@ module.exports = g;
         console.log(bodyContent);
         return bodyContent;
     },
+    // 是否显示界面
     shouldInjectDom() {
         let href = location.href;
-        let list = [/danbooru/, /yande.re\/post/, /yande.re\/pool/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/];
+        let list = [
+        //    /baidu.com/,
+        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/];
         let should = false;
         list.forEach(item => {
             // console.log(href.match(item));
@@ -948,7 +951,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-11 15:42:34
+ * @Last Modified time: 2020-06-12 11:53:32
  */
 
 
@@ -1362,6 +1365,7 @@ const store = {
         },
         // ichi-up获取页面教程截图
         saveScreenshot({ dispatch }) {
+
             $('.adsbygoogle,ins').remove();
             let article = $('article.single-post');
 
@@ -1370,7 +1374,7 @@ const store = {
             if ($('.article-copied').length > 0) {
                 newDom = $('.article-copied');
             } else {
-                newDom = $('<div class="article-copied" style="position:fixed;left:-1000px;top:0;background-color:white;border:0px solid red;width:624px">' + article.html() + '</div>');
+                newDom = $('<div class="article-copied" style="position:fixed;left:-1000px;top:0;background-color:white;width:624px">' + article.html() + '</div>');
                 console.log(1);
                 newDom.find('.post-inner-link,.single-post-banner,.post-footer').remove();
                 console.log(2);
@@ -1384,6 +1388,7 @@ const store = {
             setTimeout(() => {
                 document.documentElement.scrollTop = 0;
                 document.documentElement.scrollLeft = 0;
+
                 __WEBPACK_IMPORTED_MODULE_2_html2canvas___default()(newDom[0]).then(function (canvas) {
                     let dataUrl = canvas.toDataURL();
 
@@ -1399,7 +1404,7 @@ const store = {
                             dispatch('saveIchiUpHtml');
                             // return;
                             // 下载截图
-                            window.sendDownload({ url: dataUrl, fileName: __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom) + '.png' });
+                            // window.sendDownload({url: dataUrl, fileName: util.getSaveName(newDom)+'.png'});
 
                             __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].notifyStatus('success');
                         } else {
@@ -1416,43 +1421,6 @@ const store = {
                     console.error(e);
                 });
             }, 1000);
-
-            return;
-            // article.find('ins').remove();
-            //  let article = $('.l-contents');
-            article.css({
-                'background-color': 'white' // 设置背景图底色为白色的
-            });
-            // 去除广告等多余节点
-            article.find('ins').remove();
-            let postInnerLink = article.find('.post-inner-link');
-            console.log(postInnerLink.length);
-            $('.post-inner-link').css({
-                opacity: 0
-            });
-            console.warn('=====================================');
-            console.log(article[0]);
-
-            __WEBPACK_IMPORTED_MODULE_2_html2canvas___default()(article[0]).then(function (canvas) {
-                document.body.appendChild(canvas);
-                let dataUrl = canvas.toDataURL();
-
-                let checkFun = () => {
-                    // alert(window.sendDownload);
-                    // イラストにも流行がある！プロイラストレーターが意識する絵柄のトレンド | いちあっぷ.png
-                    let distFileName = document.title + '.png';
-                    distFileName = distFileName.replace(/\|/mig, '——'); // 去除特殊字符
-                    if (window.sendDownload) {
-                        window.sendDownload({ url: dataUrl, fileName: distFileName });
-                    } else {
-                        setTimeout(() => {
-                            console.log('timeout');
-                            checkFun();
-                        }, 500);
-                    }
-                };
-                checkFun();
-            });
         },
         saveIchiUpHtml() {
             // 生成html页面
@@ -1525,6 +1493,19 @@ const store = {
                 file.onload = () => {
                     // 下截html
                     window.sendDownload && window.sendDownload({ url: file.result, fileName: __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom) + '.json' });
+                    newDom2.css({
+                        position: 'fixed',
+                        left: '-1000px',
+                        top: 0
+                    });
+                    $('body').append(newDom2);
+                    document.documentElement.scrollTop = 0;
+                    document.documentElement.scrollLeft = 0;
+
+                    __WEBPACK_IMPORTED_MODULE_2_html2canvas___default()(newDom2[0]).then(function (canvas) {
+                        let dataUrl = canvas.toDataURL();
+                        window.sendDownload({ url: dataUrl, fileName: __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom2) + '.png' });
+                    });
                 };
             });
         }

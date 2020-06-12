@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-11 15:42:34
+ * @Last Modified time: 2020-06-12 15:08:43
  */
 
 import util from '../util.js';
@@ -427,6 +427,7 @@ const store = {
         },
         // ichi-up获取页面教程截图
         saveScreenshot({dispatch}){
+
             $('.adsbygoogle,ins').remove();
             let article = $('article.single-post');
             
@@ -435,7 +436,7 @@ const store = {
             if($('.article-copied').length > 0) {
                 newDom = $('.article-copied');
             } else {
-                newDom = $('<div class="article-copied" style="position:fixed;left:-1000px;top:0;background-color:white;border:0px solid red;width:624px">'+article.html()+'</div>');
+                newDom = $('<div class="article-copied" style="position:fixed;left:-1000px;top:0;background-color:white;width:624px">'+article.html()+'</div>');
                 console.log(1);
                 newDom.find('.post-inner-link,.single-post-banner,.post-footer').remove();
                 console.log(2);
@@ -450,22 +451,18 @@ const store = {
             setTimeout(()=>{
                 document.documentElement.scrollTop = 0;
                 document.documentElement.scrollLeft = 0;
+
                 html2canvas(newDom[0]).then(function(canvas) {
                     let dataUrl = canvas.toDataURL();
     
                     let checkFun = ()=>{
-                        // alert(window.sendDownload);
-                        // イラストにも流行がある！プロイラストレーターが意識する絵柄のトレンド | いちあっぷ.png
-                        /* let distFileName = document.title + '.png';
-                        let date = location.pathname.split('/');
-                        date = newDom.find('.date').html();
-                        distFileName = date+'-' + distFileName.replace(/\|/mig, '——');// 去除特殊字符 */
+                      
                         if(window.sendDownload) {
 
                             dispatch('saveIchiUpHtml');
                             // return;
                             // 下载截图
-                            window.sendDownload({url: dataUrl, fileName: util.getSaveName(newDom)+'.png'});
+                            // window.sendDownload({url: dataUrl, fileName: util.getSaveName(newDom)+'.png'});
 
                             util.notifyStatus('success');
                         } else {
@@ -482,45 +479,7 @@ const store = {
                     console.error(e);
                 });
 
-            }, 1000)
-
-            return;
-            // article.find('ins').remove();
-           //  let article = $('.l-contents');
-            article.css({
-                'background-color': 'white', // 设置背景图底色为白色的
-            })
-            // 去除广告等多余节点
-            article.find('ins').remove();
-            let postInnerLink = article.find('.post-inner-link');
-            console.log(postInnerLink.length);
-            $('.post-inner-link').css({
-                opacity: 0,
-            })
-            console.warn('=====================================');
-            console.log(article[0]);
-
-            html2canvas(article[0]).then(function(canvas) {
-                document.body.appendChild(canvas);
-                let dataUrl = canvas.toDataURL();
-
-                let checkFun = ()=>{
-                    // alert(window.sendDownload);
-                    // イラストにも流行がある！プロイラストレーターが意識する絵柄のトレンド | いちあっぷ.png
-                    let distFileName = document.title + '.png';
-                    distFileName = distFileName.replace(/\|/mig, '——');// 去除特殊字符
-                    if(window.sendDownload) {
-                        window.sendDownload({url: dataUrl, fileName: distFileName});
-                    } else {
-                        setTimeout(()=>{
-                            console.log('timeout');
-                            checkFun();
-                        }, 500)
-                    }
-
-                } 
-                checkFun();
-            });
+            }, 1000);
         },
         saveIchiUpHtml(){
             // 生成html页面
@@ -595,6 +554,20 @@ const store = {
                 file.onload = ()=>{
                     // 下截html
                     window.sendDownload && window.sendDownload({url: file.result, fileName: util.getSaveName(newDom)+'.json'});
+                    newDom2.css({
+                        position:'fixed',
+                        left:'-1000px',
+                        top: 0,
+                    })
+                    $('body').append(newDom2);
+                    document.documentElement.scrollTop = 0;
+                    document.documentElement.scrollLeft = 0;
+                    
+                    html2canvas(newDom2[0]).then(function(canvas) {
+                        let dataUrl = canvas.toDataURL();
+                        window.sendDownload({url: dataUrl, fileName: util.getSaveName(newDom2)+'.png'});
+                    })
+
                 }
             })
         }
