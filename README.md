@@ -20,5 +20,7 @@ https://ichi-up.net/2017/054
 
 6.acfun 文章中的图片
 
+7.碧蓝幻想中文维基
+/gbf\.huijiwiki\.com\/wiki/,
 
 

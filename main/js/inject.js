@@ -492,7 +492,7 @@ module.exports = g;
         let href = location.href;
         let list = [
         //    /baidu.com/,
-        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/];
+        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/];
         let should = false;
         list.forEach(item => {
             // console.log(href.match(item));
@@ -507,7 +507,9 @@ module.exports = g;
         return false; */
     },
     getUrlType() {
-        let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }, { match: /ichi\-up\.net\//, type: 'ichi-up' }, { match: /bing\.ioliu\.cn/, type: 'bing' }];
+        let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, // 未用
+        { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }, { match: /ichi\-up\.net\//, type: 'ichi-up' }, { match: /bing\.ioliu\.cn/, type: 'bing' }, { match: /gbf\.huijiwiki\.com\/wiki/, type: 'gbf' }, // gbf维基
+        { match: /arknights\.huijiwiki\.com\/wiki/, type: 'arknights' }];
         let href = location.href;
         let urlType = '';
         list.forEach(item => {
@@ -951,7 +953,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-12 11:53:32
+ * @Last Modified time: 2020-06-15 16:32:16
  */
 
 
@@ -980,7 +982,12 @@ const store = {
         fetchingList: [],
         isfetching: false,
         parallelNum: 2, // localStorage.getItem('parallelNum'),
-        pageDataSuccess: false
+        pageDataSuccess: false,
+        gbfList: [],
+        gbfImgList: [],
+        arknightsList: [],
+        arknightsImgList: []
+
     },
     // ---------------------------------------------------------------------------------------------------------
     getters: {
@@ -1126,6 +1133,57 @@ const store = {
                 title = splitTitle[splitTitle.length - 1];
                 state.tags = title;
                 // console.log(state.tags);
+            } else if (state.urlType == 'gbf') {
+                state.gbfList = [];
+                state.gbfImgList = [];
+                let mw = $('.mw-headline');
+                mw.each((index, item) => {
+                    let attr = $(item).html();
+                    console.log($(item));
+                    let list = $(item).parent().next().find('.flex-item.char-box');
+
+                    list.each((cIndex, cItem) => {
+                        let msg = $(cItem).find('a').eq(1);
+                        let name = msg.html();
+                        let href = 'https://gbf.huijiwiki.com' + msg.attr('href');
+                        state.gbfList.push({
+                            attr,
+                            name,
+                            href,
+                            cIndex
+                        });
+                    });
+                });
+                pageTotal = /* 1; //  */state.gbfList.length;
+                let splitTitle = document.title.split('/');
+                state.tags = splitTitle[splitTitle.length - 1];
+            } else if (state.urlType == 'arknights') {
+                // https://arknights.huijiwiki.com/wiki/%E6%A8%A1%E6%9D%BF:NavboxChar
+                state.arknightsList = [];
+                state.arknightsImgList = [];
+                console.log('arknights');
+                let list = $('.char-portrait');
+                list.each((index, item) => {
+                    let nameNode = $(item).find('.name');
+                    let name = nameNode.html();
+                    let link = 'https://arknights.huijiwiki.com' + nameNode.parent().attr('href');
+                    console.log(link);
+                    state.arknightsList.push({
+                        name,
+                        index,
+                        href: link
+                    });
+                    /* if(['Lancet-2', 'Castle-3'].indexOf(name) < 0) {
+                        state.arknightsList.push({
+                            name,
+                            index,
+                            href: link
+                        })
+                    } */
+                });
+                pageTotal = 1; //  state.arknightsList.length;
+                let splitTitle = document.title.split('/');
+                state.tags = splitTitle[splitTitle.length - 1];
             }
 
             state.pageTotal = pageTotal;
@@ -1176,6 +1234,32 @@ const store = {
                             // state.imgMapThumbnail[imageUrl] = thumbnail;
                         });
                         dispatch('fetchPageData', { pageNo: pageNo + 1 });
+                    });
+                } else if (state.urlType == 'gbf') {
+                    console.log('====================', state.gbfList);
+                    let item = state.gbfList[pageNo - 1];
+                    console.log(item);
+                    window.fetchData && window.fetchData(item.href, 1000000, function (res) {
+                        let text = res.res.replace(/\n/mig, ' ');
+                        let bodyCotent = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getBodyContent(text);
+                        console.log('bodyCotent');
+                        dispatch('fetchPageImageUrl', { content: bodyCotent, pageNo }).then(() => {
+                            dispatch('fetchPageData', { pageNo: pageNo + 1 });
+                        });
+                    });
+                } else if (state.urlType == 'arknights') {
+                    let item = state.arknightsList[pageNo - 1];
+                    console.log(item);
+                    console.log(item.name);
+                    console.log(item.href);
+                    console.log(window.fetchData);
+                    window.fetchData && window.fetchData(item.href, 1000000, function (res) {
+                        let text = res.res.replace(/\n/mig, ' ');
+                        let bodyCotent = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getBodyContent(text);
+                        console.log('bodyCotent');
+                        dispatch('fetchPageImageUrl', { content: bodyCotent, pageNo }).then(() => {
+                            dispatch('fetchPageData', { pageNo: pageNo + 1 });
+                        });
                     });
                 } else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
@@ -1236,12 +1320,37 @@ const store = {
                         state.list.push(dataFileUrl);
                         state.imgMapTag[dataFileUrl] = pageNo + '-' + (index + 1);
                     });
+                } else if (state.urlType == 'gbf') {
+                    let charStatus = dom.find('.gbf-infopage-left .filter-div--button');
+                    let imgs = dom.find('.gbf-infopage-left .character-zoom img');
+                    let pItem = state.gbfList[pageNo - 1];
+                    charStatus.each((index, item) => {
+                        let img = imgs.eq(index).attr('src');
+                        let attr = pItem.attr;
+                        let name = pItem.name;
+                        let cIndex = pItem.cIndex;
+                        let status = $(item).html();
+                        state.gbfImgList.push({
+                            status,
+                            src: img,
+                            attr,
+                            name,
+                            cIndex
+                        });
+                        state.list.push(img);
+                        state.imgMapTag[img] = `${attr}-${cIndex + 1}-${name}-${status}`;
+                    });
+                    console.log(state.gbfImgList);
+                } else if (state.urlType == 'arknights') {
+                    let role = dom.find('infopanel-item [role="tablist"]');
+                    console.log(role);
                 }
                 resolve();
             });
         },
         // 获取图片数据
         fetchImageData({ state, dispatch }, { start } = { start: false }) {
+
             if (!state.isfetching) {
                 return;
             }
@@ -1273,7 +1382,17 @@ const store = {
                                     });
                                     state.successList.push(url);
                                     // 添加下一个任务
-                                    dispatch('fetchImageData');
+                                    if (state.urlType == 'bing') {
+                                        setTimeout(() => {
+                                            dispatch('fetchImageData');
+                                        }, 1000);
+                                    } else if (state.urlType == 'gbf') {
+                                        setTimeout(() => {
+                                            dispatch('fetchImageData');
+                                        }, 1000);
+                                    } else {
+                                        dispatch('fetchImageData');
+                                    }
 
                                     let fileName = url.split('/');
                                     fileName = fileName[fileName.length - 1];
@@ -1292,6 +1411,8 @@ const store = {
                                         fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(fileName);
                                         fileName = fileName.replace('?imageslim', '');
                                         fileName = fileName.replace(/\//mig, ' ');
+                                    } else if (state.urlType == 'gbf') {
+                                        fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                                     }
                                     console.log('fileName', fileName);
                                     window.sendDownload && window.sendDownload({ url: res.res, fileName: fileName });
@@ -1310,6 +1431,10 @@ const store = {
                                             dispatch('fetchImageData');
                                         }, 2000);
                                     } else if (state.urlType == 'bing') {
+                                        setTimeout(() => {
+                                            dispatch('fetchImageData');
+                                        }, 1000);
+                                    } else if (state.urlType == 'gbf') {
                                         setTimeout(() => {
                                             dispatch('fetchImageData');
                                         }, 1000);
@@ -1393,12 +1518,7 @@ const store = {
                     let dataUrl = canvas.toDataURL();
 
                     let checkFun = () => {
-                        // alert(window.sendDownload);
-                        // イラストにも流行がある！プロイラストレーターが意識する絵柄のトレンド | いちあっぷ.png
-                        /* let distFileName = document.title + '.png';
-                        let date = location.pathname.split('/');
-                        date = newDom.find('.date').html();
-                        distFileName = date+'-' + distFileName.replace(/\|/mig, '——');// 去除特殊字符 */
+
                         if (window.sendDownload) {
 
                             dispatch('saveIchiUpHtml');
@@ -1777,10 +1897,7 @@ function sendMessageToContentScriptByPostMessage(data) {
 			}
 		}
 	};
-	// alert('dddd');
 	if (window.jQuery) {
-		//
-		// alert('bbbbbbbbbbbbbb');
 		var getUUID = function () {
 			var s = [];
 			var hexDigits = "0123456789abcdef";
@@ -1794,8 +1911,149 @@ function sendMessageToContentScriptByPostMessage(data) {
 			var uuid = s.join("");
 			return uuid;
 		};
+		// ============================================================================================
+		// 任务列表
+		var taskList = {};
 
+		// 1.接收任务请求(网页可用)
+		window.accessTask = function (url, callback) {
+			var uuid = getUUID();
+			taskList[uuid] = {
+				callback: callback,
+				url: url
+				// alert('accessTask');
+			};var src = new URL(url);
+			if (src.search) {
+				src.search += '&v=' + Date.now() + '&from=wbExtensions&uuid=' + uuid;
+			} else {
+				src.search = '?v=' + Date.now() + '&from=wbExtensions&uuid=' + uuid;
+			}
+			var iframe = jQuery('<iframe id="' + uuid + '" src="' + src.href + '" width="100" height="10" sandbox="allow-scripts allow-same-origin allow-popups">');
+			// 没有onerror事件，在onload 后5s
+			iframe.get(0).onload = function () {
+				setTimeout(function () {
+					if (taskList[uuid] && !taskList[uuid].usefull) {
+						taskList[uuid].callback({
+							content: '',
+							html: '',
+							url: taskList[uuid].url,
+							msg: 'can not fetch data in 2s after iframe onload'
+						});
+						delete taskList[uuid];
+					}
+				}, 2000);
+			};
+			iframeWrap.append(iframe);
+		};
+		// 接收判断当前iframe是否可用的任务
+		window.wonbaoInjectedObj.receiveNotifyIframeUsefull = function (result) {
+			var params = result;
+			var href = params.href;
+			var regx = /uuid=([^&]+)?&?/mig;
+			var result = regx.exec(href);
+			if (result && result[1]) {
+				var uuid = result[1];
+				if (taskList[uuid]) {
+					taskList[uuid].usefull = true;
+					// alert('yes');
+				}
+			}
+		};
+		// 接收iframe任务结果
+		window.wonbaoInjectedObj.receiveTaskResult = function (result) {
+			var params = result;
+			var href = params.href;
+
+			var regx = /uuid=([^&]+)?&?/mig;
+			var result = regx.exec(href);
+			if (result && result[1]) {
+				var uuid = result[1];
+				if (taskList[uuid]) {
+					taskList[uuid].callback({
+						content: params.content.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"'),
+						html: params.html.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"'),
+						url: taskList[uuid].url
+					});
+					delete taskList[uuid];
+					jQuery('#' + uuid).remove();
+				}
+			}
+		};
+
+		// 接收右键返回的
+		window.wonbaoInjectedObj.receiveInjectNewQueue = function (res) {
+			var url = res.url;
+			var html = res.html.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"');
+			var desc = res.desc.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"');
+			// console.warn(url);
+			// console.log(html);
+			// 如果宿主网页在receiveNewQueue，把相关的数据传进去
+			window.receiveNewQueue && window.receiveNewQueue({
+				url: url,
+				html: html,
+				desc: desc
+			});
+		};
+		// 2.打开新标签页(网页可用)
+		window.openTab = window.openTab || function (url, name, specs, replace) {
+			window.postMessage({ cmd: 'openTab', params: { url: url, name: name, specs: specs, replace: replace } }, '*');
+		};
+		// 3.电脑右下角通知(网页可用)
+		window.notify = window.notify || function (type, iconUrl, title, message) {
+			window.postMessage({ cmd: 'notify', params: { type: type, iconUrl: iconUrl, title: title, message: message } }, '*');
+		};
+
+		// 任务列表
+		var fetchDataTaskList = {};
+		// 4.fetchData (网页可用)
+
+		window.fetchData = window.fetchData || function (url, timeout, callback) {
+			var uuid = getUUID();
+			fetchDataTaskList[uuid] = {
+				callback: callback,
+				url: url
+			};
+			console.log({ cmd: 'fetchData', url: url, timeout: timeout, uuid: uuid });
+			window.postMessage({ cmd: 'fetchData', url: url, timeout: timeout, uuid: uuid }, '*');
+		};
+
+		window.wonbaoInjectedObj.receiveFetchDataTaskResult = function (result) {
+			var uuid = result.uuid;
+			if (fetchDataTaskList[uuid]) {
+				fetchDataTaskList[uuid].callback({
+					res: result.res.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"'),
+					url: result.url
+				});
+				delete fetchDataTaskList[uuid];
+			}
+		};
+		// 5.httpRequest (网页可用)
+		// 任务列表
+		var httpRequestTaskList = {};
+		// alert('ddddd5555');
+		window.httpRequest = window.httpRequest || function (url, responseType, callback) {
+			var uuid = getUUID();
+			httpRequestTaskList[uuid] = {
+				callback: callback,
+				url: url
+			};
+			window.postMessage({ cmd: 'httpRequest', url: url, uuid: uuid, responseType: responseType }, '*');
+		};
+		window.wonbaoInjectedObj.receiveHttpRequestTaskResult = function (result) {
+			var uuid = result.uuid;
+			if (httpRequestTaskList[uuid]) {
+				httpRequestTaskList[uuid].callback({
+					res: result.res, //.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"' ),
+					url: result.url
+				});
+				delete httpRequestTaskList[uuid];
+			}
+		};
+		window.sendDownload = window.sendDownload || function (data) {
+			window.postMessage({ cmd: 'sendDownload', url: data.url, fileName: data.fileName }, '*');
+		};
 		jQuery(function () {
+			alert('d');
 			var iframeWrap = jQuery('<div id="wb-iframe-wrap"></div>');
 			iframeWrap.css({
 				width: '100px',
@@ -1821,147 +2079,6 @@ function sendMessageToContentScriptByPostMessage(data) {
    		iframeWrap.append(iframe);
    	})
    }) */
-
-			// ============================================================================================
-			// 任务列表
-			var taskList = {};
-
-			// 1.接收任务请求(网页可用)
-			window.accessTask = function (url, callback) {
-				var uuid = getUUID();
-				taskList[uuid] = {
-					callback: callback,
-					url: url
-					// alert('accessTask');
-				};var src = new URL(url);
-				if (src.search) {
-					src.search += '&v=' + Date.now() + '&from=wbExtensions&uuid=' + uuid;
-				} else {
-					src.search = '?v=' + Date.now() + '&from=wbExtensions&uuid=' + uuid;
-				}
-				var iframe = jQuery('<iframe id="' + uuid + '" src="' + src.href + '" width="100" height="10" sandbox="allow-scripts allow-same-origin allow-popups">');
-				// 没有onerror事件，在onload 后5s
-				iframe.get(0).onload = function () {
-					setTimeout(function () {
-						if (taskList[uuid] && !taskList[uuid].usefull) {
-							taskList[uuid].callback({
-								content: '',
-								html: '',
-								url: taskList[uuid].url,
-								msg: 'can not fetch data in 2s after iframe onload'
-							});
-							delete taskList[uuid];
-						}
-					}, 2000);
-				};
-				iframeWrap.append(iframe);
-			};
-			// 接收判断当前iframe是否可用的任务
-			window.wonbaoInjectedObj.receiveNotifyIframeUsefull = function (result) {
-				var params = result;
-				var href = params.href;
-				var regx = /uuid=([^&]+)?&?/mig;
-				var result = regx.exec(href);
-				if (result && result[1]) {
-					var uuid = result[1];
-					if (taskList[uuid]) {
-						taskList[uuid].usefull = true;
-						// alert('yes');
-					}
-				}
-			};
-			// 接收iframe任务结果
-			window.wonbaoInjectedObj.receiveTaskResult = function (result) {
-				var params = result;
-				var href = params.href;
-
-				var regx = /uuid=([^&]+)?&?/mig;
-				var result = regx.exec(href);
-				if (result && result[1]) {
-					var uuid = result[1];
-					if (taskList[uuid]) {
-						taskList[uuid].callback({
-							content: params.content.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"'),
-							html: params.html.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"'),
-							url: taskList[uuid].url
-						});
-						delete taskList[uuid];
-						jQuery('#' + uuid).remove();
-					}
-				}
-			};
-
-			// 接收右键返回的
-			window.wonbaoInjectedObj.receiveInjectNewQueue = function (res) {
-				var url = res.url;
-				var html = res.html.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"');
-				var desc = res.desc.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"');
-				// console.warn(url);
-				// console.log(html);
-				// 如果宿主网页在receiveNewQueue，把相关的数据传进去
-				window.receiveNewQueue && window.receiveNewQueue({
-					url: url,
-					html: html,
-					desc: desc
-				});
-			};
-			// 2.打开新标签页(网页可用)
-			window.openTab = window.openTab || function (url, name, specs, replace) {
-				window.postMessage({ cmd: 'openTab', params: { url: url, name: name, specs: specs, replace: replace } }, '*');
-			};
-			// 3.电脑右下角通知(网页可用)
-			window.notify = window.notify || function (type, iconUrl, title, message) {
-				window.postMessage({ cmd: 'notify', params: { type: type, iconUrl: iconUrl, title: title, message: message } }, '*');
-			};
-
-			// 任务列表
-			var fetchDataTaskList = {};
-			// 4.fetchData (网页可用)
-			window.fetchData = window.fetchData || function (url, timeout, callback) {
-				var uuid = getUUID();
-				fetchDataTaskList[uuid] = {
-					callback: callback,
-					url: url
-				};
-				console.log({ cmd: 'fetchData', url: url, timeout: timeout, uuid: uuid });
-				window.postMessage({ cmd: 'fetchData', url: url, timeout: timeout, uuid: uuid }, '*');
-			};
-
-			window.wonbaoInjectedObj.receiveFetchDataTaskResult = function (result) {
-				var uuid = result.uuid;
-				if (fetchDataTaskList[uuid]) {
-					fetchDataTaskList[uuid].callback({
-						res: result.res.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"'),
-						url: result.url
-					});
-					delete fetchDataTaskList[uuid];
-				}
-			};
-			// 5.httpRequest (网页可用)
-			// 任务列表
-			var httpRequestTaskList = {};
-			// alert('ddddd5555');
-			window.httpRequest = window.httpRequest || function (url, responseType, callback) {
-				var uuid = getUUID();
-				httpRequestTaskList[uuid] = {
-					callback: callback,
-					url: url
-				};
-				window.postMessage({ cmd: 'httpRequest', url: url, uuid: uuid, responseType: responseType }, '*');
-			};
-			window.wonbaoInjectedObj.receiveHttpRequestTaskResult = function (result) {
-				var uuid = result.uuid;
-				if (httpRequestTaskList[uuid]) {
-					httpRequestTaskList[uuid].callback({
-						res: result.res, //.replace(/a1562723483981KJZvFoxt/mig, "'").replace(/b1562723483981KJZvFoxt/mig, '"' ),
-						url: result.url
-					});
-					delete httpRequestTaskList[uuid];
-				}
-			};
-			window.sendDownload = window.sendDownload || function (data) {
-				window.postMessage({ cmd: 'sendDownload', url: data.url, fileName: data.fileName }, '*');
-			};
 		});
 	}
 

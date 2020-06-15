@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-12 15:08:43
+ * @Last Modified time: 2020-06-15 16:32:16
  */
 
 import util from '../util.js';
@@ -33,6 +33,11 @@ const store = {
         isfetching: false,
         parallelNum: 2, // localStorage.getItem('parallelNum'),
         pageDataSuccess: false,
+        gbfList: [],
+        gbfImgList: [],
+        arknightsList: [],
+        arknightsImgList: [],
+
 	},
 	// ---------------------------------------------------------------------------------------------------------
 	getters: {
@@ -184,6 +189,58 @@ const store = {
                 title = splitTitle[splitTitle.length - 1];
                 state.tags = title;
                 // console.log(state.tags);
+            } else if (state.urlType == 'gbf') {
+                state.gbfList = [];
+                state.gbfImgList = [];
+                let mw = $('.mw-headline');
+                mw.each((index, item)=>{
+                    let attr= $(item).html();
+                    console.log($(item));
+                    let list = $(item).parent().next().find('.flex-item.char-box');
+
+                    list.each((cIndex, cItem)=>{
+                        let msg = $(cItem).find('a').eq(1);
+                        let name = msg.html();
+                        let href= 'https://gbf.huijiwiki.com' + msg.attr('href');
+                        state.gbfList.push({
+                            attr,
+                            name,
+                            href,
+                            cIndex,
+                        })
+                    })
+
+                }) 
+                pageTotal = /* 1; //  */state.gbfList.length;
+                let splitTitle = document.title.split('/');
+                state.tags = splitTitle[splitTitle.length - 1];
+            } else if(state.urlType == 'arknights') {
+                // https://arknights.huijiwiki.com/wiki/%E6%A8%A1%E6%9D%BF:NavboxChar
+                state.arknightsList = [];
+                state.arknightsImgList = [];
+                console.log('arknights');
+                let list = $('.char-portrait');
+                list.each((index, item)=>{
+                    let nameNode = $(item).find('.name');
+                    let name  = nameNode.html();
+                    let link = 'https://arknights.huijiwiki.com' + nameNode.parent().attr('href');
+                    console.log(link);
+                    state.arknightsList.push({
+                        name,
+                        index,
+                        href: link
+                    })
+                    /* if(['Lancet-2', 'Castle-3'].indexOf(name) < 0) {
+                        state.arknightsList.push({
+                            name,
+                            index,
+                            href: link
+                        })
+                    } */
+                })
+                pageTotal =  1; //  state.arknightsList.length;
+                let splitTitle = document.title.split('/');
+                state.tags = splitTitle[splitTitle.length - 1];
             }
             
             state.pageTotal = pageTotal;
@@ -236,7 +293,33 @@ const store = {
                         })
                         dispatch('fetchPageData', {pageNo: pageNo + 1});
                     });
-                } else {
+                } else if(state.urlType == 'gbf') {
+                    console.log('====================', state.gbfList);
+                    let item = state.gbfList[pageNo - 1];
+                    console.log(item);
+                    window.fetchData && window.fetchData(item.href, 1000000, function(res) {
+                        let text = res.res.replace(/\n/mig, ' ');
+                        let bodyCotent = util.getBodyContent(text);
+                        console.log('bodyCotent');
+                        dispatch('fetchPageImageUrl', {content: bodyCotent, pageNo}).then(()=>{
+                            dispatch('fetchPageData', {pageNo: pageNo + 1});
+                        })
+                    })
+                } else if(state.urlType == 'arknights') {
+                    let item = state.arknightsList[pageNo - 1];
+                    console.log(item);
+                    console.log(item.name);
+                    console.log(item.href);
+                    console.log(window.fetchData);
+                    window.fetchData && window.fetchData(item.href, 1000000, function(res) {
+                        let text = res.res.replace(/\n/mig, ' ');
+                        let bodyCotent = util.getBodyContent(text);
+                        console.log('bodyCotent');
+                        dispatch('fetchPageImageUrl', {content: bodyCotent, pageNo}).then(()=>{
+                            dispatch('fetchPageData', {pageNo: pageNo + 1});
+                        })
+                    })
+                } else{
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
                     console.log('url', url);
                     window.fetchData && window.fetchData(url, 1000000, function(res) {
@@ -298,12 +381,37 @@ const store = {
                         state.list.push(dataFileUrl);
                         state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1);
                     })
+                } else if(state.urlType == 'gbf') {
+                    let charStatus = dom.find('.gbf-infopage-left .filter-div--button');
+                    let imgs = dom.find('.gbf-infopage-left .character-zoom img');
+                    let pItem = state.gbfList[pageNo - 1];
+                    charStatus.each((index,item)=>{
+                        let img = imgs.eq(index).attr('src');
+                        let attr = pItem.attr;
+                        let name = pItem.name;
+                        let cIndex = pItem.cIndex;
+                        let status = $(item).html();
+                        state.gbfImgList.push({
+                            status,
+                            src: img,
+                            attr,
+                            name,
+                            cIndex,
+                       })
+                       state.list.push(img);
+                       state.imgMapTag[img] = `${attr}-${cIndex + 1}-${name}-${status}`;
+                    })
+                    console.log(state.gbfImgList);
+                } else if(state.urlType == 'arknights') {
+                    let role = dom.find('infopanel-item [role="tablist"]');
+                    console.log(role);
                 }
                 resolve();
             })
         },
         // 获取图片数据
         fetchImageData({state, dispatch}, {start} = {start: false}) {
+            
             if(!state.isfetching){
                 return;
             }
@@ -335,7 +443,17 @@ const store = {
                                     })
                                     state.successList.push(url);
                                     // 添加下一个任务
-                                    dispatch('fetchImageData');
+                                    if(state.urlType == 'bing'){
+                                        setTimeout(()=>{
+                                            dispatch('fetchImageData');
+                                        }, 1000)
+                                    }else  if(state.urlType == 'gbf') {
+                                        setTimeout(()=>{
+                                            dispatch('fetchImageData');
+                                        }, 1000);
+                                    } else {
+                                        dispatch('fetchImageData');
+                                    }
     
                                     let fileName = url.split('/');
                                     fileName = fileName[fileName.length - 1];
@@ -354,6 +472,8 @@ const store = {
                                         fileName = state.imgMapTag[url] + '.'+util.getExt(fileName);
                                         fileName = fileName.replace('?imageslim', '')
                                         fileName = fileName.replace(/\//mig, ' ')
+                                    } else if(state.urlType == 'gbf') {
+                                        fileName = state.imgMapTag[url] + '.' + util.getExt(url);
                                     }
                                     console.log('fileName', fileName);
                                     window.sendDownload && window.sendDownload({url: res.res, fileName: fileName});
@@ -375,7 +495,11 @@ const store = {
                                         setTimeout(()=>{
                                             dispatch('fetchImageData');
                                         }, 1000)
-                                    } else {
+                                    } else if(state.urlType == 'gbf') {
+                                        setTimeout(()=>{
+                                            dispatch('fetchImageData');
+                                        }, 1000)
+                                    }else{
                                         dispatch('fetchImageData');
                                     }
                                 }

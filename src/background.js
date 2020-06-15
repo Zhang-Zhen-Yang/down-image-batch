@@ -9,7 +9,9 @@ function shouldSendToTab(url) {
 		/www.acfun.cn\/a\//,
 		/localhost/,
 		/ichi\-up\.net\//,
-		/bing\.ioliu\.cn/
+		/bing\.ioliu\.cn/,
+		/gbf\.huijiwiki\.com\/wiki/,
+		/arknights\.huijiwiki\.com\/wiki/,
 	]
 	let should = false;
 	list.forEach((item)=>{

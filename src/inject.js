@@ -207,10 +207,7 @@ function sendMessageToContentScriptByPostMessage(data)
 			}
 		}
 	}
-	// alert('dddd');
 	if(window.jQuery) {
-		//
-		// alert('bbbbbbbbbbbbbb');
 		var getUUID = function() {
 			var s = [];
 			var hexDigits = "0123456789abcdef";
@@ -224,42 +221,7 @@ function sendMessageToContentScriptByPostMessage(data)
 			var uuid = s.join("");
 			return uuid;
 		}
-
-		jQuery(function() {
-			var iframeWrap = jQuery('<div id="wb-iframe-wrap"></div>');
-			iframeWrap.css({
-				width: '100px',
-				height: '10px',
-				border: '1px solid red',
-				position: 'absolute',
-				left: '-110px',
-				top: 0,
-				overflow: 'auto',
-				opacity: 0,
-			})
-			
-			if(
-				(location.href.indexOf('localhost') > -1) ||
-				(location.href.indexOf('wonbao') > -1) ||
-				(location.href.indexOf('file:')>-1) ||
-				location.href.indexOf('192.168') > -1
-			) {
-				jQuery('body').append(iframeWrap);
-			}
-			/* var copyBtn = jQuery('#wb-copy');
-			copyBtn.addClass('hasplug');
-			copyBtn.on('click', function(){
-				var list = window.myscript();
-				// alert(list);
-				list.forEach(function(item, index){
-					var iframe = jQuery('<iframe src="'+item+'&v='+Date.now()+'&from=wbExtensions" width="100" height="500">');
-					iframeWrap.append(iframe);
-				})
-			}) */
-
-
-
-			// ============================================================================================
+		// ============================================================================================
 			// 任务列表
 			var taskList = {};
 
@@ -357,6 +319,7 @@ function sendMessageToContentScriptByPostMessage(data)
 			// 任务列表
 			var fetchDataTaskList = {};
 			// 4.fetchData (网页可用)
+			
 			window.fetchData = window.fetchData || function(url, timeout, callback) {
 				var uuid = getUUID();
 				fetchDataTaskList[uuid] = {
@@ -402,6 +365,42 @@ function sendMessageToContentScriptByPostMessage(data)
 			window.sendDownload = window.sendDownload || function(data) {
 				window.postMessage({cmd: 'sendDownload', url: data.url, fileName: data.fileName}, '*');
 			}
+		jQuery(function() {
+			alert('d');
+			var iframeWrap = jQuery('<div id="wb-iframe-wrap"></div>');
+			iframeWrap.css({
+				width: '100px',
+				height: '10px',
+				border: '1px solid red',
+				position: 'absolute',
+				left: '-110px',
+				top: 0,
+				overflow: 'auto',
+				opacity: 0,
+			})
+			
+			if(
+				(location.href.indexOf('localhost') > -1) ||
+				(location.href.indexOf('wonbao') > -1) ||
+				(location.href.indexOf('file:')>-1) ||
+				location.href.indexOf('192.168') > -1
+			) {
+				jQuery('body').append(iframeWrap);
+			}
+			/* var copyBtn = jQuery('#wb-copy');
+			copyBtn.addClass('hasplug');
+			copyBtn.on('click', function(){
+				var list = window.myscript();
+				// alert(list);
+				list.forEach(function(item, index){
+					var iframe = jQuery('<iframe src="'+item+'&v='+Date.now()+'&from=wbExtensions" width="100" height="500">');
+					iframeWrap.append(iframe);
+				})
+			}) */
+
+
+
+			
 
 		})
 	}

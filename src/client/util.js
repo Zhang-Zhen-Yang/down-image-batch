@@ -70,6 +70,8 @@ export default {
             /localhost/,
             /ichi\-up\.net\//,
             /bing\.ioliu\.cn/,
+            /gbf\.huijiwiki\.com\/wiki/,
+            /arknights\.huijiwiki\.com\/wiki/,
         ]
         let should = false;
         list.forEach((item)=>{
@@ -90,12 +92,14 @@ export default {
             {match:/yande.re\/post/, type: 'yande.re'},
             {match:/yande.re\/pool/, type: 'yande.re.pool'},
             {match:/baidu.com/, type: 'baidu'},
-            {match:/bilibili.com/, type: 'bilibili'},
+            {match:/bilibili.com/, type: 'bilibili'}, // 未用
             {match:/www.acfun.cn\/a\//, type: 'acfun'},
             {match:/localhost/, type: 'localhost'},
             {match:/ichi\-up\.net\//, type: 'ichi-up'},
             {match:/bing\.ioliu\.cn/, type: 'bing'},
-        ]
+            {match:/gbf\.huijiwiki\.com\/wiki/, type: 'gbf'},// gbf维基
+            {match:/arknights\.huijiwiki\.com\/wiki/, type: 'arknights'},// arknights维基
+        ];
         let href = location.href;
         let urlType = '';
         list.forEach((item)=>{
