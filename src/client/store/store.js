@@ -238,7 +238,7 @@ const store = {
                         })
                     } */
                 })
-                pageTotal =  1; //  state.arknightsList.length;
+                pageTotal = state.arknightsList.length;
                 let splitTitle = document.title.split('/');
                 state.tags = splitTitle[splitTitle.length - 1];
             }
@@ -403,8 +403,29 @@ const store = {
                     })
                     console.log(state.gbfImgList);
                 } else if(state.urlType == 'arknights') {
-                    let role = dom.find('infopanel-item [role="tablist"]');
-                    console.log(role);
+                    let pItem = state.arknightsList[pageNo - 1];
+                    let info = dom.find('.infopanel-item').eq(0);
+                    let status = info.find('ul a');
+                    let name = pItem.name;
+                    let charIndex = pItem.index;
+
+                    let imgs = info.find('.tab-content img');
+                    console.log(status);
+                    console.log(imgs);
+                    status.each((index, item)=>{
+                        let img = imgs.eq(index).attr('src');
+                        state.arknightsImgList.push({
+                            src: img,
+                            name,
+                            cIndex: index,
+                        })
+                        let status = $(item).html();
+                        console.log($(item).html());
+                        state.list.push(img);
+                        state.imgMapTag[img] = `${charIndex + 1}-${name}-${status}`;
+                    })
+                    console.log(state.arknightsImgList);
+                    console.log(state.imgMapTag);
                 }
                 resolve();
             })
@@ -451,6 +472,10 @@ const store = {
                                         setTimeout(()=>{
                                             dispatch('fetchImageData');
                                         }, 1000);
+                                    } else if(state.urlType == 'arknights') {
+                                        setTimeout(()=>{
+                                            dispatch('fetchImageData');
+                                        }, 1000);
                                     } else {
                                         dispatch('fetchImageData');
                                     }
@@ -473,6 +498,8 @@ const store = {
                                         fileName = fileName.replace('?imageslim', '')
                                         fileName = fileName.replace(/\//mig, ' ')
                                     } else if(state.urlType == 'gbf') {
+                                        fileName = state.imgMapTag[url] + '.' + util.getExt(url);
+                                    } else if(state.urlType == 'arknights') {
                                         fileName = state.imgMapTag[url] + '.' + util.getExt(url);
                                     }
                                     console.log('fileName', fileName);
@@ -499,7 +526,11 @@ const store = {
                                         setTimeout(()=>{
                                             dispatch('fetchImageData');
                                         }, 1000)
-                                    }else{
+                                    }else if(state.urlType == 'arknights') {
+                                        setTimeout(()=>{
+                                            dispatch('fetchImageData');
+                                        }, 1000)
+                                    }else {
                                         dispatch('fetchImageData');
                                     }
                                 }
@@ -554,15 +585,18 @@ const store = {
 
             $('.adsbygoogle,ins').remove();
             let article = $('article.single-post');
-            
+            if(location.href.indexOf('categories') > -1) {
+                article = $('.l-contents');
+            }
+
             let newDom;
             
             if($('.article-copied').length > 0) {
                 newDom = $('.article-copied');
             } else {
-                newDom = $('<div class="article-copied" style="position:fixed;left:-1000px;top:0;background-color:white;width:624px">'+article.html()+'</div>');
+                newDom = $('<div class="article-copied" style="position:fixed;left:0px;top:0;background-color:white;width:624px">'+article.html()+'</div>');
                 console.log(1);
-                newDom.find('.post-inner-link,.single-post-banner,.post-footer').remove();
+                newDom.find('.single-post-banner,.post-footer').remove();// .post-inner-link,
                 console.log(2);
                 setTimeout(()=>{
                     // dispatch('saveIchiUpHtml');
@@ -621,13 +655,14 @@ const store = {
                 let imgH = currentImage.height();
                 let imgL = currentImage.position().left;
                 let imgT = currentImage.position().top;
-                imgs.push(currentImage.attr('src'));
+                let origin = currentImage.attr('data-original')
+                imgs.push(origin || currentImage.attr('src'));
                 // newDom2Imgs.eq(index).replaceWith(`<div class="bg-sprit" style="display:inline-block;width:${imgW}px;height:${imgH}px;background-position:${-imgL}px ${-imgT}px;"></div>`)
             })
             console.log('imgs===================================================');
             console.log(imgs);
             let imgPromises = imgs.map((imgUrl)=>{
-                let requestImgUrl = imgUrl.indexOf('//ichi-up') == 0 ?  ('https:'+imgUrl) : imgUrl;
+                let requestImgUrl = (imgUrl.indexOf('//') == 0 /* || imgUrl.indexOf('//station') == 0  */)?  ('https:'+imgUrl) : imgUrl;
                 return new Promise((resolve, reject)=>{
                     window.httpRequest && window.httpRequest(requestImgUrl, 'blob', (res)=>{
                         console.log(res);
@@ -669,6 +704,8 @@ const store = {
                     ${
                         newDom2[0].outerHTML
                     }
+                    <script src="../application.js"></script>
+                    <script src="./application.js"></script>
                 </body>
                 </html>
                 `;
@@ -677,7 +714,8 @@ const store = {
                 file.readAsDataURL(blob);
                 file.onload = ()=>{
                     // 下截html
-                    window.sendDownload && window.sendDownload({url: file.result, fileName: util.getSaveName(newDom)+'.json'});
+                    window.sendDownload && window.sendDownload({url: file.result, fileName: util.getSaveName(newDom).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.html'});
+                    console.log(util.getSaveName(newDom).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.html');
                     newDom2.css({
                         position:'fixed',
                         left:'-1000px',
@@ -689,7 +727,9 @@ const store = {
                     
                     html2canvas(newDom2[0]).then(function(canvas) {
                         let dataUrl = canvas.toDataURL();
-                        window.sendDownload({url: dataUrl, fileName: util.getSaveName(newDom2)+'.png'});
+                        let name = util.getSaveName(newDom2).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.png';
+                        console.log(util.getSaveName(newDom2).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.png');
+                        window.sendDownload({url: dataUrl, fileName: name});
                     })
 
                 }
@@ -703,3 +743,33 @@ const store = {
 export default store;
 
 // git fetch --all && git reset --hard origin/master && git pull
+
+
+
+
+
+
+// console.log(distList);
+
+var toSaveList = [];
+var state = window.project.$store.state
+var distList = state.fetchingList.concat(state.list).concat(state.errorList);
+distList.forEach((item)=>{
+    let listItem = {};
+    listItem[item] = state.imgMapTag[item] || '';
+    toSaveList.push(listItem);
+})
+var toSaveJson = {
+    href: location.href,
+    tags: state.tags,
+    list: toSaveList,
+}
+var blob = new Blob([JSON.stringify(toSaveJson)], {type : 'application/json'});
+/* console.log(toSaveList);
+console.log(blob); */
+var file = new FileReader();
+file.readAsDataURL(blob);
+file.onload = ()=>{
+    console.log(file.result);
+    window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
+}

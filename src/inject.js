@@ -366,7 +366,7 @@ function sendMessageToContentScriptByPostMessage(data)
 				window.postMessage({cmd: 'sendDownload', url: data.url, fileName: data.fileName}, '*');
 			}
 		jQuery(function() {
-			alert('d');
+			// alert('d');
 			var iframeWrap = jQuery('<div id="wb-iframe-wrap"></div>');
 			iframeWrap.css({
 				width: '100px',
