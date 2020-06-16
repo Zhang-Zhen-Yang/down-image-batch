@@ -12,6 +12,7 @@ function shouldSendToTab(url) {
 		/bing\.ioliu\.cn/,
 		/gbf\.huijiwiki\.com\/wiki/,
 		/arknights\.huijiwiki\.com\/wiki/,
+		/t\.bilibili\.com/
 	]
 	let should = false;
 	list.forEach((item)=>{

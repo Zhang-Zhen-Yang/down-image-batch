@@ -492,7 +492,7 @@ module.exports = g;
         let href = location.href;
         let list = [
         //    /baidu.com/,
-        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/];
+        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/];
         let should = false;
         list.forEach(item => {
             // console.log(href.match(item));
@@ -509,7 +509,8 @@ module.exports = g;
     getUrlType() {
         let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, // 未用
         { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }, { match: /ichi\-up\.net\//, type: 'ichi-up' }, { match: /bing\.ioliu\.cn/, type: 'bing' }, { match: /gbf\.huijiwiki\.com\/wiki/, type: 'gbf' }, // gbf维基
-        { match: /arknights\.huijiwiki\.com\/wiki/, type: 'arknights' }];
+        { match: /arknights\.huijiwiki\.com\/wiki/, type: 'arknights' }, // arknights维基
+        { match: /t\.bilibili\.com/, type: 'bilibili' }];
         let href = location.href;
         let urlType = '';
         list.forEach(item => {
@@ -953,7 +954,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-15 16:32:16
+ * @Last Modified time: 2020-06-16 15:17:34
  */
 
 
@@ -1184,6 +1185,10 @@ const store = {
                 pageTotal = state.arknightsList.length;
                 let splitTitle = document.title.split('/');
                 state.tags = splitTitle[splitTitle.length - 1];
+            } else if (state.urlType == 'bilibili') {
+                pageTotal = 1;
+                let pointer = $('.user-name .c-pointer').html();
+                state.tags = pointer;
             }
 
             state.pageTotal = pageTotal;
@@ -1260,6 +1265,10 @@ const store = {
                         dispatch('fetchPageImageUrl', { content: bodyCotent, pageNo }).then(() => {
                             dispatch('fetchPageData', { pageNo: pageNo + 1 });
                         });
+                    });
+                } else if (state.urlType == 'bilibili') {
+                    dispatch('fetchPageImageUrl', { content: '', pageNo }).then(() => {
+                        dispatch('fetchPageData', { pageNo: pageNo + 1 });
                     });
                 } else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
@@ -1365,6 +1374,32 @@ const store = {
                     });
                     console.log(state.arknightsImgList);
                     console.log(state.imgMapTag);
+                } else if (state.urlType == 'bilibili') {
+                    var slider = $('.boost-slider');
+                    var card9 = $('.card-9 .img-content');
+                    let pointer = $('.user-name .c-pointer').html();
+                    if (slider.length > 0) {
+                        console.log(1);
+                        slider.find('img').each((index, item) => {
+                            let src = $(item).attr('src');
+                            src = src.split('@')[0];
+                            src = 'https:' + src;
+                            console.log(src);
+                            state.list.push(src);
+                            state.imgMapTag[src] = `${pointer}-${index}`;
+                        });
+                    } else {
+                        card9.each((index, item) => {
+                            let $item = $(item);
+                            let src = $item.css('background-image');
+                            src = src.split('"')[1];
+                            src = src.split('@')[0];
+                            state.list.push(src);
+                            state.imgMapTag[src] = `${pointer}-${index}`;
+                        });
+                    }
+
+                    console.log(state.list);
                 }
                 resolve();
             });
@@ -1439,6 +1474,8 @@ const store = {
                                     } else if (state.urlType == 'gbf') {
                                         fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                                     } else if (state.urlType == 'arknights') {
+                                        fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
+                                    } else if (state.urlType == 'bilibili') {
                                         fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                                     }
                                     console.log('fileName', fileName);
@@ -1680,28 +1717,27 @@ const store = {
 
 // console.log(distList);
 
-var toSaveList = [];
-var state = window.project.$store.state;
+/* var toSaveList = [];
+var state = window.project.$store.state
 var distList = state.fetchingList.concat(state.list).concat(state.errorList);
-distList.forEach(item => {
+distList.forEach((item)=>{
     let listItem = {};
     listItem[item] = state.imgMapTag[item] || '';
     toSaveList.push(listItem);
-});
+})
 var toSaveJson = {
     href: location.href,
     tags: state.tags,
-    list: toSaveList
-};
-var blob = new Blob([JSON.stringify(toSaveJson)], { type: 'application/json' });
-/* console.log(toSaveList);
-console.log(blob); */
+    list: toSaveList,
+}
+var blob = new Blob([JSON.stringify(toSaveJson)], {type : 'application/json'});
+
 var file = new FileReader();
 file.readAsDataURL(blob);
-file.onload = () => {
+file.onload = ()=>{
     console.log(file.result);
-    window.sendDownload && window.sendDownload({ url: file.result, fileName: `${state.tags || 'unknow'}.json` });
-};
+    window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
+} */
 
 /***/ }),
 /* 13 */

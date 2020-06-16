@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-15 16:32:16
+ * @Last Modified time: 2020-06-16 15:17:34
  */
 
 import util from '../util.js';
@@ -241,6 +241,10 @@ const store = {
                 pageTotal = state.arknightsList.length;
                 let splitTitle = document.title.split('/');
                 state.tags = splitTitle[splitTitle.length - 1];
+            } else if(state.urlType == 'bilibili') {
+                pageTotal = 1;
+                let pointer = $('.user-name .c-pointer').html();
+                state.tags = pointer;
             }
             
             state.pageTotal = pageTotal;
@@ -319,7 +323,11 @@ const store = {
                             dispatch('fetchPageData', {pageNo: pageNo + 1});
                         })
                     })
-                } else{
+                } else if(state.urlType == 'bilibili') {
+                    dispatch('fetchPageImageUrl', {content: '', pageNo}).then(()=>{
+                        dispatch('fetchPageData', {pageNo: pageNo + 1});
+                    })
+                } else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
                     console.log('url', url);
                     window.fetchData && window.fetchData(url, 1000000, function(res) {
@@ -426,6 +434,32 @@ const store = {
                     })
                     console.log(state.arknightsImgList);
                     console.log(state.imgMapTag);
+                } else if(state.urlType == 'bilibili') {
+                    var slider = $('.boost-slider');
+                    var card9 = $('.card-9 .img-content');
+                    let pointer = $('.user-name .c-pointer').html();
+                    if(slider.length > 0) {
+                        console.log(1);
+                        slider.find('img').each((index, item)=>{
+                            let src = $(item).attr('src');
+                            src = src.split('@')[0];
+                            src = 'https:' + src;
+                            console.log(src);
+                            state.list.push(src);
+                            state.imgMapTag[src] = `${pointer}-${index}`;
+                        })
+                    } else {
+                        card9.each((index, item)=>{
+                            let $item = $(item);
+                            let src = $item.css('background-image');
+                            src = src.split('"')[1];
+                            src = src.split('@')[0];
+                            state.list.push(src);
+                            state.imgMapTag[src] = `${pointer}-${index}`;
+                        })
+                    }
+
+                    console.log(state.list);
                 }
                 resolve();
             })
@@ -500,6 +534,8 @@ const store = {
                                     } else if(state.urlType == 'gbf') {
                                         fileName = state.imgMapTag[url] + '.' + util.getExt(url);
                                     } else if(state.urlType == 'arknights') {
+                                        fileName = state.imgMapTag[url] + '.' + util.getExt(url);
+                                    }else if(state.urlType == 'bilibili') {
                                         fileName = state.imgMapTag[url] + '.' + util.getExt(url);
                                     }
                                     console.log('fileName', fileName);
@@ -751,7 +787,7 @@ export default store;
 
 // console.log(distList);
 
-var toSaveList = [];
+/* var toSaveList = [];
 var state = window.project.$store.state
 var distList = state.fetchingList.concat(state.list).concat(state.errorList);
 distList.forEach((item)=>{
@@ -765,11 +801,10 @@ var toSaveJson = {
     list: toSaveList,
 }
 var blob = new Blob([JSON.stringify(toSaveJson)], {type : 'application/json'});
-/* console.log(toSaveList);
-console.log(blob); */
+
 var file = new FileReader();
 file.readAsDataURL(blob);
 file.onload = ()=>{
     console.log(file.result);
     window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
-}
+} */

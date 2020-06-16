@@ -72,6 +72,7 @@ export default {
             /bing\.ioliu\.cn/,
             /gbf\.huijiwiki\.com\/wiki/,
             /arknights\.huijiwiki\.com\/wiki/,
+            /t\.bilibili\.com/,
         ]
         let should = false;
         list.forEach((item)=>{
@@ -99,6 +100,7 @@ export default {
             {match:/bing\.ioliu\.cn/, type: 'bing'},
             {match:/gbf\.huijiwiki\.com\/wiki/, type: 'gbf'},// gbf维基
             {match:/arknights\.huijiwiki\.com\/wiki/, type: 'arknights'},// arknights维基
+            {match: /t\.bilibili\.com/, type: 'bilibili'},// bilibili空动态
         ];
         let href = location.href;
         let urlType = '';

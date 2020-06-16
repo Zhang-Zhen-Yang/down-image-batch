@@ -23,4 +23,10 @@ https://ichi-up.net/2017/054
 7.碧蓝幻想中文维基
 /gbf\.huijiwiki\.com\/wiki/,
 
+8.arknights中文维基
+/gbf\.huijiwiki\.com\/wiki/,
+
+9.bilibili动态
+https://t.bilibili.com/401135291021450167?tab=2
+
 
