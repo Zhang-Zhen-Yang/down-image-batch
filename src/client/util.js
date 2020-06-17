@@ -1,4 +1,4 @@
-export default {
+ let util = {
     // 获取链接的查询字符
     getQueryString(url) {
         let result = {};
@@ -142,8 +142,14 @@ export default {
 
         console.log(distFileName);
         distFileName = date+'-' + distFileName.replace(/\|/mig, '——');// 去除特殊字符
+        distFileName = util.checkName(distFileName);
         console.log(distFileName);
         return distFileName;
+    },
+    checkName(str) {
+        return str.replace(/(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
     }
 
 }
+
+export default util;

@@ -428,7 +428,7 @@ module.exports = g;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony default export */ __webpack_exports__["a"] = ({
+let util = {
     // 获取链接的查询字符
     getQueryString(url) {
         let result = {};
@@ -551,11 +551,17 @@ module.exports = g;
 
         console.log(distFileName);
         distFileName = date + '-' + distFileName.replace(/\|/mig, '——'); // 去除特殊字符
+        distFileName = util.checkName(distFileName);
         console.log(distFileName);
         return distFileName;
+    },
+    checkName(str) {
+        return str.replace(/(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
     }
 
-});
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (util);
 
 /***/ }),
 /* 5 */
@@ -734,6 +740,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -743,6 +750,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     return {};
   },
   computed: {
+    urlType() {
+      return this.$store.state.urlType;
+    },
     showDialog() {
       return this.$store.state.showDialog;
     },
@@ -806,6 +816,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     saveScreenshot() {
       this.$store.dispatch('saveScreenshot');
+    },
+    openTab() {
+      this.$store.dispatch('openIchiUpTab');
     }
   },
   created() {},
@@ -954,7 +967,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-16 15:17:34
+ * @Last Modified time: 2020-06-17 17:20:23
  */
 
 
@@ -1073,11 +1086,11 @@ const store = {
                     }
                 }
             });
+            // 
             document.body.addEventListener('dragover', e => {
                 e.preventDefault();
                 // console.log(e);
             });
-
             $('.javascript-hide').removeClass('javascript-hide').css({ outline: '1px solid red' });
             // commit('showSnackbar', {text: '53333333333333333333333'})
         },
@@ -1556,6 +1569,19 @@ const store = {
                 window.sendDownload && window.sendDownload({ url: file.result, fileName: `${state.tags || 'unknow'}.json` });
             };
         },
+        openIchiUpTab() {
+            let links = $('body').find('.l-contents .post-item .block-link');
+            console.log(links.length);
+            links.each((index, item) => {
+                let href = $(item).attr('data-href');
+                console.log(href);
+                href = 'https://ichi-up.net' + href;
+                setTimeout(() => {
+                    console.log(href);
+                    window.openTab && window.openTab(href);
+                }, index * 1000);
+            });
+        },
         // ichi-up获取页面教程截图
         saveScreenshot({ dispatch }) {
 
@@ -1566,7 +1592,6 @@ const store = {
             }
 
             let newDom;
-
             if ($('.article-copied').length > 0) {
                 newDom = $('.article-copied');
             } else {
@@ -1686,8 +1711,9 @@ const store = {
                 file.readAsDataURL(blob);
                 file.onload = () => {
                     // 下截html
-                    window.sendDownload && window.sendDownload({ url: file.result, fileName: __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom).replace(/[\\\:\*\?\"\<\>\|]/mig, '-') + '.html' });
-                    console.log(__WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom).replace(/[\\\:\*\?\"\<\>\|]/mig, '-') + '.html');
+                    let fn = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom).replace(/[\\\:\*\?\"\<\>\|]/mig, '-') + '.html';
+                    window.sendDownload && window.sendDownload({ url: file.result, fileName: fn });
+                    console.warn('filename-----------------------', fn);
                     newDom2.css({
                         position: 'fixed',
                         left: '-1000px',
@@ -1700,7 +1726,7 @@ const store = {
                     __WEBPACK_IMPORTED_MODULE_2_html2canvas___default()(newDom2[0]).then(function (canvas) {
                         let dataUrl = canvas.toDataURL();
                         let name = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom2).replace(/[\\\:\*\?\"\<\>\|]/mig, '-') + '.png';
-                        console.log(__WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom2).replace(/[\\\:\*\?\"\<\>\|]/mig, '-') + '.png');
+                        console.warn('name==========================', name);
                         window.sendDownload({ url: dataUrl, fileName: name });
                     });
                 };
@@ -1738,6 +1764,19 @@ file.onload = ()=>{
     console.log(file.result);
     window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
 } */
+
+/*
+
+var name = '2019.06.04-特徴を押さえて描こう！ 鳥の描き方講座 ~スズメ編~ —— いちあっぷ.json';
+var blob = new Blob(['abc'], {type : 'application/json'});
+var file = new FileReader();
+file.readAsDataURL(blob);
+file.onload = ()=>{
+    console.log(file.result);
+    window.sendDownload && window.sendDownload({url: file.result, fileName: name});
+}
+
+*/
 
 /***/ }),
 /* 13 */
@@ -11095,7 +11134,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     on: {
       "click": _vm.saveUnfetchList
     }
-  }, [_vm._v("保存")]), _vm._v(" "), _c('button', {
+  }, [_vm._v("保存")]), _vm._v(" "), (_vm.urlType == 'ichi-up') ? _c('button', {
     staticClass: "btn",
     attrs: {
       "id": ""
@@ -11103,7 +11142,15 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     on: {
       "click": _vm.saveScreenshot
     }
-  }, [_vm._v(" 保存ichi-up教程")])])])
+  }, [_vm._v(" 保存ichi-up教程")]) : _vm._e(), _vm._v(" "), (_vm.urlType == 'ichi-up') ? _c('button', {
+    staticClass: "btn",
+    attrs: {
+      "id": ""
+    },
+    on: {
+      "click": _vm.openTab
+    }
+  }, [_vm._v("打开tab")]) : _vm._e()])])
 },staticRenderFns: []}
 
 /***/ }),

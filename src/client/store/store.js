@@ -2,14 +2,13 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-16 15:17:34
+ * @Last Modified time: 2020-06-17 17:20:23
  */
 
 import util from '../util.js';
 import data from '../data.js';
 import html2canvas from 'html2canvas';
 import { arch } from 'os';
-
 
 const store = {
 	state: {
@@ -125,11 +124,11 @@ const store = {
                     }
                 }
             })
+            // 
             document.body.addEventListener('dragover', (e)=>{
                 e.preventDefault();
                 // console.log(e);
             })
-
             $('.javascript-hide').removeClass('javascript-hide').css({outline: '1px solid red'})
             // commit('showSnackbar', {text: '53333333333333333333333'})
         },
@@ -616,6 +615,19 @@ const store = {
                 window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
             }
         },
+        openIchiUpTab() {
+            let links = $('body').find('.l-contents .post-item .block-link');
+            console.log(links.length);
+            links.each((index, item)=>{
+                let href = $(item).attr('data-href');
+                console.log(href);
+                href = 'https://ichi-up.net' + href;
+                setTimeout(()=>{
+                    console.log(href);
+                    window.openTab&&window.openTab(href);
+                }, index * 1000)
+            })
+        },
         // ichi-up获取页面教程截图
         saveScreenshot({dispatch}){
 
@@ -626,7 +638,6 @@ const store = {
             }
 
             let newDom;
-            
             if($('.article-copied').length > 0) {
                 newDom = $('.article-copied');
             } else {
@@ -672,7 +683,6 @@ const store = {
                     console.error('===============================');
                     console.error(e);
                 });
-
             }, 1000);
         },
         saveIchiUpHtml(){
@@ -750,8 +760,9 @@ const store = {
                 file.readAsDataURL(blob);
                 file.onload = ()=>{
                     // 下截html
-                    window.sendDownload && window.sendDownload({url: file.result, fileName: util.getSaveName(newDom).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.html'});
-                    console.log(util.getSaveName(newDom).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.html');
+                    let fn = util.getSaveName(newDom).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.html';
+                    window.sendDownload && window.sendDownload({url: file.result, fileName: fn});
+                    console.warn('filename-----------------------', fn);
                     newDom2.css({
                         position:'fixed',
                         left:'-1000px',
@@ -764,7 +775,7 @@ const store = {
                     html2canvas(newDom2[0]).then(function(canvas) {
                         let dataUrl = canvas.toDataURL();
                         let name = util.getSaveName(newDom2).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.png';
-                        console.log(util.getSaveName(newDom2).replace(/[\\\:\*\?\"\<\>\|]/mig, '-')+'.png');
+                        console.warn('name==========================',name);
                         window.sendDownload({url: dataUrl, fileName: name});
                     })
 
@@ -779,10 +790,6 @@ const store = {
 export default store;
 
 // git fetch --all && git reset --hard origin/master && git pull
-
-
-
-
 
 
 // console.log(distList);
@@ -808,3 +815,17 @@ file.onload = ()=>{
     console.log(file.result);
     window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
 } */
+
+
+/*
+
+var name = '2019.06.04-特徴を押さえて描こう！ 鳥の描き方講座 ~スズメ編~ —— いちあっぷ.json';
+var blob = new Blob(['abc'], {type : 'application/json'});
+var file = new FileReader();
+file.readAsDataURL(blob);
+file.onload = ()=>{
+    console.log(file.result);
+    window.sendDownload && window.sendDownload({url: file.result, fileName: name});
+}
+
+*/

@@ -308,6 +308,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 		sendResponse();
 	} else if (request.cmd == 'sendDownload') { // 下载文件
 		var dlData = [];
+		console.log(request.fileName);
 		chrome.downloads.download(
 			{
 			  url: request.url,

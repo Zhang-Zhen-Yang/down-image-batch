@@ -49,7 +49,8 @@
       </div>
       <div style="height:50px;padding:10px 0 0 10px;border-top:1px solid #efefef;">
         <button class="btn" id="" @click="saveUnfetchList">保存</button>
-        <button class="btn" id="" @click="saveScreenshot"> 保存ichi-up教程</button>
+        <button v-if="urlType == 'ichi-up'" class="btn" id="" @click="saveScreenshot"> 保存ichi-up教程</button>
+        <button v-if="urlType == 'ichi-up'" class="btn" id="" @click="openTab">打开tab</button>
       </div>
     </div>
 </template>
@@ -66,6 +67,9 @@ export default {
     }
   },
   computed:{
+    urlType() {
+      return this.$store.state.urlType;
+    },
     showDialog() {
       return this.$store.state.showDialog;
     },
@@ -129,6 +133,9 @@ export default {
     },
     saveScreenshot() {
       this.$store.dispatch('saveScreenshot');
+    },
+    openTab() {
+      this.$store.dispatch('openIchiUpTab');
     }
   },
   created() {

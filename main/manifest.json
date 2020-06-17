@@ -8,7 +8,8 @@
         "default_icon": {
             "16": "img/icon.png"
         },
-        "default_title": "fotis的扩展工具箱"
+        "default_title": "fotis的扩展工具箱",
+        "default_popup": "popup.html"
     },
     "content_scripts": [
         {
