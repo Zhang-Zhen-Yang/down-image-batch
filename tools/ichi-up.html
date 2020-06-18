@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="application.css">
+</head>
+<body>
+    <main class="l-main" style="">
+        <div class="l-main-container js-slidebar-main">
+            <div class="l-lineup-page">
+                <div class="l-lineup-header">
+                    <p>カテゴリー</p>
+                    <div class="category-title">描き方</div>
+                    <div class="category-description"></div>
+                </div>
+                <div class="l-contents">
+                    <div class="post-items">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../main/js/jq.js"></script>
+    <script src="./ichi-up.js"></script>
+    <script>
+        $(()=>{
+            let page = '1';
+            let tag = '';
+            function renderList() {
+                let dom = '';
+                let filterList = list;
+                if(page){
+                    filterList = filterList.filter((item)=>{
+                        return parseInt(item.page) == page
+                    })
+                }
+                if(tag) {
+                    filterList = filterList.filter((item)=>{
+                        return item.tagsList.indexOf(tag) > -1;
+                    })
+                }
+                filterList.forEach((item)=>{
+                    let tags = item.tagsList.map((i)=>{
+                        return `<a class="tag" href="">${i}</a>`;
+                    })
+                    dom += `
+                    <article class="post-item">
+                        <div class="block-link" data-href="/2018/046">
+                            <div class="eye-catch" data-monologue="content">
+                                <a href="/2018/046" target="_blank">
+                                    <img alt="${item.title}" class="lazy" src="${'./imgs/'+item.imgR}" />
+                                </a>
+                            </div>
+                            <div class="post-text">
+                                <div class="post-info">
+                                    <span class="category"><a href="/categories/%E6%8F%8F%E3%81%8D%E6%96%B9">描き方</a>
+                                </span>
+                                <span class="tag">
+                                    ${tags.join('')}
+                                </span>
+                                </div>
+                                <p class="post-title title-shorten">${item.title}</p>
+                                <div class="post-date">
+                                    <p class="date">${item.date}</p>
+                                </div>
+                                <div class="link-icon"><i class="material-icons">link</i>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    `
+                })
+
+                $('.post-items').empty().append(dom);
+            }
+
+            renderList();
+
+        })
+    </script>
+</body>
+</html>

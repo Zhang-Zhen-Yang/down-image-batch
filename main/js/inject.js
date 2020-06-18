@@ -967,7 +967,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-17 17:20:23
+ * @Last Modified time: 2020-06-18 16:13:47
  */
 
 
@@ -1000,7 +1000,9 @@ const store = {
         gbfList: [],
         gbfImgList: [],
         arknightsList: [],
-        arknightsImgList: []
+        arknightsImgList: [],
+
+        ichiUpItems: []
 
     },
     // ---------------------------------------------------------------------------------------------------------
@@ -1092,7 +1094,7 @@ const store = {
                 // console.log(e);
             });
             $('.javascript-hide').removeClass('javascript-hide').css({ outline: '1px solid red' });
-            // commit('showSnackbar', {text: '53333333333333333333333'})
+            // commit('showSnackbar', {text: '533333'})
         },
         startDown() {},
         // 将失败列表添加到待获取列表里
@@ -1202,6 +1204,9 @@ const store = {
                 pageTotal = 1;
                 let pointer = $('.user-name .c-pointer').html();
                 state.tags = pointer;
+            } else if (state.urlType == 'ichi-up') {
+                state.ichiUpItems = [];
+                pageTotal = 33;
             }
 
             state.pageTotal = pageTotal;
@@ -1283,6 +1288,17 @@ const store = {
                     dispatch('fetchPageImageUrl', { content: '', pageNo }).then(() => {
                         dispatch('fetchPageData', { pageNo: pageNo + 1 });
                     });
+                } else if (state.urlType == 'ichi-up') {
+                    let url = `https://ichi-up.net/categories/%E6%8F%8F%E3%81%8D%E6%96%B9?page=${pageNo}`;
+                    window.fetchData && window.fetchData(url, 1000000, function (res) {
+                        let text = res.res.replace(/\n/mig, ' ');
+                        let bodyCotent = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getBodyContent(text);
+                        console.log('bodyCotent');
+                        // console.log(bodyCotent);
+                        dispatch('fetchPageImageUrl', { content: bodyCotent, pageNo }).then(() => {
+                            dispatch('fetchPageData', { pageNo: pageNo + 1 });
+                        });
+                    });
                 } else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
                     console.log('url', url);
@@ -1298,11 +1314,14 @@ const store = {
                     });
                 }
             } else {
+                if (state.urlType == 'ichi-up') {
+                    dispatch('saveIchiUpData');
+                }
                 state.pageDataSuccess = true;
             }
         },
         // 通过html解析页面img
-        fetchPageImageUrl({ state }, { content, pageNo }) {
+        fetchPageImageUrl({ state, dispatch }, { content, pageNo }) {
             console.log('fetchPageImageUrl');
             return new Promise((resolve, reject) => {
                 let dom = jQuery('<div>' + content + '</div>');
@@ -1413,6 +1432,43 @@ const store = {
                     }
 
                     console.log(state.list);
+                } else if (state.urlType == 'ichi-up') {
+                    let postItems = dom.find('.l-contents .post-item');
+                    postItems.each((index, item) => {
+                        let $item = $(item);
+                        let link = $item.find('.block-link').attr('data-href');
+                        let poster = $item.find('.eye-catch img').attr('data-original');
+                        let catetory = $item.find('.post-text .category a').html();
+                        let tags = $item.find('.post-text span.tag a');
+                        let title = $item.find('.post-title').html();
+                        let date = $item.find('.post-date .date').html();
+                        let imgR = link;
+                        let tagsList = [];
+                        tags.each((index, item) => {
+                            tagsList.push($(item).html());
+                        });
+                        state.list.push(poster);
+                        /* if(state.imgMapTag[poster]) {
+                            console.warn('时间重复', date);
+                            imgR = state.imgMapTag[poster] = date.replace('/', '-')+'-'+ parseInt(Math.random() * 1000);
+                        } else {
+                            imgR = state.imgMapTag[poster] = date.replace('/', '-');
+                          } */
+
+                        imgR = state.imgMapTag[poster] = imgR.replace(/^\//, '').replace('/', '-') + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(poster);
+                        state.ichiUpItems.push({
+                            link,
+                            poster,
+                            catetory,
+                            title,
+                            tagsList,
+                            date,
+                            imgR,
+                            pageNo: pageNo
+                        });
+                    });
+                    console.log(state.ichiUpItems);
+                    console.log(state.imgMapTag);
                 }
                 resolve();
             });
@@ -1423,21 +1479,18 @@ const store = {
             if (!state.isfetching) {
                 return;
             }
-            // alert('ddd');
             if (start) {
                 for (let i = 0; i < state.parallelNum; i++) {
                     dispatch('fetchImageData');
                 }
                 __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].notifyStatus('progress');
             } else {
-                console.log('ddddd');
                 if (state.fetchingList.length < state.parallelNum) {
                     if (state.list.length > 0) {
                         try {
                             console.log(state.list[0]);
                             let url = state.list.splice(0, 1);
                             url = url[0];
-                            console.log('88888');
                             state.fetchingList.push(url);
                             console.log(window.httpRequest);
                             window.httpRequest && window.httpRequest(url, 'blob', res => {
@@ -1460,6 +1513,10 @@ const store = {
                                             dispatch('fetchImageData');
                                         }, 1000);
                                     } else if (state.urlType == 'arknights') {
+                                        setTimeout(() => {
+                                            dispatch('fetchImageData');
+                                        }, 1000);
+                                    } else if (state.urlType == 'ichi-up') {
                                         setTimeout(() => {
                                             dispatch('fetchImageData');
                                         }, 1000);
@@ -1490,6 +1547,9 @@ const store = {
                                         fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                                     } else if (state.urlType == 'bilibili') {
                                         fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
+                                    } else if (state.urlType == 'ichi-up') {
+
+                                        fileName = state.imgMapTag[url];
                                     }
                                     console.log('fileName', fileName);
                                     window.sendDownload && window.sendDownload({ url: res.res, fileName: fileName });
@@ -1516,6 +1576,10 @@ const store = {
                                             dispatch('fetchImageData');
                                         }, 1000);
                                     } else if (state.urlType == 'arknights') {
+                                        setTimeout(() => {
+                                            dispatch('fetchImageData');
+                                        }, 1000);
+                                    } else if (state.urlType == 'ichi-up') {
                                         setTimeout(() => {
                                             dispatch('fetchImageData');
                                         }, 1000);
@@ -1567,6 +1631,32 @@ const store = {
             file.onload = () => {
                 console.log(file.result);
                 window.sendDownload && window.sendDownload({ url: file.result, fileName: `${state.tags || 'unknow'}.json` });
+            };
+        },
+        saveIchiUpData({ state }) {
+            let list = [];
+            state.ichiUpItems.forEach((item, index) => {
+                list.push(`
+                {
+                    link:  '${item.link}',
+                    poster: '${item.poster}',
+                    catetory: '${item.catetory}',
+                    title: '${item.title}',
+                    tagsList: ${JSON.stringify(item.tagsList)},
+                    date: '${item.date}',
+                    imgR: '${item.imgR}',
+                    pageNo: '${item.pageNo}'
+                }
+                `);
+            });
+            let listStr = `let list = [${list.join(',')}]`;
+            console.log(listStr);
+
+            let blob = new Blob([listStr], { type: 'text/javascript' });
+            let file = new FileReader();
+            file.readAsDataURL(blob);
+            file.onload = () => {
+                window.sendDownload && window.sendDownload({ url: file.result, fileName: 'ichi-up.js' });
             };
         },
         openIchiUpTab() {
@@ -1727,6 +1817,7 @@ const store = {
                         let dataUrl = canvas.toDataURL();
                         let name = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getSaveName(newDom2).replace(/[\\\:\*\?\"\<\>\|]/mig, '-') + '.png';
                         console.warn('name==========================', name);
+                        __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].notifyStatus('success');
                         window.sendDownload({ url: dataUrl, fileName: name });
                     });
                 };
