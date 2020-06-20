@@ -967,7 +967,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-18 16:13:47
+ * @Last Modified time: 2020-06-19 13:53:44
  */
 
 
@@ -982,7 +982,7 @@ const store = {
             text: '',
             timeout: 2000
         },
-        showDialog: true,
+        showDialog: false,
         urlType: 'danbooru',
         pageTotal: 0,
         currentPage: 1,
