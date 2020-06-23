@@ -492,7 +492,7 @@ let util = {
         let href = location.href;
         let list = [
         //    /baidu.com/,
-        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/];
+        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /t\.bilibili\.com/];
         let should = false;
         list.forEach(item => {
             // console.log(href.match(item));
@@ -506,6 +506,7 @@ let util = {
         }
         return false; */
     },
+    // 链接标识
     getUrlType() {
         let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, // 未用
         { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }, { match: /ichi\-up\.net\//, type: 'ichi-up' }, { match: /bing\.ioliu\.cn/, type: 'bing' }, { match: /gbf\.huijiwiki\.com\/wiki/, type: 'gbf' }, // gbf维基
@@ -521,6 +522,7 @@ let util = {
         });
         return urlType;
     },
+    // 更改网页title
     notifyStatus(status) {
         let title = document.title;
         title = title.replace(/^(↓|√)/, '');
@@ -541,6 +543,7 @@ let util = {
         let nameList = name.split('.');
         return nameList[nameList.length - 1] || '';
     },
+
     getTitle() {
         return document.title.replace(/^(↓|√)/, '');
     },
@@ -555,6 +558,7 @@ let util = {
         console.log(distFileName);
         return distFileName;
     },
+    // 将特殊符号改成其他
     checkName(str) {
         return str.replace(/(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
     }

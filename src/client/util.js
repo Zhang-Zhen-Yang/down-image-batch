@@ -73,6 +73,7 @@
             /gbf\.huijiwiki\.com\/wiki/,
             /arknights\.huijiwiki\.com\/wiki/,
             /t\.bilibili\.com/,
+            /t\.bilibili\.com/,
         ]
         let should = false;
         list.forEach((item)=>{
@@ -87,6 +88,7 @@
         }
         return false; */
     },
+    // 链接标识
     getUrlType() {
         let list = [
             {match: /danbooru/, type: 'danbooru'},
@@ -112,6 +114,7 @@
         })
         return urlType;
     },
+    // 更改网页title
     notifyStatus(status) {
         let title = document.title;
         title = title.replace(/^(↓|√)/, '');
@@ -132,6 +135,7 @@
         let nameList = name.split('.');
         return nameList[nameList.length -1] || ''
     },
+
     getTitle() {
         return document.title.replace(/^(↓|√)/, '');
     },
@@ -146,6 +150,7 @@
         console.log(distFileName);
         return distFileName;
     },
+    // 将特殊符号改成其他
     checkName(str) {
         return str.replace(/(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
     }
