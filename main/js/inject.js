@@ -971,7 +971,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-19 13:53:44
+ * @Last Modified time: 2020-06-24 17:46:13
  */
 
 
@@ -1497,6 +1497,7 @@ const store = {
                             url = url[0];
                             state.fetchingList.push(url);
                             console.log(window.httpRequest);
+
                             window.httpRequest && window.httpRequest(url, 'blob', res => {
                                 console.log(res);
                                 if (res.res) {
@@ -2285,8 +2286,27 @@ function sendMessageToContentScriptByPostMessage(data) {
 				delete httpRequestTaskList[uuid];
 			}
 		};
+		// 向后台发送下载任务
+		var downloadTaskList = {};
 		window.sendDownload = window.sendDownload || function (data) {
-			window.postMessage({ cmd: 'sendDownload', url: data.url, fileName: data.fileName }, '*');
+			var uuid = getUUID();
+			downloadTaskList[uuid] = {
+				callback: data.callback,
+				url: data.url
+			};
+			window.postMessage({ cmd: 'sendDownload', uuid: uuid, url: data.url, fileName: data.fileName }, '*');
+		};
+		window.wonbaoInjectedObj.notifyDownloadComplete = function (result) {
+			console.log('inject', result);
+			var uuid = result.uuid;
+			if (downloadTaskList[uuid]) {
+				console.log('yyyy');
+				downloadTaskList[uuid].callback({
+					url: result.url,
+					success: result.res == 'success'
+				});
+				delete downloadTaskList[uuid];
+			}
 		};
 		jQuery(function () {
 			// alert('d');

@@ -162,8 +162,22 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 			}
 		)
 		injectCustomJs(codeURL, true); 
-
-			
+	} else if(request.cmd == 'downloadComplete') {
+		console.log('downloadComplete -------------------');
+		var result = {
+			url: request.url,
+			uuid: request.uuid,
+			res: request.res //(request.res || '').replace(/'/mig, 'a1562723483981KJZvFoxt').replace(/"/mig, 'b1562723483981KJZvFoxt' ),
+		}
+		console.log(result);
+		console.log('result', result);
+		var codeURL = URL.createObjectURL(new Blob(
+			['window.wonbaoInjectedObj&&window.wonbaoInjectedObj.notifyDownloadComplete&&window.wonbaoInjectedObj.notifyDownloadComplete('+JSON.stringify(result)+')']
+			),{
+				type: 'application/javascript'
+			}
+		)
+		injectCustomJs(codeURL, true); 
 	}
 });
 
@@ -254,7 +268,7 @@ window.addEventListener("message", function(e)
 		});
 	} else if(e.data.cmd == 'sendDownload') {
 		console.log([e.data.url, e.data.fileName]);
-		chrome.runtime.sendMessage({cmd:'sendDownload', url: e.data.url, fileName: e.data.fileName}, function(response) {
+		chrome.runtime.sendMessage({cmd:'sendDownload', url: e.data.url, uuid: e.data.uuid, fileName: e.data.fileName}, function(response) {
 		});
 	}
 }, false);

@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-19 13:53:44
+ * @Last Modified time: 2020-06-24 17:46:13
  */
 
 import util from '../util.js';
@@ -542,6 +542,10 @@ const store = {
                             url = url[0];
                             state.fetchingList.push(url);
                             console.log(window.httpRequest);
+
+
+
+
                             window.httpRequest && window.httpRequest(url, 'blob', (res)=>{
                                 console.log(res);
                                 if(res.res) {
@@ -637,6 +641,9 @@ const store = {
                                     }
                                 }
                             });
+
+
+                            
                         } catch(e){
                             console.warn(e);
                         } 
