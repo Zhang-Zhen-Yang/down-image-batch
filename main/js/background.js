@@ -74,7 +74,7 @@
 //-------------------- 右键菜单演示 ------------------------//
 function shouldSendToTab(url) {
 	// tab.url.indexOf('danbooru') > -1 || tab.url.indexOf('yande.re') > -1  ||tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:') > -1 || tab.url.indexOf('192.168') > -1
-	let list = [/danbooru/, /yande.re/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/];
+	let list = [/danbooru/, /yande.re/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.1999\.co\.jp\/eng\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/];
 	let should = false;
 	list.forEach(item => {
 		if (url.match(item)) {

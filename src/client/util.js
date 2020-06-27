@@ -74,6 +74,9 @@
             /arknights\.huijiwiki\.com\/wiki/,
             /t\.bilibili\.com/,
             /t\.bilibili\.com/,
+            /www\.hpoi\.net\/hobby/,
+            /www\.1999\.co\.jp\/eng\/image/,
+            /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/,
         ]
         let should = false;
         list.forEach((item)=>{
@@ -103,6 +106,9 @@
             {match:/gbf\.huijiwiki\.com\/wiki/, type: 'gbf'},// gbf维基
             {match:/arknights\.huijiwiki\.com\/wiki/, type: 'arknights'},// arknights维基
             {match: /t\.bilibili\.com/, type: 'bilibili'},// bilibili空动态
+            {match: /www\.hpoi\.net\/hobby/, type: 'hpoi'},// hpoi手办
+            {match: /www\.1999\.co\.jp\/eng\/image/, type: 'hobby'},// hpoi手办
+            {match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/, type: 'nyahentai'},// nyahentai
         ];
         let href = location.href;
         let urlType = '';

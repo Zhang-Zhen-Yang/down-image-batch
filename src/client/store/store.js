@@ -30,7 +30,7 @@ const store = {
         errorList: [],// data.errorList,
         fetchingList: [],
         isfetching: false,
-        parallelNum: 2, // localStorage.getItem('parallelNum'),
+        parallelNum: 1, // localStorage.getItem('parallelNum'),
         pageDataSuccess: false,
         gbfList: [],
         gbfImgList: [],
@@ -249,6 +249,16 @@ const store = {
             } else if(state.urlType == 'ichi-up') {
                 state.ichiUpItems = [];
                 pageTotal = 33;
+            } else if(state.urlType == 'hpoi') {
+                pageTotal = 1;
+                state.tags = document.title.split('|')[0].trim();
+            } else if(state.urlType == 'hobby') {
+                pageTotal = 1;
+                state.tags = document.title.trim();
+            } else if(state.urlType == 'nyahentai') {
+                pageTotal = 1;
+                state.tags = util.checkName($('#info-block #info h2').html());
+                console.log(state.tags);
             }
             
             state.pageTotal = pageTotal;
@@ -341,6 +351,32 @@ const store = {
                         dispatch('fetchPageImageUrl', {content: bodyCotent, pageNo}).then(()=>{
                             dispatch('fetchPageData', {pageNo: pageNo + 1});
                         })
+                    })
+                } else if(state.urlType == 'hpoi') {
+
+                    $('.av-masonry-container.light-gallery a').each((index, item)=>{
+                        let img = ($(item).attr('href'));
+                        state.list.push(img);
+                        state.imgMapTag[img] = index + 1;
+                    })
+                } else if(state.urlType == 'hobby') {
+                    $('#imgAll img').not('.TopThumbImg,.hoverImg').each((index, item)=>{
+                        let img = 'https://www.1999.co.jp'+ ($(item).attr('src'));
+                        state.list.push(img);
+                        state.imgMapTag[img] = index + 1;
+                    })
+                } else if(state.urlType == 'nyahentai') {
+
+
+                    /* https://search.pstatic.net/common?src=https://mt.404cdn.com/galleries/1557596/1t.jpg
+                    https://search.pstatic.net/common?src=https://mi.404cdn.com/galleries/1557596/1.jpg */
+
+
+                    $('.container .thumb-container img.lazyloaded').each((index, item)=>{
+                        let img = ($(item).attr('src'));
+                        img = img.replace('t.404', 'i.404').replace('t.', '.');
+                        state.list.push(img);
+                        state.imgMapTag[img] = index + 1;
                     })
                 } else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
@@ -543,10 +579,116 @@ const store = {
                             state.fetchingList.push(url);
                             console.log(window.httpRequest);
 
+                            //
+
+                            let fileName = url.split('/');
+                                    fileName = fileName[fileName.length - 1];
+                                    fileName = state.tags +'-'+ (state.imgMapTag[url] || '')+ '.' + util.getExt(fileName);
+                                    if(fileName.indexOf('.') < 0){
+                                        fileName += '.jpg';
+                                    }
+                                    if(fileName.indexOf(' ') > -1) {
+                                        let splitFileName = fileName.split(' ');
+                                        fileName = splitFileName[splitFileName.length - 1];
+                                    }
+                                  
+                                    // 下载图片
+                                    console.log(state.imgMapTag[url]);
+                                    if(state.urlType == 'bing') {
+                                        fileName = state.imgMapTag[url] + '.'+util.getExt(fileName);
+                                        fileName = fileName.replace('?imageslim', '')
+                                        fileName = fileName.replace(/\//mig, ' ')
+                                    } else if(state.urlType == 'gbf') {
+                                        fileName = state.imgMapTag[url] + '.' + util.getExt(url);
+                                    } else if(state.urlType == 'arknights') {
+                                        fileName = state.imgMapTag[url] + '.' + util.getExt(url);
+                                    }else if(state.urlType == 'bilibili') {
+                                        fileName = state.imgMapTag[url] + '.' + util.getExt(url);
+                                    } else if(state.urlType == 'ichi-up') {
+                                        fileName = state.imgMapTag[url];
+                                    } else if(state.urlType == 'hpoi') {
+                                        fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
+                                    }else if(state.urlType == 'hobby') {
+                                        fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
+                                    } else if(state.urlType == 'nyahentai') {
+                                        fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
+                                    }
+                                    console.log('fileName', fileName);
+                                    window.sendDownload && window.sendDownload({url: url, fileName: fileName,callback: (res)=>{
+                                        if(res.success) {
+                                            state.list = state.list.filter((i)=>{
+                                                return i != url;
+                                            })
+                                            state.fetchingList = state.fetchingList.filter((i)=>{
+                                                return i != url;
+                                            })
+                                            state.successList.push(url);
+                                            // 添加下一个任务
+                                            if(state.urlType == 'bing'){
+                                                setTimeout(()=>{
+                                                    dispatch('fetchImageData');
+                                                }, 1000)
+                                            }else  if(state.urlType == 'gbf') {
+                                                setTimeout(()=>{
+                                                    dispatch('fetchImageData');
+                                                }, 1000);
+                                            } else if(state.urlType == 'arknights') {
+                                                setTimeout(()=>{
+                                                    dispatch('fetchImageData');
+                                                }, 1000);
+                                            } else if(state.urlType == 'ichi-up') {
+                                                setTimeout(()=>{
+                                                    dispatch('fetchImageData');
+                                                }, 1000);
+                                            } else {
+                                                dispatch('fetchImageData');
+                                            }
+                                        } else {
+                                                // console.log('errorList', errorList);
+                                                state.list = state.list.filter((i)=>{
+                                                    return i != url;
+                                                })
+                                                state.fetchingList = state.fetchingList.filter((i)=>{
+                                                    return i != url;
+                                                })
+                                                state.errorList.push(url);
+                                                // 添加下一个任务
+                                                if(state.urlType == 'yade.re.pool') {
+                                                    setTimeout(()=>{
+                                                        dispatch('fetchImageData');
+                                                    }, 2000)
+                                                } else if(state.urlType == 'bing'){
+                                                    setTimeout(()=>{
+                                                        dispatch('fetchImageData');
+                                                    }, 1000)
+                                                } else if(state.urlType == 'gbf') {
+                                                    setTimeout(()=>{
+                                                        dispatch('fetchImageData');
+                                                    }, 1000)
+                                                }else if(state.urlType == 'arknights') {
+                                                    setTimeout(()=>{
+                                                        dispatch('fetchImageData');
+                                                    }, 1000)
+                                                }else if(state.urlType == 'ichi-up') {
+                                                    setTimeout(()=>{
+                                                        dispatch('fetchImageData');
+                                                    }, 1000)
+                                                }else {
+                                                    dispatch('fetchImageData');
+                                                }
+                                        }
 
 
 
-                            window.httpRequest && window.httpRequest(url, 'blob', (res)=>{
+                                    }});
+
+
+
+
+                            
+
+                           /*  window.httpRequest && window.httpRequest(url, 'blob', (res)=>{
+
                                 console.log(res);
                                 if(res.res) {
                                     state.list = state.list.filter((i)=>{
@@ -601,8 +743,13 @@ const store = {
                                     }else if(state.urlType == 'bilibili') {
                                         fileName = state.imgMapTag[url] + '.' + util.getExt(url);
                                     } else if(state.urlType == 'ichi-up') {
-                                        
                                         fileName = state.imgMapTag[url];
+                                    } else if(state.urlType == 'hpoi') {
+                                        fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
+                                    }else if(state.urlType == 'hobby') {
+                                        fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
+                                    } else if(state.urlType == 'nyahentai') {
+                                        fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
                                     }
                                     console.log('fileName', fileName);
                                     window.sendDownload && window.sendDownload({url: res.res, fileName: fileName});
@@ -640,7 +787,7 @@ const store = {
                                         dispatch('fetchImageData');
                                     }
                                 }
-                            });
+                            }); */
 
 
                             

@@ -12,10 +12,7 @@ function shouldSendToTab(url) {
 		/bing\.ioliu\.cn/,
 		/gbf\.huijiwiki\.com\/wiki/,
 		/arknights\.huijiwiki\.com\/wiki/,
-		/t\.bilibili\.com/,
-		/www\.hpoi\.net\/hobby/,
-		/www\.1999\.co\.jp\/eng\/image/,
-		/(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/
+		/t\.bilibili\.com/
 	]
 	let should = false;
 	list.forEach((item)=>{
@@ -140,10 +137,6 @@ backgroundInit();
 //-------------------- badge演示 ------------------------//
 var contentMap = {
 }
-
-
-
-var dlData = [];
 // 监听来自content-script的消息
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 {	
@@ -314,78 +307,26 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 		xhr.send(null);
 		sendResponse();
 	} else if (request.cmd == 'sendDownload') { // 下载文件
-		
+		var dlData = [];
 		console.log(request.fileName);
-
-		try{
-			chrome.downloads.download(
-				{
-				  url: request.url,
-				  filename: request.fileName,
-				  conflictAction: 'overwrite',
-				  saveAs: false,
-				},
-				function (id, e) {
-					console.log(1, id);
-					console.log(2, e);
-				  // id 是 Chrome 新建立的下载任务的 id
-				  dlData[id] = {
-					url: request.url,
-					id: request.id,
-					uuid: request.uuid,
-					res: 'success'
-				  }
-				  /* console.log('downloadComplete');
-				  sendFetchDataToContentScript(dlData[id], 'downloadComplete'); */
-				},
-			)
-
-		} catch(e){
-			console.log();
-			console.error(e);
-		}
+		chrome.downloads.download(
+			{
+			  url: request.url,
+			  filename: request.fileName,
+			  conflictAction: 'overwrite',
+			  saveAs: false,
+			},
+			function (id) {
+			  // id 是 Chrome 新建立的下载任务的 id
+			  dlData[id] = {
+				url: request.url,
+				id: request.id,
+				uuid: false,
+			  }
+			}
+		  )
 	}
 });
-
-
-chrome.downloads.onChanged.addListener(function(detail) {
-	console.log(detail);
-	const data = dlData[detail.id];
-	if (data) {
-		let msg = ''
-		let err = ''
-		// 判断当前文件名是否正常。下载时必定会有一次 detail.filename.current 有值
-		/* if (detail.filename && detail.filename.current) {
-			const changedName = detail.filename.current
-			if (
-			changedName.endsWith('jfif') ||
-			changedName.match(UUIDRegexp) !== null
-			) {
-			// 文件名是 UUID
-			data.uuid = true
-			}
-		} */
-		if (detail.state && detail.state.current === 'complete') {
-			msg = 'downloaded';
-			sendFetchDataToContentScript(data, 'downloadComplete');
-			dlData[detail.id] = '';
-		}
-		if (detail.error && detail.error.current) {
-			msg = 'download_err'
-			err = detail.error.current
-			data.res = 'error';
-			sendFetchDataToContentScript(data, 'downloadComplete');
-			dlData[detail.id] = '';
-		}
-		// 返回信息
-		if (msg) {
-			chrome.tabs.sendMessage(data.tabId, { msg, data, err })
-			// 清除这个任务的数据
-			dlData[detail.id] = null
-		}
-	}
-
-})
 
 // 将跨域获取的数据传回到content-script, content-script 再传到宿主页面 
 function sendFetchDataToContentScript(data, cmd) {
