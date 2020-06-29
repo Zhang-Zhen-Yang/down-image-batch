@@ -492,7 +492,7 @@ let util = {
         let href = location.href;
         let list = [
         //    /baidu.com/,
-        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /t\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.1999\.co\.jp\/eng\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/];
+        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /t\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.1999\.co\.jp\/eng\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/, /shimo\.im\/docs/];
         let should = false;
         list.forEach(item => {
             // console.log(href.match(item));
@@ -514,7 +514,8 @@ let util = {
         { match: /t\.bilibili\.com/, type: 'bilibili' }, // bilibili空动态
         { match: /www\.hpoi\.net\/hobby/, type: 'hpoi' }, // hpoi手办
         { match: /www\.1999\.co\.jp\/eng\/image/, type: 'hobby' }, // hpoi手办
-        { match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/, type: 'nyahentai' }];
+        { match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/, type: 'nyahentai' }, // nyahentai
+        { match: /shimo\.im\/docs/, type: 'shimo' }];
         let href = location.href;
         let urlType = '';
         list.forEach(item => {
@@ -974,7 +975,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-24 17:46:13
+ * @Last Modified time: 2020-06-29 17:56:22
  */
 
 
@@ -1224,8 +1225,10 @@ const store = {
                 pageTotal = 1;
                 state.tags = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].checkName($('#info-block #info h2').html());
                 console.log(state.tags);
+            } else if (state.urlType == 'shimo') {
+                pageTotal = 1;
+                state.tags = document.title;
             }
-
             state.pageTotal = pageTotal;
         },
         // 获取页面数据
@@ -1339,6 +1342,14 @@ const store = {
                         img = img.replace('t.404', 'i.404').replace('t.', '.');
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
+                    });
+                } else if (state.urlType == 'shimo') {
+                    $('#editor img').each((index, item) => {
+                        let img = $(item).attr('src').replace('!thumbnail', '');
+                        let l = img.split('/');
+                        let tag = l[l.length - 1];
+                        state.imgMapTag[tag] = img;
+                        state.list.push(img);
                     });
                 } else {
                     let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
@@ -1510,7 +1521,7 @@ const store = {
                     });
                     console.log(state.ichiUpItems);
                     console.log(state.imgMapTag);
-                }
+                } else if (state.urlType == 'shimo') {}
                 resolve();
             });
         },
@@ -1567,6 +1578,8 @@ const store = {
                             } else if (state.urlType == 'hobby') {
                                 fileName = state.tags + '/' + state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                             } else if (state.urlType == 'nyahentai') {
+                                fileName = state.tags + '/' + state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
+                            } else if (state.urlType == '=shimo') {
                                 fileName = state.tags + '/' + state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                             }
                             console.log('fileName', fileName);
@@ -1743,6 +1756,9 @@ const store = {
                             __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].notifyStatus('success');
                             window.notify('basic', '', '获取完成', `user:${state.tags}`);
                             state.isfetching = false;
+                            if (state.urlType == 'shimo') {
+                                dispatch('downloadShimo');
+                            }
                         }
                     }
                     if (state.list.length > 0) {
@@ -1816,6 +1832,16 @@ const store = {
                     console.log(href);
                     window.openTab && window.openTab(href);
                 }, index * 1000);
+            });
+        },
+        downloadShimo() {
+            let content = $('#editor')[0].outerHTML;
+            $(content).find('img').each((item, index) => {
+                let $item = $(item);
+                let src = $item.attr('src');
+                let l = src.split('/');
+                let tag = l[l.length - 1];
+                $(item).attr({ src: tag });
             });
         },
         // ichi-up获取页面教程截图

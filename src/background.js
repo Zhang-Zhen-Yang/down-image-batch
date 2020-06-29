@@ -15,7 +15,8 @@ function shouldSendToTab(url) {
 		/t\.bilibili\.com/,
 		/www\.hpoi\.net\/hobby/,
 		/www\.1999\.co\.jp\/eng\/image/,
-		/(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/
+		/(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/,
+		/shimo\.im\/docs/,
 	]
 	let should = false;
 	list.forEach((item)=>{
