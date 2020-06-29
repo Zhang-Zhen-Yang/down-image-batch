@@ -262,6 +262,7 @@ const store = {
             } else if(state.urlType == 'shimo') {
                 pageTotal = 1;
                 state.tags = document.title;
+                console.log(state.tags);
             }
             state.pageTotal = pageTotal;
         },
@@ -385,7 +386,11 @@ const store = {
                         let img = $(item).attr('src').replace('!thumbnail', '');
                         let l = img.split('/');
                         let tag = l[l.length - 1];
-                        state.imgMapTag[tag] = img;
+                        console.log(l)
+                        console.log(tag, img);
+                        state.imgMapTag[img] = tag;
+                        if(index == 0) {
+                        }
                         state.list.push(img);
                     })
                 }else{
@@ -624,8 +629,8 @@ const store = {
                                         fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
                                     } else if(state.urlType == 'nyahentai') {
                                         fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
-                                    }else if(state.urlType == '=shimo') {
-                                        fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
+                                    }else if(state.urlType == 'shimo') {
+                                        fileName = state.tags +'/'+ state.imgMapTag[url]// + '.' + util.getExt(url);
                                     }
                                     console.log('fileName', fileName);
                                     window.sendDownload && window.sendDownload({url: url, fileName: fileName,callback: (res)=>{
@@ -892,17 +897,48 @@ const store = {
                 }, index * 1000)
             })
         },
-        downloadShimo() {
+        downloadShimo({state}) {
             let content = $('#editor')[0].outerHTML;
-            $(content).find('img').each((item, index)=>{
+            let copyContent = $(content);
+            copyContent.find('img').each((index, item)=>{
                 let $item = $(item);
-                let src = $item.attr('src');
+                let src = $item.attr('src').replace('!thumbnail', '');
+
+                let dir = state.tags +'/';
                 let l = src.split('/')
                 let tag = l[l.length - 1]
-                $(item).attr({src: tag});
-                
-
+                $(item).attr({src: dir + tag});
             })
+            // copyContent.append($('.new-doc-directory'));
+            let html = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta http-equiv="X-UA-Compatible" content="ie=edge">
+                <title>${util.getTitle()}</title>
+                <link href="./shimo.css" media="all" rel="stylesheet">
+                <link href="../shimo.css" media="all" rel="stylesheet">
+                <style>
+                </style>
+            </head>
+            <body>
+                ${
+                    copyContent[0].outerHTML
+                }
+                <script src="../shimo.js"></script>
+                <script src="./shimo.js"></script>
+            </body>
+            </html>  
+            `;
+            let blob = new Blob([html], {type : 'text/html'});
+            let file = new FileReader();
+            file.readAsDataURL(blob);
+            file.onload = ()=>{
+                window.sendDownload && window.sendDownload({url: file.result, fileName: this.state.tags + '.html'});
+            }
+
         },
         // ichi-up获取页面教程截图
         saveScreenshot({dispatch}){
