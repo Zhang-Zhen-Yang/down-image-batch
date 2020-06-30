@@ -377,7 +377,7 @@ function sendMessageToContentScriptByPostMessage(data)
 				var uuid = result.uuid;
 				if(downloadTaskList[uuid]) {
 					console.log('yyyy');
-					downloadTaskList[uuid].callback({
+					downloadTaskList[uuid].callback && downloadTaskList[uuid].callback({
 						url: result.url,
 						success: result.res == 'success'
 					})

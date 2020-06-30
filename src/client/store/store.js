@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-29 17:56:22
+ * @Last Modified time: 2020-06-30 10:20:11
  */
 
 import util from '../util.js';
@@ -897,6 +897,7 @@ const store = {
                 }, index * 1000)
             })
         },
+        // 下载石案文档文章
         downloadShimo({state}) {
             let content = $('#editor')[0].outerHTML;
             let copyContent = $(content);
@@ -936,7 +937,9 @@ const store = {
             let file = new FileReader();
             file.readAsDataURL(blob);
             file.onload = ()=>{
-                window.sendDownload && window.sendDownload({url: file.result, fileName: this.state.tags + '.html'});
+                window.sendDownload && window.sendDownload({url: file.result, fileName: this.state.tags + '.html', callback: ()=>{
+                    
+                }});
             }
 
         },

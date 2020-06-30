@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .drop-area{
+            width: 500px;
+            height: 300px;
+            border: 1px dashed #cccccc;
+        }
+    </style>
+</head>
+<body>
+    <table>
+            <tr>
+                <td>
+                    <div class="drop-area">
+                    
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+    <script src="../main/js/jq.js"></script>
+    <script>
+        let urlMap = {};
+        let dir = '';
+        String.prototype.endWith = function(e){
+            let text = this.toString();
+            if(  text && e && (text.indexOf(e) + e.length)==text.length) {
+                return true;
+            }
+            return false;
+        }
+        $(()=>{
+            let dropArea = $('.drop-area');
+            dropArea.on('dragover', (e)=>{
+                e.preventDefault();
+            }).on('drop', (e)=>{
+                e.preventDefault();
+                let files = e.originalEvent.dataTransfer.files;
+                if(files.length == 1 && files[0].name.indexOf('.') < 0) {
+                    dir = files[0].name;
+                }
+                if(files.length > 0){
+                    Array.from(files).forEach((item)=>{
+                        console.log(item);
+                        let name = item.name;
+                        let fileReader = new FileReader();
+                        fileReader.readAsDataURL(item);
+                        fileReader.onload = function() {
+                            let paddingL = 300;
+                            let paddingR = 300;
+                            let paddingT = 0;
+                            let paddingB = 0;
+                            let img = new Image();
+                            img.src = fileReader.result;
+                            img.onload = ()=>{
+                                console.log([img.width, img.height]);
+                                let availWidth = img.width - paddingL - paddingR;
+                                let availHeight = img.height - paddingT - paddingB;
+                                let canvas = $('<canvas></canvas>').attr({
+                                    width: availWidth,
+                                    height: availHeight
+                                })
+                                $('body').append(canvas);
+                                console.log(canvas[0]);
+                                canvas[0].getContext('2d').drawImage(img, paddingL, 0, availWidth, availHeight, 0, 0, availWidth, availHeight);
+                            }
+                        }
+                        
+                    })
+                    console.log(e);
+                }
+                console.log(JSON.stringify(urlMap));
+            })
+        })
+    </script>
+    
+</body>
+</html>
