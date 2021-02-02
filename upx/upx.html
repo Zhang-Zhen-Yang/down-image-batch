@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>upx download</title>
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #btn-start{
+            background-color: #00a1d6;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            border:none;
+            padding: 8px 15px;
+            border-radius: 5px;
+
+        }
+        #image-list a{
+            display: inline-block;
+            width: 30vw;
+            height: 30vw;
+            margin-left:2.5vw;
+            margin-top:2.5vw;
+        }
+        #image-list img{
+            display: inline-block;
+            width: 30vw;
+            height: 30vw;
+            object-fit: contain;
+            object-position: center;
+            background-color: #efefef;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td rowspan="5">
+                <input type="file" id="fileIn">
+                <textarea name="" id="urls-input" cols="30" rows="10"></textarea>
+            </td>
+            <td>
+                总数：<span id="c-total"></span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                成功：<span id="c-success"></span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                失败：<span id="c-fail"></span>
+            </td>
+        </tr>
+        <tr>
+            <td><input id="count-input" type="number" value = "50"></td>
+        </tr>
+        <tr>
+            <td>
+                <button class="btn" id="btn-start">start</button>
+                <button class="btn" id="btn-stop">stop</button>
+                <button class="btn" id="btn-addError">add Error</button>
+                <button class="btn" id="btn-save">保存</button>
+                
+            </td>
+        </tr>
+    </table>
+    <div id="error-list">
+
+    </div>
+    <div id="image-list">
+
+    </div>
+    
+    <script>
+        
+        var fetchIng = false;
+        var urlsInput = document.getElementById('urls-input');
+        var btnStrat = document.getElementById('btn-start');
+        var btnStp = document.getElementById('btn-stop');
+        var btnSave = document.getElementById('btn-save');
+
+        var btnAddError = document.getElementById('btn-addError');
+        var cTotal = document.getElementById('c-total');
+        var cSuccess = document.getElementById('c-success');
+        var cFail = document.getElementById('c-fail');
+        var imageList = document.getElementById('image-list');
+        var errorDomList = document.getElementById('error-list');
+        var tags = '';
+        var href = '';
+        var count = 0;
+        
+
+
+        btnStrat.addEventListener('click',function(){
+            if(fetchIng){
+                alert('正在获取中···');
+            } else {
+                // 解析过数据
+                if(tags) {
+                    if(fetchIng) {
+                        alert('正在获取中...');
+                    } else {
+                        fetchIng = true;
+                        fetchData();
+                        count = 0;
+                    }
+                } else {
+                    var urls = (new Function('return '+urlsInput.value))();
+                    cTotal.innerText = urls.list.length;
+                    tags = urls.tags;
+                    href = urls.href;
+                    var list = [];
+                    for(var i in urls.list){
+                        var item = urls.list[i];
+                        for(var j in item) {
+                            list.push(j);
+                        }
+                    }
+                    var distList = [];
+                    for(var i in list) {
+                        distList.push({
+                            url: list[i],
+                            index: i
+                        })
+                    }
+                    window.list = distList;
+                    window.toFecthList = JSON.parse(JSON.stringify(distList));
+                    window.successList = [];
+                    window.failList = [];
+                    console.log(urls);
+    
+    
+                    fetchIng = true;
+                    fetchData();
+                    document.title = urls.tags;
+                    count = 0;
+                }
+            }
+            
+
+            if(fetchIng) {
+                
+            } else {
+                
+            }
+        })
+
+        btnStp.addEventListener('click', function() {
+            fetchIng = false
+        })
+
+        btnAddError.addEventListener('click', function() {
+            if(window.failList.length > 0) {
+                window.toFecthList = window.failList.concat(window.toFecthList);
+                window.failList = []; 
+                fetchData();
+                setCount();
+            } else {
+                alert('无失败条目');
+            }
+        })
+
+        function fetchData() {
+            if(count >= document.getElementById('count-input').value) {
+                alert('数量已到');
+                fetchIng = false;
+                return;
+            }
+            if(window.toFecthList.length > 0 && fetchIng) {
+                (function(){
+                    var item = window.toFecthList.shift();
+                    console.log(item);
+                    console.log(toFecthList);
+                    var url = item.url;
+                    var index = item.index;
+                    var node = document.getElementById('img'+ index);
+                    if(!node) {
+                        node = document.createElement('a');
+                        node.setAttribute('id', 'img'+ index);
+                        node.setAttribute('href', url);
+                        node.setAttribute('target', '_blank');
+                        imageList.appendChild(node);
+                    }
+                    var image = new Image();
+                    image.src = url;
+                    count += 1;
+                   
+                    image.onload = function() {
+                        node.innerText='success'
+                        // node.appendChild(image);
+                        var a = document.createElement('a');
+                        var urlSplit = url.split('/') || [];
+                        var filename = urlSplit[urlSplit.length - 1];
+                        a.href = url;
+                        a.target = '_blank';
+                        console.log('filename', filename);
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.innerText = 'now:'+Date.now();
+                        a.click();
+                        setTimeout(function(){
+                            window.successList.push({url: url,index: index});
+                            setCount();
+                            fetchData();
+                        }, 1000);
+                    }
+                    image.onerror = function() {
+                        window.failList.push({url: url, index: index});
+                        fetchData();
+                        setCount();
+                    }
+                })()
+
+            } else {
+                if(!fetchIng) {
+                    alert('fetchIng 为false');
+                } else {
+                    alert('toFetchList 为0');
+                }
+                // fetchIng = false;
+            }
+        }
+        function setCount() {
+            cSuccess.innerText = successList.length;
+            cFail.innerText = failList.length;
+            let map = {};
+            for(var i in failList){
+                map[failList[i].url] = Date.now();
+            }
+            errorDomList.innerText = JSON.stringify(map);
+            
+        }
+
+
+
+
+        var fileIn = document.getElementById('fileIn')
+        fileIn.onchange = function(e) {
+            console.log(e.target.files);
+            var files = e.target.files;
+            if(files[0]) {
+                var file = new FileReader();
+                file.readAsText(files[0]);
+                file.onload = function (r) {
+                    urlsInput.value = file.result;
+                }
+            }
+        }
+        btnSave.addEventListener('click', function() {
+            if(failList && toFecthList) {
+
+                let list = [];
+                for(var i in failList){
+                    let m = {};
+                    m[failList[i].url] = Date.now();
+                    list.push(m);
+                }
+                for(var i in toFecthList){
+                    let m = {};
+                    m[toFecthList[i].url] = Date.now();
+                    list.push(m);
+                }
+                let str = JSON.stringify({
+                    tags: tags,
+                    href: href,
+                    list: list
+                })
+               
+                var blob = new Blob([str], {type : 'application/json'});
+                let link = window.URL.createObjectURL(blob);
+
+
+
+                var a = document.createElement('a');
+               
+                var filename = tags + '.json'
+                a.href = link;
+                a.target = '_blank';
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+            }
+            
+        })
+    </script>
+</body>
+</html>

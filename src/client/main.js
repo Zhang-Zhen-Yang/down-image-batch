@@ -22,18 +22,33 @@ if(util.shouldInjectDom()) {
 
   // alert('https://ichi-up.net/2016/006'.match(/ichi\-up\.net\//)); 
 
-  setTimeout(()=>{
-    document.body.appendChild(hostView);
+  if($) {
+    $('body').prepend('<div id="e-app"></div>')
     window.project = new Vue({
       el: '#e-app',
       store,
       render: h => h(App)
     })
-    console.log('2020-06-06 08:46:27');
-  }, 1000)
+    console.log('2020-06-06 08:46:27 one');
+    // alert('ddddd');
+  } else{
+    setTimeout(()=>{
+      alert('dddd');
+      document.body.appendChild(hostView);
+      window.project = new Vue({
+        el: '#e-app',
+        store,
+        render: h => h(App)
+      })
+      console.log('2020-06-06 08:46:27');
+    }, 1000)
+
+  }
   
   
 
+} else {
+  console.log('no');
 }
 
 /* util.notifyStatus('progress');

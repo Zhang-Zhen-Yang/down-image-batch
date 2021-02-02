@@ -492,7 +492,7 @@ let util = {
         let href = location.href;
         let list = [
         //    /baidu.com/,
-        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /t\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.1999\.co\.jp\/eng\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/, /shimo\.im\/docs/];
+        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /space\.bilibili\.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.hpoi\.cn\/album/, /www\.hpoi\.net\/album/, /www\.1999\.co\.jp\/eng\/image/, /www\.1999\.co\.jp\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, /shimo\.im\/docs/, /weibo\.com/];
         let should = false;
         list.forEach(item => {
             // console.log(href.match(item));
@@ -508,18 +508,23 @@ let util = {
     },
     // 链接标识
     getUrlType() {
-        let list = [{ match: /danbooru/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /bilibili.com/, type: 'bilibili' }, // 未用
-        { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }, { match: /ichi\-up\.net\//, type: 'ichi-up' }, { match: /bing\.ioliu\.cn/, type: 'bing' }, { match: /gbf\.huijiwiki\.com\/wiki/, type: 'gbf' }, // gbf维基
+        let list = [{ match: /danbooru\.donmai\.us\/posts/, type: 'danbooru' }, { match: /danbooru\.donmai\.us\/pools/, type: 'danbooru' }, { match: /yande.re\/post/, type: 'yande.re' }, { match: /yande.re\/pool/, type: 'yande.re.pool' }, { match: /baidu.com/, type: 'baidu' }, { match: /www.acfun.cn\/a\//, type: 'acfun' }, { match: /localhost/, type: 'localhost' }, { match: /ichi\-up\.net\//, type: 'ichi-up' }, { match: /bing\.ioliu\.cn/, type: 'bing' }, { match: /gbf\.huijiwiki\.com\/wiki/, type: 'gbf' }, // gbf维基
         { match: /arknights\.huijiwiki\.com\/wiki/, type: 'arknights' }, // arknights维基
         { match: /t\.bilibili\.com/, type: 'bilibili' }, // bilibili空动态
+        { match: /space\.bilibili.com/, type: 'bilibiliSpace' }, // 未用
         { match: /www\.hpoi\.net\/hobby/, type: 'hpoi' }, // hpoi手办
+        { match: /www\.hpoi\.cn\/album/, type: 'hpoi' }, // hpoi手办
+        { match: /www\.hpoi\.net\/album/, type: 'hpoi' }, // hpoi手办
         { match: /www\.1999\.co\.jp\/eng\/image/, type: 'hobby' }, // hpoi手办
-        { match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/, type: 'nyahentai' }, // nyahentai
-        { match: /shimo\.im\/docs/, type: 'shimo' }];
+        { match: /www\.1999\.co\.jp\/image/, type: 'hobby' }, // hpoi手办
+        { match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, type: 'nyahentai' }, // nyahentai
+        { match: /shimo\.im\/docs/, type: 'shimo' }, // nyahentai
+        { match: /weibo\.com/, type: 'weibo' }];
         let href = location.href;
         let urlType = '';
         list.forEach(item => {
-            // console.log(href.match(item.match));
+            /* console.log(href)
+            console.log(href.match(item.match)); */
             if (href.match(item.match)) {
                 urlType = item.type;
             }
@@ -608,15 +613,29 @@ if (__WEBPACK_IMPORTED_MODULE_4__util__["a" /* default */].shouldInjectDom()) {
 
   // alert('https://ichi-up.net/2016/006'.match(/ichi\-up\.net\//)); 
 
-  setTimeout(() => {
-    document.body.appendChild(hostView);
+  if ($) {
+    $('body').prepend('<div id="e-app"></div>');
     window.project = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
       el: '#e-app',
       store,
       render: h => h(__WEBPACK_IMPORTED_MODULE_1__App_vue___default.a)
     });
-    console.log('2020-06-06 08:46:27');
-  }, 1000);
+    console.log('2020-06-06 08:46:27 one');
+    // alert('ddddd');
+  } else {
+    setTimeout(() => {
+      alert('dddd');
+      document.body.appendChild(hostView);
+      window.project = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
+        el: '#e-app',
+        store,
+        render: h => h(__WEBPACK_IMPORTED_MODULE_1__App_vue___default.a)
+      });
+      console.log('2020-06-06 08:46:27');
+    }, 1000);
+  }
+} else {
+  console.log('no');
 }
 
 /* util.notifyStatus('progress');
@@ -672,7 +691,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   created() {
     this.$store.dispatch('init');
   },
-  mounted() {},
+  mounted() {
+    // alert('dddd');
+  },
   watch: {
     snackbar: {
       handler(e) {
@@ -749,6 +770,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -758,6 +785,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     return {};
   },
   computed: {
+    tags() {
+      return this.$store.state.tags;
+    },
+    useDir: {
+      get() {
+        return this.$store.state.useDir;
+      },
+      set(val) {
+        this.$store.state.useDir.val;
+      }
+    },
     urlType() {
       return this.$store.state.urlType;
     },
@@ -807,6 +845,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     startFetchPageData() {
       this.$store.dispatch('startFetchPageData');
+    },
+    startFetchPageDataWithNoPixiv() {
+      this.$store.dispatch('startFetchPageDataWithNoPixiv');
     },
     fetchImageData() {
       if (this.isfetching) {
@@ -975,7 +1016,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-29 17:56:22
+ * @Last Modified time: 2020-06-30 10:20:11
  */
 
 
@@ -985,6 +1026,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 const store = {
     state: {
+        containsPixiv: true,
         snackbar: {
             show: false,
             text: '',
@@ -995,9 +1037,11 @@ const store = {
         pageTotal: 0,
         currentPage: 1,
         tags: 'tags',
+        useDir: true,
 
         imgMapTag: {}, //{list1: 'tag1', list2: 'tag2', list3: 'tag3', list4: 'tag4'},
         imgMapThumbnail: {},
+        imgMapPixivImg: {},
         list: __WEBPACK_IMPORTED_MODULE_1__data_js__["a" /* default */].list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
         successList: [], //data.successList,
         errorList: [], // data.errorList,
@@ -1093,6 +1137,39 @@ const store = {
                                 console.error(e);
                             }
                         };
+                    } else if (__WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].endWidth(file[0].name, '.txt')) {
+                        let fileReader = new FileReader();
+                        fileReader.readAsText(file[0]);
+                        fileReader.onload = () => {
+                            let jsonText = fileReader.result;
+                            console.log(jsonText);
+                            try {
+                                // let json = JSON.parse(jsonText);
+                                state.tags = 'artist';
+                                state.list = [];
+                                state.errorList = [];
+                                state.successList = [];
+                                state.fetchingList = [];
+                                state.imgMapTag = {};
+
+                                let toSetList = [];
+                                let toSetMap = {};
+                                let list = jsonText.split('\r\n');
+                                list.forEach((item, index) => {
+                                    let key = item;
+                                    //if(u.indexOf(key) > -1) {
+                                    toSetList.push(key);
+                                    //}
+                                    toSetMap[key] = 'artist' + index;
+                                });
+                                state.list = toSetList;
+                                state.imgMapTag = toSetMap;
+                                console.log(toSetList);
+                                console.log(toSetMap);
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        };
                     }
                 }
             });
@@ -1101,7 +1178,7 @@ const store = {
                 e.preventDefault();
                 // console.log(e);
             });
-            $('.javascript-hide').removeClass('javascript-hide').css({ outline: '1px solid red' });
+            jq('.javascript-hide').removeClass('javascript-hide').css({ outline: '1px solid red' });
             // commit('showSnackbar', {text: '533333'})
         },
         startDown() {},
@@ -1114,16 +1191,23 @@ const store = {
         },
         // 开始获取页面数据
         startFetchPageData({ state, commit, dispatch }) {
+            state.containsPixiv = true;
+            console.log('startFetchPageData');
+            dispatch('fetchPageCount');
+            dispatch('fetchPageData', { pageNo: 1 });
+        },
+        startFetchPageDataWithNoPixiv({ state, commit, dispatch }) {
+
+            state.containsPixiv = false;
             console.log('startFetchPageData');
             dispatch('fetchPageCount');
             dispatch('fetchPageData', { pageNo: 1 });
         },
         // 获取共有多少页
         fetchPageCount({ state, commit, dispatch, getters }) {
-            // alert(state.urlType);
             let dom = jQuery('<div>' + jQuery('body').html() + '</div>');
             let pageNo = 0;
-            let pageTotal = 0;
+            let pageTotal = 1;
             if (state.urlType == 'danbooru') {
                 let numberedPage = dom.find('.numbered-page a');
                 numberedPage.each((index, pItem) => {
@@ -1134,6 +1218,11 @@ const store = {
                         pageTotal = p;
                     }
                 });
+                if (location.href.indexOf('pools') > -1) {
+                    let p = jq('#description p');
+                    let dtextLink = jq('#description .dtext-link').eq(0);
+                    state.tags = p.length > 0 ? p.text() : dtextLink.text();
+                }
             } else if (state.urlType == 'yande.re') {
                 let numberedPage = dom.find('#paginator a');
                 // alert(numberedPage.length);
@@ -1151,8 +1240,8 @@ const store = {
             } else if (state.urlType == 'acfun') {
                 pageTotal = 1;
             } else if (state.urlType == 'yande.re.pool') {
-                pageTotal = $('body').find('#post-list-posts li').length;
-                let title = $('body').find('h4').html();;
+                pageTotal = jq('body').find('#post-list-posts li').length;
+                let title = jq('body').find('h4').html();;
                 let splitTitle = title.split(' ');
                 title = splitTitle[splitTitle.length - 1];
                 state.tags = title;
@@ -1160,14 +1249,14 @@ const store = {
             } else if (state.urlType == 'gbf') {
                 state.gbfList = [];
                 state.gbfImgList = [];
-                let mw = $('.mw-headline');
+                let mw = jq('.mw-headline');
                 mw.each((index, item) => {
-                    let attr = $(item).html();
-                    console.log($(item));
-                    let list = $(item).parent().next().find('.flex-item.char-box');
+                    let attr = jq(item).html();
+                    console.log(jq(item));
+                    let list = jq(item).parent().next().find('.flex-item.char-box');
 
                     list.each((cIndex, cItem) => {
-                        let msg = $(cItem).find('a').eq(1);
+                        let msg = jq(cItem).find('a').eq(1);
                         let name = msg.html();
                         let href = 'https://gbf.huijiwiki.com' + msg.attr('href');
                         state.gbfList.push({
@@ -1186,9 +1275,9 @@ const store = {
                 state.arknightsList = [];
                 state.arknightsImgList = [];
                 console.log('arknights');
-                let list = $('.char-portrait');
+                let list = jq('.char-portrait');
                 list.each((index, item) => {
-                    let nameNode = $(item).find('.name');
+                    let nameNode = jq(item).find('.name');
                     let name = nameNode.html();
                     let link = 'https://arknights.huijiwiki.com' + nameNode.parent().attr('href');
                     console.log(link);
@@ -1210,7 +1299,14 @@ const store = {
                 state.tags = splitTitle[splitTitle.length - 1];
             } else if (state.urlType == 'bilibili') {
                 pageTotal = 1;
-                let pointer = $('.user-name .c-pointer').html();
+                let pointer = jq('.user-name .c-pointer').html();
+                state.tags = pointer;
+            } else if (state.urlType == 'ichi-up') {} else if (state.urlType == 'bilibiliSpace') {
+                // biblibilib图片空间
+                let c = jq('#page-dynamic .card').not('li');
+                console.log('c count', c.length);
+                pageTotal = c.length;
+                let pointer = jq('#h-name').html();
                 state.tags = pointer;
             } else if (state.urlType == 'ichi-up') {
                 state.ichiUpItems = [];
@@ -1223,9 +1319,13 @@ const store = {
                 state.tags = document.title.trim();
             } else if (state.urlType == 'nyahentai') {
                 pageTotal = 1;
-                state.tags = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].checkName($('#info-block #info h2').html());
+                state.tags = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].checkName(jq('#info-block #info h2').html());
                 console.log(state.tags);
             } else if (state.urlType == 'shimo') {
+                pageTotal = 1;
+                state.tags = document.title;
+                console.log(state.tags);
+            } else if (state.urlType == 'weibo') {
                 pageTotal = 1;
                 state.tags = document.title;
                 console.log(state.tags);
@@ -1268,7 +1368,7 @@ const store = {
                         let bodyCotent = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getBodyContent(res.res);
                         let dom = jQuery('<div>' + bodyCotent + '</div>').find('.card ');
                         dom.each((index, item) => {
-                            let currentItem = $(item);
+                            let currentItem = jq(item);
                             let href = currentItem.find('a').attr('href');
                             href = ' http://h1.ioliu.cn' + href.split('?')[0].replace('photo', 'bing') + '_1920x1080.jpg?imageslim'; // http://h1.ioliu.cn/bing/MarleyBeach_ZH-CN0404372814_1920x1080.jpg?imageslim
                             let title = currentItem.find('h3').html();
@@ -1309,6 +1409,19 @@ const store = {
                     dispatch('fetchPageImageUrl', { content: '', pageNo }).then(() => {
                         dispatch('fetchPageData', { pageNo: pageNo + 1 });
                     });
+                } else if (state.urlType == 'bilibiliSpace') {
+                    let url = jq('#page-dynamic .card').not('li').eq(pageNo - 1);
+                    let did = url.attr('data-did');
+                    let dynamicLink = `https://t.bilibili.com/${did}?tab=2`;
+                    window.accessTask && window.accessTask(dynamicLink, function (res) {
+                        // console.log(res.html);
+                        let text = res.html.replace(/\n/mig, ' ');
+                        dispatch('fetchPageImageUrl', { content: text, pageNo }).then(() => {
+                            setTimeout(() => {
+                                dispatch('fetchPageData', { pageNo: pageNo + 1 });
+                            }, 500);
+                        });
+                    });
                 } else if (state.urlType == 'ichi-up') {
                     let url = `https://ichi-up.net/categories/%E6%8F%8F%E3%81%8D%E6%96%B9?page=${pageNo}`;
                     window.fetchData && window.fetchData(url, 1000000, function (res) {
@@ -1322,14 +1435,14 @@ const store = {
                     });
                 } else if (state.urlType == 'hpoi') {
 
-                    $('.av-masonry-container.light-gallery a').each((index, item) => {
-                        let img = $(item).attr('href');
+                    jq('.av-masonry-container.light-gallery a').each((index, item) => {
+                        let img = jq(item).attr('href');
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
                     });
                 } else if (state.urlType == 'hobby') {
-                    $('#imgAll img').not('.TopThumbImg,.hoverImg').each((index, item) => {
-                        let img = 'https://www.1999.co.jp' + $(item).attr('src');
+                    jq('#imgAll img').not('.TopThumbImg,.hoverImg').each((index, item) => {
+                        let img = 'https://www.1999.co.jp' + jq(item).attr('src');
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
                     });
@@ -1338,15 +1451,17 @@ const store = {
                     /* https://search.pstatic.net/common?src=https://mt.404cdn.com/galleries/1557596/1t.jpg
                     https://search.pstatic.net/common?src=https://mi.404cdn.com/galleries/1557596/1.jpg */
 
-                    $('.container .thumb-container img.lazyloaded').each((index, item) => {
-                        let img = $(item).attr('src');
+                    jq('.container .thumb-container img.lazyloaded').each((index, item) => {
+                        let img = jq(item).attr('src');
+                        console.log('img', img);
                         img = img.replace('t.404', 'i.404').replace('t.', '.');
+                        img = img.replace('t1', 'i0').replace('t.', '.');
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
                     });
                 } else if (state.urlType == 'shimo') {
-                    $('#editor img').each((index, item) => {
-                        let img = $(item).attr('src').replace('!thumbnail', '');
+                    jq('#editor img').each((index, item) => {
+                        let img = jq(item).attr('src').replace('!thumbnail', '');
                         let l = img.split('/');
                         let tag = l[l.length - 1];
                         console.log(l);
@@ -1355,8 +1470,18 @@ const store = {
                         if (index == 0) {}
                         state.list.push(img);
                     });
+                } else if (state.urlType == 'weibo') {
+                    dispatch('fetchPageImageUrl', { content: '', pageNo }).then(() => {
+                        dispatch('fetchPageData', { pageNo: pageNo + 1 });
+                    });
                 } else {
-                    let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
+                    let url;
+                    if (state.pathname.indexOf('pools') > -1) {
+                        url = `${state.origin}${state.pathname}?page=${pageNo}`;
+                    } else {
+                        url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
+                    }
+
                     console.log('url', url);
                     window.fetchData && window.fetchData(url, 1000000, function (res) {
                         // console.log(res);
@@ -1383,16 +1508,29 @@ const store = {
                 let dom = jQuery('<div>' + content + '</div>');
 
                 if (state.urlType == 'danbooru') {
-                    let articles = dom.find('#posts-container article');
+                    // alert('ddd');
+                    let articles = location.href.indexOf('pools') > -1 ? dom.find('#c-pools article') : dom.find('#posts-container article');
                     let currentPageImage = [];
                     articles.each((index, a) => {
+                        let article = jQuery(a);
+                        let dataSource = article.attr('data-source') || '';
                         let dataFileUrl = jQuery(a).attr('data-file-url');
                         if (dataFileUrl.indexOf('/') == 0) {
                             dataFileUrl = 'https://danbooru.me' + dataFileUrl;
                         }
-                        state.imgMapTag[dataFileUrl] = pageNo + '-' + (index + 1) + '-';
-                        state.imgMapThumbnail[dataFileUrl] = jQuery(a).find('img').attr('src');
-                        state.list.push(dataFileUrl);
+                        if (!state.containsPixiv && dataSource.indexOf('pximg') > -1) {
+                            console.log('dataSource', dataSource);
+                        } else {
+                            state.imgMapTag[dataFileUrl] = pageNo + '-' + (index + 1) + '-';
+                            if (location.href.indexOf('pools') > -1) {
+                                state.imgMapTag[dataFileUrl] = state.list.length + 1;
+                            }
+                            state.imgMapThumbnail[dataFileUrl] = jQuery(a).find('img').attr('src');
+                            if (dataSource.indexOf('pximg') > -1) {
+                                state.imgMapPixivImg[dataFileUrl] = dataSource;
+                            }
+                            state.list.push(dataFileUrl);
+                        }
                     });
                 } else if (state.urlType == 'yande.re') {
                     // alert(state.urlType);
@@ -1410,6 +1548,19 @@ const store = {
                         state.imgMapTag[dataFileUrl] = pageNo + '-' + (index + 1);
                         state.imgMapThumbnail[dataFileUrl] = jQuery(a).prev().find('img').attr('src');
                     });
+                } else if (state.urlType == 'weibo') {
+                    jq('.photo_cont .ph_ar_box').each((index, item) => {
+                        let i = jQuery(item);
+                        let actionData = i.attr('action-data');
+                        console.log(index);
+                        let qs = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getQueryString(decodeURIComponent(actionData));
+                        console.log(qs);
+                        // let url = `https://photo.weibo.com/${qs.uid}/wbphotos/large/mid/${qs.mid}/pid/${qs.pid}`;
+                        let url = `https://wx3.sinaimg.cn/large/${qs.pid}.jpg`;
+
+                        state.list.push(url);
+                        state.imgMapTag[url] = qs.mid + '.jpg';
+                    });
                 } else if (state.urlType == 'acfun') {
                     let articles = dom.find('.article-content img').not('.ubb-emotion');
                     articles.each((index, a) => {
@@ -1426,7 +1577,7 @@ const store = {
                         let attr = pItem.attr;
                         let name = pItem.name;
                         let cIndex = pItem.cIndex;
-                        let status = $(item).html();
+                        let status = jq(item).html();
                         state.gbfImgList.push({
                             status,
                             src: img,
@@ -1455,43 +1606,82 @@ const store = {
                             name,
                             cIndex: index
                         });
-                        let status = $(item).html();
-                        console.log($(item).html());
+                        let status = jq(item).html();
+                        console.log(jq(item).html());
                         state.list.push(img);
                         state.imgMapTag[img] = `${charIndex + 1}-${name}-${status}`;
                     });
                     console.log(state.arknightsImgList);
                     console.log(state.imgMapTag);
                 } else if (state.urlType == 'bilibili') {
-                    var slider = $('.boost-slider');
-                    var card9 = $('.card-9 .img-content');
-                    let pointer = $('.user-name .c-pointer').html();
+                    var slider = jq('.boost-slider');
+                    var card9 = jq('.zoom-list .card .img-content');
+                    let pointer = jq('.user-name .c-pointer').html();
+                    let time = jq('.time.tc-slate span').eq(0).text();
+                    let content = jq('.content-full').text().slice(0, 30);
+                    content = content.replace(/(\/)|(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
                     if (slider.length > 0) {
                         console.log(1);
                         slider.find('img').each((index, item) => {
-                            let src = $(item).attr('src');
+                            let src = jq(item).attr('src');
                             src = src.split('@')[0];
                             src = 'https:' + src;
                             console.log(src);
                             state.list.push(src);
-                            state.imgMapTag[src] = `${pointer}-${index}`;
+                            state.imgMapTag[src] = `${time} ${content}/${index}`;
                         });
                     } else {
                         card9.each((index, item) => {
-                            let $item = $(item);
+                            let $item = jq(item);
                             let src = $item.css('background-image');
                             src = src.split('"')[1];
                             src = src.split('@')[0];
+                            if (src.indexOf('//') == 0) {
+                                src = 'https:' + src;
+                            }
                             state.list.push(src);
-                            state.imgMapTag[src] = `${pointer}-${index}`;
+                            state.imgMapTag[src] = `${time} ${content}/${index}`;
                         });
                     }
 
                     console.log(state.list);
+                } else if (state.urlType == 'bilibiliSpace') {
+                    var slider = dom.find('.boost-slider');
+                    var card9 = dom.find('.zoom-list .card .img-content');
+                    let pointer = dom.find('.user-name .c-pointer').html();
+                    let time = dom.find('.time.tc-slate span').eq(0).text();
+                    let content = dom.find('.content-full').text().slice(0, 30);
+                    content = content.replace(/(\/)|(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
+                    if (slider.length > 0) {
+                        console.log(1);
+                        slider.find('img').each((index, item) => {
+                            let src = jq(item).attr('src');
+                            src = src.split('@')[0];
+                            src = 'https:' + src;
+                            console.log(src);
+                            state.list.push(src);
+                            state.imgMapTag[src] = `${time} ${content}/${index}`;
+                        });
+                    } else {
+                        card9.each((index, item) => {
+                            let $item = jq(item);
+                            let src = $item.css('background-image');
+                            src = src.split('"')[1];
+                            src = src.split('@')[0];
+                            if (src.indexOf('//') == 0) {
+                                src = 'https:' + src;
+                            }
+                            state.list.push(src);
+                            state.imgMapTag[src] = `${time} ${content}/${index}`;
+                        });
+                    }
+
+                    console.log(state.list);
+                    console.log(state.imgMapTag);
                 } else if (state.urlType == 'ichi-up') {
                     let postItems = dom.find('.l-contents .post-item');
                     postItems.each((index, item) => {
-                        let $item = $(item);
+                        let $item = jq(item);
                         let link = $item.find('.block-link').attr('data-href');
                         let poster = $item.find('.eye-catch img').attr('data-original');
                         let catetory = $item.find('.post-text .category a').html();
@@ -1501,7 +1691,7 @@ const store = {
                         let imgR = link;
                         let tagsList = [];
                         tags.each((index, item) => {
-                            tagsList.push($(item).html());
+                            tagsList.push(jq(item).html());
                         });
                         state.list.push(poster);
                         /* if(state.imgMapTag[poster]) {
@@ -1565,7 +1755,14 @@ const store = {
 
                             // 下载图片
                             console.log(state.imgMapTag[url]);
-                            if (state.urlType == 'bing') {
+                            let pximg = state.imgMapPixivImg[url];
+                            if (state.urlType == 'danbooru' && location.href.indexOf('pools') > -1) {
+                                let t = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].checkName(state.tags);
+                                fileName = t + '/' + (state.imgMapTag[url] || '') + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(fileName);
+                                console.log('f1', fileName);
+
+                                console.log('f2', fileName);
+                            }if (state.urlType == 'bing') {
                                 fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(fileName);
                                 fileName = fileName.replace('?imageslim', '');
                                 fileName = fileName.replace(/\//mig, ' ');
@@ -1575,82 +1772,36 @@ const store = {
                                 fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                             } else if (state.urlType == 'bilibili') {
                                 fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
+                            } else if (state.urlType == 'bilibiliSpace') {
+                                fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                             } else if (state.urlType == 'ichi-up') {
                                 fileName = state.imgMapTag[url];
                             } else if (state.urlType == 'hpoi') {
-                                fileName = state.tags + '/' + state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
+                                fileName = state.tags.replace('er.', 'er') + '/' + state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                             } else if (state.urlType == 'hobby') {
                                 fileName = state.tags + '/' + state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                             } else if (state.urlType == 'nyahentai') {
                                 fileName = state.tags + '/' + state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(url);
                             } else if (state.urlType == 'shimo') {
                                 fileName = state.tags + '/' + state.imgMapTag[url]; // + '.' + util.getExt(url);
-                            }
+                            } /* else if(state.urlType == 'yande.re') {
+                                let f = url.split('/');
+                                fileName = state.tags +'-'+ f[f.length - 1];
+                              } */else if (state.urlType == 'weibo') {
+                                    fileName = state.imgMapTag[url];
+                                } else if (state.urlType == 'danbooru' || state.urlType == 'yande.re') {
+                                    fileName = (state.useDir ? state.tags + '/' : '') + fileName;
+                                }
+                            /* fileName = util.checkName(fileName)
                             console.log('fileName', fileName);
-                            window.sendDownload && window.sendDownload({ url: url, fileName: fileName, callback: res => {
-                                    if (res.success) {
-                                        state.list = state.list.filter(i => {
-                                            return i != url;
-                                        });
-                                        state.fetchingList = state.fetchingList.filter(i => {
-                                            return i != url;
-                                        });
-                                        state.successList.push(url);
-                                        // 添加下一个任务
-                                        if (state.urlType == 'bing') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 1000);
-                                        } else if (state.urlType == 'gbf') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 1000);
-                                        } else if (state.urlType == 'arknights') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 1000);
-                                        } else if (state.urlType == 'ichi-up') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 1000);
-                                        } else {
-                                            dispatch('fetchImageData');
-                                        }
-                                    } else {
-                                        // console.log('errorList', errorList);
-                                        state.list = state.list.filter(i => {
-                                            return i != url;
-                                        });
-                                        state.fetchingList = state.fetchingList.filter(i => {
-                                            return i != url;
-                                        });
-                                        state.errorList.push(url);
-                                        // 添加下一个任务
-                                        if (state.urlType == 'yade.re.pool') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 2000);
-                                        } else if (state.urlType == 'bing') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 1000);
-                                        } else if (state.urlType == 'gbf') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 1000);
-                                        } else if (state.urlType == 'arknights') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 1000);
-                                        } else if (state.urlType == 'ichi-up') {
-                                            setTimeout(() => {
-                                                dispatch('fetchImageData');
-                                            }, 1000);
-                                        } else {
-                                            dispatch('fetchImageData');
-                                        }
-                                    }
-                                } });
+                            return;  */
+                            console.log('fileName', fileName);
+                            fileName = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].checkName(fileName);
+                            // alert(state.urlType);
+                            if (state.urlType == 'yande.re.pool') {
+                                fileName = state.tags + '/' + fileName;
+                            }
+                            dispatch('downloadImage', { url, fileName, pximg });
 
                             /*  window.httpRequest && window.httpRequest(url, 'blob', (res)=>{
                                    console.log(res);
@@ -1773,6 +1924,117 @@ const store = {
                 }
             }
         },
+        downloadImage({ state, dispatch }, { url, fileName, pximg }) {
+            console.warn(['====================', url, fileName, pximg]);
+            let c = function (res) {
+                if (res.success) {
+                    state.list = state.list.filter(i => {
+                        return i != url;
+                    });
+                    state.fetchingList = state.fetchingList.filter(i => {
+                        return i != url;
+                    });
+                    state.successList.push(url);
+                    // 添加下一个任务
+                    if (state.urlType == 'bing') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if (state.urlType == 'gbf') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if (state.urlType == 'arknights') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if (state.urlType == 'ichi-up') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if (state.urlType == 'weibo') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1100);
+                    } else if (state.urlType == 'bilibiliSpace') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1100);
+                    } else {
+                        dispatch('fetchImageData');
+                    }
+                } else {
+                    // console.log('errorList', errorList);
+                    state.list = state.list.filter(i => {
+                        return i != url;
+                    });
+                    state.fetchingList = state.fetchingList.filter(i => {
+                        return i != url;
+                    });
+                    state.errorList.push(url);
+                    // 添加下一个任务
+                    if (state.urlType == 'yade.re.pool') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 2000);
+                    } else if (state.urlType == 'danbooru.pool') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 2000);
+                    } else if (state.urlType == 'bing') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if (state.urlType == 'gbf') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if (state.urlType == 'arknights') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if (state.urlType == 'bilibiliSpace') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1100);
+                    } else if (state.urlType == 'ichi-up') {
+                        setTimeout(() => {
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else {
+                        dispatch('fetchImageData');
+                    }
+                }
+            };
+
+            if (pximg) {
+                window.sendDownload && window.sendDownload({
+                    url: pximg,
+                    fileName: fileName,
+                    callback: res => {
+                        if (res.success) {
+                            c(res);
+                        } else {
+                            window.sendDownload && window.sendDownload({
+                                url: url,
+                                fileName: fileName,
+                                callback: r => {
+                                    c(r);
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+                window.sendDownload && window.sendDownload({
+                    url: url,
+                    fileName: fileName,
+                    callback: res => {
+                        c(res);
+                    }
+                });
+            }
+        },
         // 保存未获取成功的列表
         saveUnfetchList({ state }) {
             let distList = state.fetchingList.concat(state.list).concat(state.errorList);
@@ -1796,7 +2058,18 @@ const store = {
             file.readAsDataURL(blob);
             file.onload = () => {
                 console.log(file.result);
-                window.sendDownload && window.sendDownload({ url: file.result, fileName: `${state.tags || 'unknow'}.json` });
+                let webFrom = '';
+                switch (state.urlType) {
+                    case 'danbooru':
+                        webFrom = 'danbooru';
+                        break;
+                    case 'yande.re':
+                        webFrom = 'yandere';
+                        break;
+                    default:
+                        break;
+                }
+                window.sendDownload && window.sendDownload({ url: file.result, fileName: `${state.tags || 'unknow'}.${webFrom || '.'}json` });
             };
         },
         saveIchiUpData({ state }) {
@@ -1826,10 +2099,10 @@ const store = {
             };
         },
         openIchiUpTab() {
-            let links = $('body').find('.l-contents .post-item .block-link');
+            let links = jq('body').find('.l-contents .post-item .block-link');
             console.log(links.length);
             links.each((index, item) => {
-                let href = $(item).attr('data-href');
+                let href = jq(item).attr('data-href');
                 console.log(href);
                 href = 'https://ichi-up.net' + href;
                 setTimeout(() => {
@@ -1838,19 +2111,20 @@ const store = {
                 }, index * 1000);
             });
         },
+        // 下载石案文档文章
         downloadShimo({ state }) {
-            let content = $('#editor')[0].outerHTML;
-            let copyContent = $(content);
+            let content = jq('#editor')[0].outerHTML;
+            let copyContent = jq(content);
             copyContent.find('img').each((index, item) => {
-                let $item = $(item);
+                let $item = jq(item);
                 let src = $item.attr('src').replace('!thumbnail', '');
 
                 let dir = state.tags + '/';
                 let l = src.split('/');
                 let tag = l[l.length - 1];
-                $(item).attr({ src: dir + tag });
+                jq(item).attr({ src: dir + tag });
             });
-            // copyContent.append($('.new-doc-directory'));
+            // copyContent.append(jq('.new-doc-directory'));
             let html = `
             <!DOCTYPE html>
             <html lang="en">
@@ -1875,23 +2149,23 @@ const store = {
             let file = new FileReader();
             file.readAsDataURL(blob);
             file.onload = () => {
-                window.sendDownload && window.sendDownload({ url: file.result, fileName: this.state.tags + '.html' });
+                window.sendDownload && window.sendDownload({ url: file.result, fileName: this.state.tags + '.html', callback: () => {} });
             };
         },
         // ichi-up获取页面教程截图
         saveScreenshot({ dispatch }) {
 
-            $('.adsbygoogle,ins').remove();
-            let article = $('article.single-post');
+            jq('.adsbygoogle,ins').remove();
+            let article = jq('article.single-post');
             if (location.href.indexOf('categories') > -1) {
-                article = $('.l-contents');
+                article = jq('.l-contents');
             }
 
             let newDom;
-            if ($('.article-copied').length > 0) {
-                newDom = $('.article-copied');
+            if (jq('.article-copied').length > 0) {
+                newDom = jq('.article-copied');
             } else {
-                newDom = $('<div class="article-copied" style="position:fixed;left:0px;top:0;background-color:white;width:624px">' + article.html() + '</div>');
+                newDom = jq('<div class="article-copied" style="position:fixed;left:0px;top:0;background-color:white;width:624px">' + article.html() + '</div>');
                 console.log(1);
                 newDom.find('.single-post-banner,.post-footer').remove(); // .post-inner-link,
                 console.log(2);
@@ -1899,7 +2173,7 @@ const store = {
                     // dispatch('saveIchiUpHtml');
                     dispatch('saveScreenshot');
                 }, 200);
-                $('body').prepend(newDom);
+                jq('body').prepend(newDom);
             }
             console.log('3');
             setTimeout(() => {
@@ -1936,15 +2210,15 @@ const store = {
         },
         saveIchiUpHtml() {
             // 生成html页面
-            let newDom = $('.article-copied');
-            let newDom2 = $('<div class="article-copied" style="margin:0 auto;background-color:white;border:0px solid red;width:624px">' + newDom.html() + '</div>');
+            let newDom = jq('.article-copied');
+            let newDom2 = jq('<div class="article-copied" style="margin:0 auto;background-color:white;border:0px solid red;width:624px">' + newDom.html() + '</div>');
             let newDom2Imgs = newDom2.find('img');
             let newDomImgs = newDom.find('img');
 
             let imgs = [];
             //
             newDomImgs.each((index, item) => {
-                let currentImage = $(item);
+                let currentImage = jq(item);
                 console.log(currentImage);
                 let imgW = currentImage.width();
                 let imgH = currentImage.height();
@@ -2015,7 +2289,7 @@ const store = {
                         left: '-1000px',
                         top: 0
                     });
-                    $('body').append(newDom2);
+                    jq('body').append(newDom2);
                     document.documentElement.scrollTop = 0;
                     document.documentElement.scrollLeft = 0;
 
@@ -2258,6 +2532,12 @@ function sendMessageToContentScriptByPostMessage(data) {
 			// 拼多多 目前没有要通过特殊处理才能拿到数据的数据就在html 页面上，所以直接通过httpRequest拿取会比较好
 			var html = document.getElementsByTagName('html')[0].innerHTML;
 			window.postMessage({ cmd: 'notifyIframeCopyResult', content: '', href: href, html: html }, '*');
+		} else if (href.indexOf('t.bilibili.com') > -1) {
+			console.log(html);
+			console.log('bilibiliSpace=====');
+			setTimeout(function () {
+				window.postMessage({ cmd: 'notifyIframeCopyResult', content: '', href: href, html: document.getElementsByTagName('html')[0].innerHTML }, '*');
+			}, 1500);
 		} else {
 			// 天猫
 			var regx = /"httpsDescUrl"\s*:\s*"(.+?)"\s*/mig;
@@ -2335,7 +2615,7 @@ function sendMessageToContentScriptByPostMessage(data) {
 			}
 		}
 	};
-	if (window.jQuery) {
+	if (window.jq) {
 		var getUUID = function () {
 			var s = [];
 			var hexDigits = "0123456789abcdef";
@@ -2366,7 +2646,7 @@ function sendMessageToContentScriptByPostMessage(data) {
 			} else {
 				src.search = '?v=' + Date.now() + '&from=wbExtensions&uuid=' + uuid;
 			}
-			var iframe = jQuery('<iframe id="' + uuid + '" src="' + src.href + '" width="100" height="10" sandbox="allow-scripts allow-same-origin allow-popups">');
+			var iframe = jq('<iframe id="' + uuid + '" src="' + src.href + '" width="100" height="10" sandbox="allow-scripts allow-same-origin allow-popups">');
 			// 没有onerror事件，在onload 后5s
 			iframe.get(0).onload = function () {
 				setTimeout(function () {
@@ -2375,11 +2655,11 @@ function sendMessageToContentScriptByPostMessage(data) {
 							content: '',
 							html: '',
 							url: taskList[uuid].url,
-							msg: 'can not fetch data in 2s after iframe onload'
+							msg: 'can not fetch data in 8s after iframe onload'
 						});
 						delete taskList[uuid];
 					}
-				}, 2000);
+				}, 8000);
 			};
 			iframeWrap.append(iframe);
 		};
@@ -2413,7 +2693,7 @@ function sendMessageToContentScriptByPostMessage(data) {
 						url: taskList[uuid].url
 					});
 					delete taskList[uuid];
-					jQuery('#' + uuid).remove();
+					jq('#' + uuid).remove();
 				}
 			}
 		};
@@ -2502,16 +2782,16 @@ function sendMessageToContentScriptByPostMessage(data) {
 			var uuid = result.uuid;
 			if (downloadTaskList[uuid]) {
 				console.log('yyyy');
-				downloadTaskList[uuid].callback({
+				downloadTaskList[uuid].callback && downloadTaskList[uuid].callback({
 					url: result.url,
 					success: result.res == 'success'
 				});
 				delete downloadTaskList[uuid];
 			}
 		};
-		jQuery(function () {
+		jq(function () {
 			// alert('d');
-			var iframeWrap = jQuery('<div id="wb-iframe-wrap"></div>');
+			var iframeWrap = jq('<div id="wb-iframe-wrap"></div>');
 			iframeWrap.css({
 				width: '100px',
 				height: '10px',
@@ -2523,16 +2803,17 @@ function sendMessageToContentScriptByPostMessage(data) {
 				opacity: 0
 			});
 
-			if (location.href.indexOf('localhost') > -1 || location.href.indexOf('wonbao') > -1 || location.href.indexOf('file:') > -1 || location.href.indexOf('192.168') > -1) {
-				jQuery('body').append(iframeWrap);
+			if (location.href.indexOf('localhost') > -1 || location.href.indexOf('wonbao') > -1 || location.href.indexOf('file:') > -1 || location.href.indexOf('192.168') > -1 || location.href.indexOf('bilibili') > -1) {
+				jq('body').append(iframeWrap);
+				window.iframeWrap = iframeWrap;
 			}
-			/* var copyBtn = jQuery('#wb-copy');
+			/* var copyBtn = jq('#wb-copy');
    copyBtn.addClass('hasplug');
    copyBtn.on('click', function(){
    	var list = window.myscript();
    	// alert(list);
    	list.forEach(function(item, index){
-   		var iframe = jQuery('<iframe src="'+item+'&v='+Date.now()+'&from=wbExtensions" width="100" height="500">');
+   		var iframe = jq('<iframe src="'+item+'&v='+Date.now()+'&from=wbExtensions" width="100" height="500">');
    		iframeWrap.append(iframe);
    	})
    }) */
@@ -2548,7 +2829,7 @@ function sendMessageToContentScriptByPostMessage(data) {
  	
  	if(origin == 'https://www.baidu.com') {
  		// 下载弹窗
- 		var dialog = jQuery('<div style="width:600px;height:400px;background-color:white;position:fixed;left:50%;top:50%;transform: translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,0.3);z-index:100;">\
+ 		var dialog = jq('<div style="width:600px;height:400px;background-color:white;position:fixed;left:50%;top:50%;transform: translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,0.3);z-index:100;">\
  			<div style="height: 30px;">\
  				<div style="float:right;cursor:pointer;color:red;font-size: 30px;margin: 0px 6px 0 0;" class="e-dialog-diss">&times;</div>\
  			</div>\
@@ -2587,8 +2868,8 @@ function sendMessageToContentScriptByPostMessage(data) {
  		<div>');
  		
  		// 右侧开始下载按钮
- 		var downloadBtn = jQuery('<div style="width: 30px;height:35px;line-height:35px;color:white;border-radius:3px 0 0 3px;background-color:rgb(0,122,204);position:fixed;right:0;top:200px;cursor:pointer;" title="下载">&darr;</div>');
- 		jQuery('body').append(downloadBtn)
+ 		var downloadBtn = jq('<div style="width: 30px;height:35px;line-height:35px;color:white;border-radius:3px 0 0 3px;background-color:rgb(0,122,204);position:fixed;right:0;top:200px;cursor:pointer;" title="下载">&darr;</div>');
+ 		jq('body').append(downloadBtn)
  		dialog.hide().appendTo('body');
  
  		downloadBtn.on('click', function(){
@@ -11336,7 +11617,50 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     on: {
       "click": _vm.startFetchPageData
     }
-  }, [_vm._v("获取")]), _vm._v(" "), _c('br'), _vm._v(" "), _c('div', [_vm._v("\n        过程："), (!_vm.pageDataSuccess) ? _c('span', [_vm._v("共" + _vm._s(_vm.pageTotal) + "页 正在获取第" + _vm._s(_vm.currentPage) + "页")]) : _vm._e(), _vm._v(" "), (_vm.pageDataSuccess) ? _c('span', [_vm._v("获取完成")]) : _vm._e()]), _vm._v(" "), _c('br'), _vm._v(" "), _c('button', {
+  }, [_vm._v("获取")]), _vm._v(" "), _c('button', {
+    staticClass: "btn",
+    attrs: {
+      "id": "btn-fetch-data"
+    },
+    on: {
+      "click": _vm.startFetchPageDataWithNoPixiv
+    }
+  }, [_vm._v("获取非pixiv图片")]), _vm._v(" "), _c('br'), _vm._v(" "), _c('div', [_vm._v("\n        过程："), (!_vm.pageDataSuccess) ? _c('span', [_vm._v("共" + _vm._s(_vm.pageTotal) + "页 正在获取第" + _vm._s(_vm.currentPage) + "页")]) : _vm._e(), _vm._v(" "), (_vm.pageDataSuccess) ? _c('span', [_vm._v("获取完成")]) : _vm._e()]), _vm._v(" "), _c('div', [_c('label', {
+    staticStyle: {
+      "cursor": "pointer"
+    }
+  }, [_c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.useDir),
+      expression: "useDir"
+    }],
+    attrs: {
+      "type": "checkbox"
+    },
+    domProps: {
+      "checked": Array.isArray(_vm.useDir) ? _vm._i(_vm.useDir, null) > -1 : (_vm.useDir)
+    },
+    on: {
+      "change": function($event) {
+        var $$a = _vm.useDir,
+          $$el = $event.target,
+          $$c = $$el.checked ? (true) : (false);
+        if (Array.isArray($$a)) {
+          var $$v = null,
+            $$i = _vm._i($$a, $$v);
+          if ($$el.checked) {
+            $$i < 0 && (_vm.useDir = $$a.concat([$$v]))
+          } else {
+            $$i > -1 && (_vm.useDir = $$a.slice(0, $$i).concat($$a.slice($$i + 1)))
+          }
+        } else {
+          _vm.useDir = $$c
+        }
+      }
+    }
+  }), _vm._v(" " + _vm._s(_vm.tags) + "\n      ")])]), _vm._v(" "), _c('br'), _vm._v(" "), _c('button', {
     class: 'btn ' + (_vm.isfetching ? 'btn-fetching' : 'btn-stoped'),
     attrs: {
       "id": "fetImage"

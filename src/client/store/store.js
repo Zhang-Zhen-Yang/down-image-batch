@@ -12,6 +12,7 @@ import { arch } from 'os';
 
 const store = {
 	state: {
+        containsPixiv: true,
         snackbar: {
             show: false,
             text: '',
@@ -22,9 +23,11 @@ const store = {
         pageTotal: 0,
         currentPage: 1,
         tags: 'tags',
+        useDir: true,
 
         imgMapTag: {},//{list1: 'tag1', list2: 'tag2', list3: 'tag3', list4: 'tag4'},
         imgMapThumbnail: {},
+        imgMapPixivImg: {},
         list: data.list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
         successList: [],//data.successList,
         errorList: [],// data.errorList,
@@ -123,6 +126,39 @@ const store = {
                                 console.error(e);
                             }
                         }
+                    } else if(util.endWidth(file[0].name, '.txt')) {
+                        let fileReader = new FileReader();
+                        fileReader.readAsText(file[0]);
+                        fileReader.onload = ()=>{
+                            let jsonText = fileReader.result;
+                            console.log(jsonText);
+                            try{
+                                // let json = JSON.parse(jsonText);
+                                state.tags = 'artist';
+                                state.list = [];
+                                state.errorList = [];
+                                state.successList = [];
+                                state.fetchingList = [];
+                                state.imgMapTag = {};
+
+                                let toSetList = [];
+                                let toSetMap = {};
+                                let list = jsonText.split('\r\n');
+                                list.forEach((item,index) => {
+                                    let key = item
+                                    //if(u.indexOf(key) > -1) {
+                                        toSetList.push(key);
+                                    //}
+                                    toSetMap[key] = 'artist' + index;
+                                })
+                                state.list = toSetList;
+                                state.imgMapTag = toSetMap;
+                                console.log(toSetList);
+                                console.log(toSetMap);
+                            }catch(e){
+                                console.error(e);
+                            }
+                        }
                     }
                 }
             })
@@ -131,7 +167,7 @@ const store = {
                 e.preventDefault();
                 // console.log(e);
             })
-            $('.javascript-hide').removeClass('javascript-hide').css({outline: '1px solid red'})
+            jq('.javascript-hide').removeClass('javascript-hide').css({outline: '1px solid red'})
             // commit('showSnackbar', {text: '533333'})
         },
         startDown(){
@@ -146,16 +182,23 @@ const store = {
         },
         // 开始获取页面数据
         startFetchPageData({state,commit,dispatch}) {
+            state.containsPixiv = true;
+            console.log('startFetchPageData');
+            dispatch('fetchPageCount');
+            dispatch('fetchPageData', {pageNo: 1});
+        },
+        startFetchPageDataWithNoPixiv({state,commit,dispatch}) {
+            
+            state.containsPixiv = false;
             console.log('startFetchPageData');
             dispatch('fetchPageCount');
             dispatch('fetchPageData', {pageNo: 1});
         },
         // 获取共有多少页
         fetchPageCount({state, commit, dispatch, getters}) {
-            // alert(state.urlType);
             let dom = jQuery('<div>'+jQuery('body').html()+'</div>');
             let pageNo = 0;
-            let pageTotal = 0;
+            let pageTotal = 1;
             if(state.urlType == 'danbooru') {
                 let numberedPage = dom.find('.numbered-page a');
                 numberedPage.each((index, pItem)=>{
@@ -166,6 +209,12 @@ const store = {
                         pageTotal = p
                     }
                 });
+                if(location.href.indexOf('pools') > -1) {
+                    let p = jq('#description p');
+                    let dtextLink = jq('#description .dtext-link').eq(0);
+                    state.tags = (p.length > 0 ? p.text() : dtextLink.text() );
+                    
+                }
 
             } else if(state.urlType == 'yande.re') {
                 let numberedPage = dom.find('#paginator a');
@@ -184,23 +233,23 @@ const store = {
             } else if (state.urlType == 'acfun') {
                 pageTotal = 1;
             } else if(state.urlType == 'yande.re.pool'){
-                pageTotal = $('body').find('#post-list-posts li').length;
-                let title = $('body').find('h4').html();;
+                pageTotal = jq('body').find('#post-list-posts li').length;
+                let title = jq('body').find('h4').html();;
                 let splitTitle = title.split(' ');
                 title = splitTitle[splitTitle.length - 1];
                 state.tags = title;
                 // console.log(state.tags);
-            } else if (state.urlType == 'gbf') {
+            }else if (state.urlType == 'gbf') {
                 state.gbfList = [];
                 state.gbfImgList = [];
-                let mw = $('.mw-headline');
+                let mw = jq('.mw-headline');
                 mw.each((index, item)=>{
-                    let attr= $(item).html();
-                    console.log($(item));
-                    let list = $(item).parent().next().find('.flex-item.char-box');
+                    let attr= jq(item).html();
+                    console.log(jq(item));
+                    let list = jq(item).parent().next().find('.flex-item.char-box');
 
                     list.each((cIndex, cItem)=>{
-                        let msg = $(cItem).find('a').eq(1);
+                        let msg = jq(cItem).find('a').eq(1);
                         let name = msg.html();
                         let href= 'https://gbf.huijiwiki.com' + msg.attr('href');
                         state.gbfList.push({
@@ -220,9 +269,9 @@ const store = {
                 state.arknightsList = [];
                 state.arknightsImgList = [];
                 console.log('arknights');
-                let list = $('.char-portrait');
+                let list = jq('.char-portrait');
                 list.each((index, item)=>{
-                    let nameNode = $(item).find('.name');
+                    let nameNode = jq(item).find('.name');
                     let name  = nameNode.html();
                     let link = 'https://arknights.huijiwiki.com' + nameNode.parent().attr('href');
                     console.log(link);
@@ -244,7 +293,15 @@ const store = {
                 state.tags = splitTitle[splitTitle.length - 1];
             } else if(state.urlType == 'bilibili') {
                 pageTotal = 1;
-                let pointer = $('.user-name .c-pointer').html();
+                let pointer = jq('.user-name .c-pointer').html();
+                state.tags = pointer;
+            } else if(state.urlType == 'ichi-up') {
+
+            } else if(state.urlType == 'bilibiliSpace') { // biblibilib图片空间
+                let c= jq('#page-dynamic .card').not('li');
+                console.log('c count', c.length);
+                pageTotal = c.length;
+                let pointer = jq('#h-name').html();
                 state.tags = pointer;
             } else if(state.urlType == 'ichi-up') {
                 state.ichiUpItems = [];
@@ -257,9 +314,13 @@ const store = {
                 state.tags = document.title.trim();
             } else if(state.urlType == 'nyahentai') {
                 pageTotal = 1;
-                state.tags = util.checkName($('#info-block #info h2').html());
+                state.tags = util.checkName(jq('#info-block #info h2').html());
                 console.log(state.tags);
             } else if(state.urlType == 'shimo') {
+                pageTotal = 1;
+                state.tags = document.title;
+                console.log(state.tags);
+            } else if(state.urlType == 'weibo') {
                 pageTotal = 1;
                 state.tags = document.title;
                 console.log(state.tags);
@@ -302,7 +363,7 @@ const store = {
                         let bodyCotent = util.getBodyContent(res.res);
                         let dom =  jQuery('<div>'+bodyCotent+'</div>').find('.card ');
                         dom.each((index, item)=>{
-                            let currentItem = $(item);
+                            let currentItem = jq(item);
                             let href = currentItem.find('a').attr('href');
                             href = ' http://h1.ioliu.cn' + href.split('?')[0].replace('photo', 'bing') + '_1920x1080.jpg?imageslim';   // http://h1.ioliu.cn/bing/MarleyBeach_ZH-CN0404372814_1920x1080.jpg?imageslim
                             let title = currentItem.find('h3').html();
@@ -344,6 +405,20 @@ const store = {
                     dispatch('fetchPageImageUrl', {content: '', pageNo}).then(()=>{
                         dispatch('fetchPageData', {pageNo: pageNo + 1});
                     })
+                } else if (state.urlType == 'bilibiliSpace') {
+                    let url = jq('#page-dynamic .card').not('li').eq(pageNo - 1);
+                    let did = url.attr('data-did');
+                    let dynamicLink = `https://t.bilibili.com/${did}?tab=2`;
+                    window.accessTask && window.accessTask(dynamicLink, function(res) {
+                        // console.log(res.html);
+                        let text = res.html.replace(/\n/mig, ' ');
+                        dispatch('fetchPageImageUrl', {content: text, pageNo}).then(()=>{
+                            setTimeout(()=>{
+                                dispatch('fetchPageData', {pageNo: pageNo + 1});
+                            }, 500)
+                        }) 
+                    })
+                    
                 } else if(state.urlType == 'ichi-up') {
                     let url = `https://ichi-up.net/categories/%E6%8F%8F%E3%81%8D%E6%96%B9?page=${pageNo}`;
                     window.fetchData && window.fetchData(url, 1000000, function(res) {
@@ -357,14 +432,14 @@ const store = {
                     })
                 } else if(state.urlType == 'hpoi') {
 
-                    $('.av-masonry-container.light-gallery a').each((index, item)=>{
-                        let img = ($(item).attr('href'));
+                    jq('.av-masonry-container.light-gallery a').each((index, item)=>{
+                        let img = (jq(item).attr('href'));
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
                     })
                 } else if(state.urlType == 'hobby') {
-                    $('#imgAll img').not('.TopThumbImg,.hoverImg').each((index, item)=>{
-                        let img = 'https://www.1999.co.jp'+ ($(item).attr('src'));
+                    jq('#imgAll img').not('.TopThumbImg,.hoverImg').each((index, item)=>{
+                        let img = 'https://www.1999.co.jp'+ (jq(item).attr('src'));
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
                     })
@@ -375,15 +450,17 @@ const store = {
                     https://search.pstatic.net/common?src=https://mi.404cdn.com/galleries/1557596/1.jpg */
 
 
-                    $('.container .thumb-container img.lazyloaded').each((index, item)=>{
-                        let img = ($(item).attr('src'));
+                    jq('.container .thumb-container img.lazyloaded').each((index, item)=>{
+                        let img = (jq(item).attr('src'));
+                        console.log('img', img);
                         img = img.replace('t.404', 'i.404').replace('t.', '.');
+                        img = img.replace('t1', 'i0').replace('t.', '.');
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
                     })
                 } else if(state.urlType == 'shimo') {
-                    $('#editor img').each((index ,item)=>{
-                        let img = $(item).attr('src').replace('!thumbnail', '');
+                    jq('#editor img').each((index ,item)=>{
+                        let img = jq(item).attr('src').replace('!thumbnail', '');
                         let l = img.split('/');
                         let tag = l[l.length - 1];
                         console.log(l)
@@ -393,8 +470,23 @@ const store = {
                         }
                         state.list.push(img);
                     })
-                }else{
-                    let url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
+                }else if(state.urlType == 'weibo') {
+                    dispatch('fetchPageImageUrl', {content: '', pageNo}).then(()=>{
+                        dispatch('fetchPageData', {pageNo: pageNo + 1});
+                    })
+
+
+                    
+                } else {
+                    let url
+                    if(state.pathname.indexOf('pools') > -1 ) {
+                        url = `${state.origin}${state.pathname}?page=${pageNo}`;
+                    } else {
+                        url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
+                    }
+                    
+                   
+
                     console.log('url', url);
                     window.fetchData && window.fetchData(url, 1000000, function(res) {
                         // console.log(res);
@@ -421,16 +513,29 @@ const store = {
                 let dom = jQuery('<div>'+content+'</div>');
                
                 if(state.urlType == 'danbooru') {
-                    let articles = dom.find('#posts-container article');
+                    // alert('ddd');
+                    let articles = location.href.indexOf('pools') > -1 ? dom.find('#c-pools article') : dom.find('#posts-container article');
                     let currentPageImage = [];
                     articles.each((index, a) => {
+                        let article = jQuery(a);
+                        let dataSource = article.attr('data-source') || '';
                         let dataFileUrl = jQuery(a).attr('data-file-url');
                         if(dataFileUrl.indexOf('/') == 0) {
                             dataFileUrl = 'https://danbooru.me' + dataFileUrl;
                         }
-                        state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1) + '-';
-                        state.imgMapThumbnail[dataFileUrl] = jQuery(a).find('img').attr('src');
-                        state.list.push(dataFileUrl);
+                        if(!state.containsPixiv && dataSource.indexOf('pximg') > -1) {
+                            console.log('dataSource', dataSource);
+                        } else {
+                            state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1) + '-';
+                            if(location.href.indexOf('pools') > -1) {
+                                state.imgMapTag[dataFileUrl] = state.list.length + 1;
+                            }
+                            state.imgMapThumbnail[dataFileUrl] = jQuery(a).find('img').attr('src');
+                            if(dataSource.indexOf('pximg') > -1) {
+                                state.imgMapPixivImg[dataFileUrl] = dataSource;
+                            }
+                            state.list.push(dataFileUrl);
+                        }
             
                     })
 
@@ -451,7 +556,21 @@ const store = {
                         state.imgMapTag[dataFileUrl] = pageNo +'-'+ (index + 1);
                         state.imgMapThumbnail[dataFileUrl] = jQuery(a).prev().find('img').attr('src');
                     })
-                } else if(state.urlType == 'acfun') {
+                } else if(state.urlType == 'weibo') {
+                    jq('.photo_cont .ph_ar_box').each((index, item)=>{
+                        let i = jQuery(item);
+                        let actionData = i.attr('action-data');
+                        console.log(index);
+                        let qs = util.getQueryString(decodeURIComponent(actionData));
+                        console.log(qs);
+                        // let url = `https://photo.weibo.com/${qs.uid}/wbphotos/large/mid/${qs.mid}/pid/${qs.pid}`;
+                        let url = `https://wx3.sinaimg.cn/large/${qs.pid}.jpg`;
+
+                        state.list.push(url);
+                        state.imgMapTag[url] = qs.mid+'.jpg';
+                
+                    })
+                }else if(state.urlType == 'acfun') {
                     let articles = dom.find('.article-content img').not('.ubb-emotion');
                     articles.each((index, a)=>{
                         let dataFileUrl = jQuery(a).attr('src');
@@ -467,7 +586,7 @@ const store = {
                         let attr = pItem.attr;
                         let name = pItem.name;
                         let cIndex = pItem.cIndex;
-                        let status = $(item).html();
+                        let status = jq(item).html();
                         state.gbfImgList.push({
                             status,
                             src: img,
@@ -496,43 +615,82 @@ const store = {
                             name,
                             cIndex: index,
                         })
-                        let status = $(item).html();
-                        console.log($(item).html());
+                        let status = jq(item).html();
+                        console.log(jq(item).html());
                         state.list.push(img);
                         state.imgMapTag[img] = `${charIndex + 1}-${name}-${status}`;
                     })
                     console.log(state.arknightsImgList);
                     console.log(state.imgMapTag);
                 } else if(state.urlType == 'bilibili') {
-                    var slider = $('.boost-slider');
-                    var card9 = $('.card-9 .img-content');
-                    let pointer = $('.user-name .c-pointer').html();
+                    var slider = jq('.boost-slider');
+                    var card9 = jq('.zoom-list .card .img-content');
+                    let pointer = jq('.user-name .c-pointer').html();
+                    let time = jq('.time.tc-slate span').eq(0).text();
+                    let content = jq('.content-full').text().slice(0, 30);
+                    content = content.replace(/(\/)|(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
                     if(slider.length > 0) {
                         console.log(1);
                         slider.find('img').each((index, item)=>{
-                            let src = $(item).attr('src');
+                            let src = jq(item).attr('src');
                             src = src.split('@')[0];
                             src = 'https:' + src;
                             console.log(src);
                             state.list.push(src);
-                            state.imgMapTag[src] = `${pointer}-${index}`;
+                            state.imgMapTag[src] = `${time} ${content}/${index}`;
                         })
                     } else {
                         card9.each((index, item)=>{
-                            let $item = $(item);
+                            let $item = jq(item);
                             let src = $item.css('background-image');
                             src = src.split('"')[1];
                             src = src.split('@')[0];
+                            if(src.indexOf('//') == 0) {
+                             src = 'https:'+ src;
+                            }
                             state.list.push(src);
-                            state.imgMapTag[src] = `${pointer}-${index}`;
+                            state.imgMapTag[src] = `${time} ${content}/${index}`;
                         })
                     }
 
                     console.log(state.list);
-                } else if(state.urlType == 'ichi-up') {
+                }  else if(state.urlType == 'bilibiliSpace') {
+                    var slider = dom.find('.boost-slider');
+                    var card9 = dom.find('.zoom-list .card .img-content');
+                    let pointer = dom.find('.user-name .c-pointer').html();
+                    let time = dom.find('.time.tc-slate span').eq(0).text();
+                    let content = dom.find('.content-full').text().slice(0, 30);
+                    content = content.replace(/(\/)|(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
+                    if(slider.length > 0) {
+                        console.log(1);
+                        slider.find('img').each((index, item)=>{
+                            let src = jq(item).attr('src');
+                            src = src.split('@')[0];
+                            src = 'https:' + src;
+                            console.log(src);
+                            state.list.push(src);
+                            state.imgMapTag[src] = `${time} ${content}/${index}`;
+                        })
+                    } else {
+                        card9.each((index, item)=>{
+                            let $item = jq(item);
+                            let src = $item.css('background-image');
+                            src = src.split('"')[1];
+                            src = src.split('@')[0];
+                            if(src.indexOf('//') == 0) {
+                             src = 'https:'+ src;
+                            }
+                            state.list.push(src);
+                            state.imgMapTag[src] = `${time} ${content}/${index}`;
+                        })
+                    }
+
+                    console.log(state.list);
+                    console.log(state.imgMapTag);
+                }  else if(state.urlType == 'ichi-up') {
                     let postItems = dom.find('.l-contents .post-item');
                     postItems.each((index, item)=>{
-                        let $item = $(item);
+                        let $item = jq(item);
                         let link = $item.find('.block-link').attr('data-href');
                         let poster  = $item.find('.eye-catch img').attr('data-original');
                         let catetory = $item.find('.post-text .category a').html();
@@ -542,7 +700,7 @@ const store = {
                         let imgR = link;
                         let tagsList = [];
                         tags.each((index, item)=>{
-                            tagsList.push($(item).html())
+                            tagsList.push(jq(item).html())
                         })
                         state.list.push(poster);
                         /* if(state.imgMapTag[poster]) {
@@ -608,10 +766,18 @@ const store = {
                                         let splitFileName = fileName.split(' ');
                                         fileName = splitFileName[splitFileName.length - 1];
                                     }
+
                                   
                                     // 下载图片
                                     console.log(state.imgMapTag[url]);
-                                    if(state.urlType == 'bing') {
+                                    let pximg = state.imgMapPixivImg[url];
+                                    if(state.urlType == 'danbooru' && location.href.indexOf('pools') > -1) {
+                                        let t  = util.checkName(state.tags);
+                                        fileName = t + '/' +(state.imgMapTag[url] || '')+ '.' + util.getExt(fileName);
+                                        console.log('f1', fileName);
+                                        
+                                        console.log('f2', fileName);
+                                    } if(state.urlType == 'bing') {
                                         fileName = state.imgMapTag[url] + '.'+util.getExt(fileName);
                                         fileName = fileName.replace('?imageslim', '')
                                         fileName = fileName.replace(/\//mig, ' ')
@@ -621,85 +787,37 @@ const store = {
                                         fileName = state.imgMapTag[url] + '.' + util.getExt(url);
                                     }else if(state.urlType == 'bilibili') {
                                         fileName = state.imgMapTag[url] + '.' + util.getExt(url);
+                                    }else if(state.urlType == 'bilibiliSpace') {
+                                        fileName = state.imgMapTag[url] + '.' + util.getExt(url);
                                     } else if(state.urlType == 'ichi-up') {
                                         fileName = state.imgMapTag[url];
                                     } else if(state.urlType == 'hpoi') {
-                                        fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
+                                        fileName = state.tags.replace('er.','er') +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
                                     }else if(state.urlType == 'hobby') {
                                         fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
                                     } else if(state.urlType == 'nyahentai') {
                                         fileName = state.tags +'/'+ state.imgMapTag[url] + '.' + util.getExt(url);
                                     }else if(state.urlType == 'shimo') {
                                         fileName = state.tags +'/'+ state.imgMapTag[url]// + '.' + util.getExt(url);
+                                    } /* else if(state.urlType == 'yande.re') {
+                                        let f = url.split('/');
+                                        fileName = state.tags +'-'+ f[f.length - 1];
+                                    } */else if(state.urlType == 'weibo') {
+                                        fileName = state.imgMapTag[url];
+                                    } else if(state.urlType == 'danbooru' || state.urlType == 'yande.re') {
+                                        fileName = (state.useDir ? (state.tags +'/') : '' ) + fileName
                                     }
+                                    /* fileName = util.checkName(fileName)
+                                   console.log('fileName', fileName);
+                                    return;  */
                                     console.log('fileName', fileName);
-                                    window.sendDownload && window.sendDownload({url: url, fileName: fileName,callback: (res)=>{
-                                        if(res.success) {
-                                            state.list = state.list.filter((i)=>{
-                                                return i != url;
-                                            })
-                                            state.fetchingList = state.fetchingList.filter((i)=>{
-                                                return i != url;
-                                            })
-                                            state.successList.push(url);
-                                            // 添加下一个任务
-                                            if(state.urlType == 'bing'){
-                                                setTimeout(()=>{
-                                                    dispatch('fetchImageData');
-                                                }, 1000)
-                                            }else  if(state.urlType == 'gbf') {
-                                                setTimeout(()=>{
-                                                    dispatch('fetchImageData');
-                                                }, 1000);
-                                            } else if(state.urlType == 'arknights') {
-                                                setTimeout(()=>{
-                                                    dispatch('fetchImageData');
-                                                }, 1000);
-                                            } else if(state.urlType == 'ichi-up') {
-                                                setTimeout(()=>{
-                                                    dispatch('fetchImageData');
-                                                }, 1000);
-                                            } else {
-                                                dispatch('fetchImageData');
-                                            }
-                                        } else {
-                                                // console.log('errorList', errorList);
-                                                state.list = state.list.filter((i)=>{
-                                                    return i != url;
-                                                })
-                                                state.fetchingList = state.fetchingList.filter((i)=>{
-                                                    return i != url;
-                                                })
-                                                state.errorList.push(url);
-                                                // 添加下一个任务
-                                                if(state.urlType == 'yade.re.pool') {
-                                                    setTimeout(()=>{
-                                                        dispatch('fetchImageData');
-                                                    }, 2000)
-                                                } else if(state.urlType == 'bing'){
-                                                    setTimeout(()=>{
-                                                        dispatch('fetchImageData');
-                                                    }, 1000)
-                                                } else if(state.urlType == 'gbf') {
-                                                    setTimeout(()=>{
-                                                        dispatch('fetchImageData');
-                                                    }, 1000)
-                                                }else if(state.urlType == 'arknights') {
-                                                    setTimeout(()=>{
-                                                        dispatch('fetchImageData');
-                                                    }, 1000)
-                                                }else if(state.urlType == 'ichi-up') {
-                                                    setTimeout(()=>{
-                                                        dispatch('fetchImageData');
-                                                    }, 1000)
-                                                }else {
-                                                    dispatch('fetchImageData');
-                                                }
-                                        }
+                                    fileName = util.checkName(fileName);
+                                    // alert(state.urlType);
+                                    if(state.urlType == 'yande.re.pool') {
+                                        fileName = state.tags +'/'+fileName
+                                    }
+                                    dispatch('downloadImage', {url, fileName, pximg});
 
-
-
-                                    }});
 
 
 
@@ -832,6 +950,118 @@ const store = {
                 }
             }
         },
+        downloadImage({state, dispatch}, {url, fileName,pximg}) {
+            console.warn(['====================', url, fileName, pximg]);
+            let c = function(res) {
+                if(res.success) {
+                    state.list = state.list.filter((i)=>{
+                        return i != url;
+                    })
+                    state.fetchingList = state.fetchingList.filter((i)=>{
+                        return i != url;
+                    })
+                    state.successList.push(url);
+                    // 添加下一个任务
+                    if(state.urlType == 'bing'){
+                        setTimeout(()=>{
+                            dispatch('fetchImageData');
+                        }, 1000)
+                    }else  if(state.urlType == 'gbf') {
+                        setTimeout(()=>{
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if(state.urlType == 'arknights') {
+                        setTimeout(()=>{
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if(state.urlType == 'ichi-up') {
+                        setTimeout(()=>{
+                            dispatch('fetchImageData');
+                        }, 1000);
+                    } else if(state.urlType == 'weibo') {
+                        setTimeout(()=>{
+                            dispatch('fetchImageData');
+                        }, 1100);
+                    }else if(state.urlType == 'bilibiliSpace') {
+                        setTimeout(()=>{
+                            dispatch('fetchImageData');
+                        }, 1100);
+                    }  else{
+                        dispatch('fetchImageData');
+                    }
+                } else {
+                        // console.log('errorList', errorList);
+                        state.list = state.list.filter((i)=>{
+                            return i != url;
+                        })
+                        state.fetchingList = state.fetchingList.filter((i)=>{
+                            return i != url;
+                        })
+                        state.errorList.push(url);
+                        // 添加下一个任务
+                        if(state.urlType == 'yade.re.pool') {
+                            setTimeout(()=>{
+                                dispatch('fetchImageData');
+                            }, 2000)
+                        } else if(state.urlType == 'danbooru.pool') {
+                            setTimeout(()=>{
+                                dispatch('fetchImageData');
+                            }, 2000)
+                        } else if(state.urlType == 'bing'){
+                            setTimeout(()=>{
+                                dispatch('fetchImageData');
+                            }, 1000)
+                        } else if(state.urlType == 'gbf') {
+                            setTimeout(()=>{
+                                dispatch('fetchImageData');
+                            }, 1000)
+                        }else if(state.urlType == 'arknights') {
+                            setTimeout(()=>{
+                                dispatch('fetchImageData');
+                            }, 1000)
+                        } else if(state.urlType == 'bilibiliSpace') {
+                            setTimeout(()=>{
+                                dispatch('fetchImageData');
+                            }, 1100);
+                        } else if(state.urlType == 'ichi-up') {
+                            setTimeout(()=>{
+                                dispatch('fetchImageData');
+                            }, 1000)
+                        }else {
+                            dispatch('fetchImageData');
+                        }
+                }
+            }
+
+
+            if(pximg) {
+                window.sendDownload && window.sendDownload({
+                    url: pximg,
+                    fileName: fileName,
+                    callback: (res) => {
+                        if(res.success){
+                            c(res);
+                        } else {
+                            window.sendDownload && window.sendDownload({
+                                url: url,
+                                fileName: fileName,
+                                callback: (r) => {
+                                    c(r);
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+                window.sendDownload && window.sendDownload({
+                    url: url,
+                    fileName: fileName,
+                    callback: (res) => {
+                        c(res);
+                    }
+                });
+            }
+        },
         // 保存未获取成功的列表
         saveUnfetchList({state}){
             let distList = state.fetchingList.concat(state.list).concat(state.errorList);
@@ -855,7 +1085,18 @@ const store = {
             file.readAsDataURL(blob);
             file.onload = ()=>{
                 console.log(file.result);
-                window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.json`});
+                let webFrom = '';
+                switch (state.urlType) {
+                    case 'danbooru':
+                        webFrom = 'danbooru'
+                        break;
+                    case 'yande.re':
+                        webFrom = 'yandere'
+                        break;
+                    default:
+                        break;
+                }
+                window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.${webFrom || '.' }json`});
             }
         },
         saveIchiUpData({state,}) {
@@ -885,10 +1126,10 @@ const store = {
             }
         },
         openIchiUpTab() {
-            let links = $('body').find('.l-contents .post-item .block-link');
+            let links = jq('body').find('.l-contents .post-item .block-link');
             console.log(links.length);
             links.each((index, item)=>{
-                let href = $(item).attr('data-href');
+                let href = jq(item).attr('data-href');
                 console.log(href);
                 href = 'https://ichi-up.net' + href;
                 setTimeout(()=>{
@@ -899,18 +1140,18 @@ const store = {
         },
         // 下载石案文档文章
         downloadShimo({state}) {
-            let content = $('#editor')[0].outerHTML;
-            let copyContent = $(content);
+            let content = jq('#editor')[0].outerHTML;
+            let copyContent = jq(content);
             copyContent.find('img').each((index, item)=>{
-                let $item = $(item);
+                let $item = jq(item);
                 let src = $item.attr('src').replace('!thumbnail', '');
 
                 let dir = state.tags +'/';
                 let l = src.split('/')
                 let tag = l[l.length - 1]
-                $(item).attr({src: dir + tag});
+                jq(item).attr({src: dir + tag});
             })
-            // copyContent.append($('.new-doc-directory'));
+            // copyContent.append(jq('.new-doc-directory'));
             let html = `
             <!DOCTYPE html>
             <html lang="en">
@@ -946,17 +1187,17 @@ const store = {
         // ichi-up获取页面教程截图
         saveScreenshot({dispatch}){
 
-            $('.adsbygoogle,ins').remove();
-            let article = $('article.single-post');
+            jq('.adsbygoogle,ins').remove();
+            let article = jq('article.single-post');
             if(location.href.indexOf('categories') > -1) {
-                article = $('.l-contents');
+                article = jq('.l-contents');
             }
 
             let newDom;
-            if($('.article-copied').length > 0) {
-                newDom = $('.article-copied');
+            if(jq('.article-copied').length > 0) {
+                newDom = jq('.article-copied');
             } else {
-                newDom = $('<div class="article-copied" style="position:fixed;left:0px;top:0;background-color:white;width:624px">'+article.html()+'</div>');
+                newDom = jq('<div class="article-copied" style="position:fixed;left:0px;top:0;background-color:white;width:624px">'+article.html()+'</div>');
                 console.log(1);
                 newDom.find('.single-post-banner,.post-footer').remove();// .post-inner-link,
                 console.log(2);
@@ -964,7 +1205,7 @@ const store = {
                     // dispatch('saveIchiUpHtml');
                     dispatch('saveScreenshot');
                 }, 200);
-                $('body').prepend(newDom);
+                jq('body').prepend(newDom);
                 
             }
             console.log('3');
@@ -1002,15 +1243,15 @@ const store = {
         },
         saveIchiUpHtml(){
             // 生成html页面
-            let newDom = $('.article-copied');
-            let newDom2 = $('<div class="article-copied" style="margin:0 auto;background-color:white;border:0px solid red;width:624px">'+newDom.html()+'</div>');
+            let newDom = jq('.article-copied');
+            let newDom2 = jq('<div class="article-copied" style="margin:0 auto;background-color:white;border:0px solid red;width:624px">'+newDom.html()+'</div>');
             let newDom2Imgs = newDom2.find('img');
             let newDomImgs = newDom.find('img');
             
             let imgs = [];
             //
             newDomImgs.each((index, item)=>{
-                let currentImage = $(item);
+                let currentImage = jq(item);
                 console.log(currentImage);
                 let imgW = currentImage.width();
                 let imgH = currentImage.height();
@@ -1083,7 +1324,7 @@ const store = {
                         left:'-1000px',
                         top: 0,
                     })
-                    $('body').append(newDom2);
+                    jq('body').append(newDom2);
                     document.documentElement.scrollTop = 0;
                     document.documentElement.scrollLeft = 0;
                     

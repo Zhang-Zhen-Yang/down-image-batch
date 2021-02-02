@@ -9,10 +9,16 @@
       <div style="height: 420px;overflow:auto;box-sizing: border-box;padding:10px 0 10px 10px;width: 99%;">
         <h3>1.通过httpRequest 获取 图片</h3>
         <button class="btn" id="btn-fetch-data" @click="startFetchPageData">获取</button>
+        <button class="btn" id="btn-fetch-data" @click="startFetchPageDataWithNoPixiv">获取非pixiv图片</button>
         <br>
         <div>
             过程：<span v-if="!pageDataSuccess">共{{pageTotal}}页 正在获取第{{currentPage}}页</span>
             <span v-if="pageDataSuccess">获取完成</span>
+        </div>
+        <div>
+          <label style="cursor:pointer;">
+            <input type="checkbox" v-model="useDir">&emsp;{{ tags }}
+          </label>
         </div>
         <br>
         <!-- 获取到的列表 -->
@@ -67,6 +73,17 @@ export default {
     }
   },
   computed:{
+    tags() {
+      return this.$store.state.tags;
+    },
+    useDir: {
+      get() {
+        return this.$store.state.useDir;
+      },
+      set(val) {
+        this.$store.state.useDir.val;
+      }
+    },
     urlType() {
       return this.$store.state.urlType;
     },
@@ -116,6 +133,9 @@ export default {
     },
     startFetchPageData() {
       this.$store.dispatch('startFetchPageData');
+    },
+    startFetchPageDataWithNoPixiv() {
+      this.$store.dispatch('startFetchPageDataWithNoPixiv');
     },
     fetchImageData() {
       if (this.isfetching) {

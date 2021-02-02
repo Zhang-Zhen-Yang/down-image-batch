@@ -2,6 +2,7 @@
 // 注意，必须设置了run_at=document_start 此段代码才会生效
 document.addEventListener('DOMContentLoaded', function()
 {	
+	console.log('ddddddddddddddddddd');
 	// var hostNames = ['item.taobao.com', 'detail.tmall.com', 'detail.1688.com']
 	// 注入自定义JS
 	if(!window.jQuery) {
@@ -10,6 +11,13 @@ document.addEventListener('DOMContentLoaded', function()
 	injectCustomJs();
 
 });
+/* setTimeout(function(){
+	alert('ddd');
+	if(!window.jQuery) {
+		injectCustomJs('js/jq.js');
+		injectCustomJs();
+	}
+}, 5000) */
 
 /* function initCustomPanel()
 {
@@ -41,7 +49,10 @@ function injectCustomJs(jsPath, additional)
 	} else {
 		temp.src = jsPath;
 	}
-	document.body.appendChild(temp);
+	setTimeout(function(){
+		console.log('temp', temp);
+		document.body.appendChild(temp);
+	}, 2000);
 	temp.onload = function()
 	{
 		// 执行完后移除掉
@@ -203,7 +214,9 @@ chrome.runtime.onConnect.addListener(function(port) {
 
 window.addEventListener("message", function(e)
 {
-	// console.log('收到消息：', e.data);
+	// alert(JSON.stringify(e));
+	console.warn('收到消息：', e);
+	
 	if(e.data && e.data.cmd == 'invoke') {
 		eval('('+e.data.code+')');
 	}
@@ -217,6 +230,7 @@ window.addEventListener("message", function(e)
 	}
 	// 收到复制的html信息
 	else if(e.data.cmd == 'notifyIframeCopyResult') {
+		console.log(e.data);
 		chrome.runtime.sendMessage({cmd:'notifyIframeCopyResult', content: e.data.content, href: e.data.href, html: e.data.html}, function(response) {
 			
 		});

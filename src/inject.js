@@ -120,7 +120,13 @@ function sendMessageToContentScriptByPostMessage(data)
 		} else if(href.indexOf('yangkeduo.com/goods') > -1) { // 拼多多 目前没有要通过特殊处理才能拿到数据的数据就在html 页面上，所以直接通过httpRequest拿取会比较好
 			var html = document.getElementsByTagName('html')[0].innerHTML;
 			window.postMessage({cmd: 'notifyIframeCopyResult', content:  '', href: href, html: html}, '*');
-		} else {
+		}  else  if(href.indexOf('t.bilibili.com') > -1) {
+			console.log(html);
+			console.log('bilibiliSpace=====');
+			setTimeout(function() {
+				window.postMessage({cmd: 'notifyIframeCopyResult', content:  '', href: href, html:  document.getElementsByTagName('html')[0].innerHTML}, '*');
+			}, 1500)
+		}else {
 			// 天猫
 			var regx = /"httpsDescUrl"\s*:\s*"(.+?)"\s*/mig;
 			var result = regx.exec(html);
@@ -207,7 +213,7 @@ function sendMessageToContentScriptByPostMessage(data)
 			}
 		}
 	}
-	if(window.jQuery) {
+	if(window.jq) {
 		var getUUID = function() {
 			var s = [];
 			var hexDigits = "0123456789abcdef";
@@ -239,7 +245,7 @@ function sendMessageToContentScriptByPostMessage(data)
 				} else {
 					src.search = '?v='+Date.now()+'&from=wbExtensions&uuid='+uuid;
 				}
-				var iframe = jQuery('<iframe id="'+uuid+'" src="'+src.href+'" width="100" height="10" sandbox="allow-scripts allow-same-origin allow-popups">');
+				var iframe = jq('<iframe id="'+uuid+'" src="'+src.href+'" width="100" height="10" sandbox="allow-scripts allow-same-origin allow-popups">');
 				// 没有onerror事件，在onload 后5s
 				iframe.get(0).onload = function() {
 					setTimeout(function() {
@@ -248,11 +254,11 @@ function sendMessageToContentScriptByPostMessage(data)
 								content: '',
 								html: '',
 								url: taskList[uuid].url,
-								msg: 'can not fetch data in 2s after iframe onload'
+								msg: 'can not fetch data in 8s after iframe onload'
 							});
 							delete taskList[uuid];
 						}
-					}, 2000);
+					}, 8000);
 				}
 				iframeWrap.append(iframe);
 			}
@@ -286,7 +292,7 @@ function sendMessageToContentScriptByPostMessage(data)
 							url: taskList[uuid].url
 						});
 						delete taskList[uuid];
-						jQuery('#'+uuid).remove();
+						jq('#'+uuid).remove();
 					}
 				}
 			}
@@ -384,9 +390,9 @@ function sendMessageToContentScriptByPostMessage(data)
 					delete downloadTaskList[uuid];
 				}
 			}
-		jQuery(function() {
+		jq(function() {
 			// alert('d');
-			var iframeWrap = jQuery('<div id="wb-iframe-wrap"></div>');
+			var iframeWrap = jq('<div id="wb-iframe-wrap"></div>');
 			iframeWrap.css({
 				width: '100px',
 				height: '10px',
@@ -398,21 +404,24 @@ function sendMessageToContentScriptByPostMessage(data)
 				opacity: 0,
 			})
 			
+			
 			if(
 				(location.href.indexOf('localhost') > -1) ||
 				(location.href.indexOf('wonbao') > -1) ||
 				(location.href.indexOf('file:')>-1) ||
-				location.href.indexOf('192.168') > -1
+				location.href.indexOf('192.168') > -1||
+				location.href.indexOf('bilibili') > -1
 			) {
-				jQuery('body').append(iframeWrap);
+				jq('body').append(iframeWrap);
+				window.iframeWrap = iframeWrap;
 			}
-			/* var copyBtn = jQuery('#wb-copy');
+			/* var copyBtn = jq('#wb-copy');
 			copyBtn.addClass('hasplug');
 			copyBtn.on('click', function(){
 				var list = window.myscript();
 				// alert(list);
 				list.forEach(function(item, index){
-					var iframe = jQuery('<iframe src="'+item+'&v='+Date.now()+'&from=wbExtensions" width="100" height="500">');
+					var iframe = jq('<iframe src="'+item+'&v='+Date.now()+'&from=wbExtensions" width="100" height="500">');
 					iframeWrap.append(iframe);
 				})
 			}) */
@@ -434,7 +443,7 @@ function sendMessageToContentScriptByPostMessage(data)
 		
 		if(origin == 'https://www.baidu.com') {
 			// 下载弹窗
-			var dialog = jQuery('<div style="width:600px;height:400px;background-color:white;position:fixed;left:50%;top:50%;transform: translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,0.3);z-index:100;">\
+			var dialog = jq('<div style="width:600px;height:400px;background-color:white;position:fixed;left:50%;top:50%;transform: translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,0.3);z-index:100;">\
 				<div style="height: 30px;">\
 					<div style="float:right;cursor:pointer;color:red;font-size: 30px;margin: 0px 6px 0 0;" class="e-dialog-diss">&times;</div>\
 				</div>\
@@ -473,8 +482,8 @@ function sendMessageToContentScriptByPostMessage(data)
 			<div>');
 			
 			// 右侧开始下载按钮
-			var downloadBtn = jQuery('<div style="width: 30px;height:35px;line-height:35px;color:white;border-radius:3px 0 0 3px;background-color:rgb(0,122,204);position:fixed;right:0;top:200px;cursor:pointer;" title="下载">&darr;</div>');
-			jQuery('body').append(downloadBtn)
+			var downloadBtn = jq('<div style="width: 30px;height:35px;line-height:35px;color:white;border-radius:3px 0 0 3px;background-color:rgb(0,122,204);position:fixed;right:0;top:200px;cursor:pointer;" title="下载">&darr;</div>');
+			jq('body').append(downloadBtn)
 			dialog.hide().appendTo('body');
 	
 			downloadBtn.on('click', function(){

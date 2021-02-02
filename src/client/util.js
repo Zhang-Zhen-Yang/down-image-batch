@@ -65,7 +65,7 @@
             /danbooru/,
             /yande.re\/post/,
             /yande.re\/pool/,
-            /bilibili.com/,
+            /space\.bilibili\.com/,
             /www.acfun.cn\/a\//,
             /localhost/,
             /ichi\-up\.net\//,
@@ -73,11 +73,14 @@
             /gbf\.huijiwiki\.com\/wiki/,
             /arknights\.huijiwiki\.com\/wiki/,
             /t\.bilibili\.com/,
-            /t\.bilibili\.com/,
             /www\.hpoi\.net\/hobby/,
+            /www\.hpoi\.cn\/album/,
+            /www\.hpoi\.net\/album/,
             /www\.1999\.co\.jp\/eng\/image/,
-            /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/,
+            /www\.1999\.co\.jp\/image/,
+            /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/,
             /shimo\.im\/docs/,
+            /weibo\.com/,
         ]
         let should = false;
         list.forEach((item)=>{
@@ -95,11 +98,11 @@
     // 链接标识
     getUrlType() {
         let list = [
-            {match: /danbooru/, type: 'danbooru'},
+            {match: /danbooru\.donmai\.us\/posts/, type: 'danbooru'},
+            {match: /danbooru\.donmai\.us\/pools/, type: 'danbooru'},
             {match:/yande.re\/post/, type: 'yande.re'},
             {match:/yande.re\/pool/, type: 'yande.re.pool'},
             {match:/baidu.com/, type: 'baidu'},
-            {match:/bilibili.com/, type: 'bilibili'}, // 未用
             {match:/www.acfun.cn\/a\//, type: 'acfun'},
             {match:/localhost/, type: 'localhost'},
             {match:/ichi\-up\.net\//, type: 'ichi-up'},
@@ -107,15 +110,21 @@
             {match:/gbf\.huijiwiki\.com\/wiki/, type: 'gbf'},// gbf维基
             {match:/arknights\.huijiwiki\.com\/wiki/, type: 'arknights'},// arknights维基
             {match: /t\.bilibili\.com/, type: 'bilibili'},// bilibili空动态
+            {match:/space\.bilibili.com/, type: 'bilibiliSpace'}, // 未用
             {match: /www\.hpoi\.net\/hobby/, type: 'hpoi'},// hpoi手办
+            {match: /www\.hpoi\.cn\/album/, type: 'hpoi'},// hpoi手办
+            {match: /www\.hpoi\.net\/album/, type: 'hpoi'},// hpoi手办
             {match: /www\.1999\.co\.jp\/eng\/image/, type: 'hobby'},// hpoi手办
-            {match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/, type: 'nyahentai'},// nyahentai
+            {match: /www\.1999\.co\.jp\/image/, type: 'hobby'},// hpoi手办
+            {match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, type: 'nyahentai'},// nyahentai
             {match: /shimo\.im\/docs/, type: 'shimo'},// nyahentai
+            {match: /weibo\.com/, type: 'weibo'},// nyahentai
         ];
         let href = location.href;
         let urlType = '';
         list.forEach((item)=>{
-            // console.log(href.match(item.match));
+            /* console.log(href)
+            console.log(href.match(item.match)); */
             if(href.match(item.match)) {
                 urlType = item.type;
             }

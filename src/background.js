@@ -13,10 +13,15 @@ function shouldSendToTab(url) {
 		/gbf\.huijiwiki\.com\/wiki/,
 		/arknights\.huijiwiki\.com\/wiki/,
 		/t\.bilibili\.com/,
+		/space\.bilibili\.com/,
 		/www\.hpoi\.net\/hobby/,
+		/www\.hpoi\.net\/album/,
 		/www\.1999\.co\.jp\/eng\/image/,
-		/(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)/,
+		/www\.1999\.co\.jp\/image/,
+		/(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/,
 		/shimo\.im\/docs/,
+		/weibo\.com/,
+		/www\.hpoi\.cn\/album/
 	]
 	let should = false;
 	list.forEach((item)=>{
@@ -175,7 +180,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 	else if (request.cmd == 'notifyIframeHtmlUsefull') { // 告知当前iframe 页面是否有内容
 		chrome.tabs.query({}, function(tabs){
 			tabs.forEach(function(tab, index) {
-				if(tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:')>-1 || tab.url.indexOf('192.168') > -1 || tab.url.indexOf('yangkeduo.com/goods') > -1) {
+				if(tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:')>-1 || tab.url.indexOf('192.168') > -1 || tab.url.indexOf('yangkeduo.com/goods') > -1 && tab.url.indexOf('space.bilibili.com') > -1) {
 					chrome.tabs.sendMessage(
 						tabs[index].id, 
 						{
@@ -193,7 +198,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 	else if(request.cmd == 'notifyIframeCopyResult') {
 		chrome.tabs.query({}, function(tabs){
 			tabs.forEach(function(tab, index) {
-				if(tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:')>-1 || tab.url.indexOf('192.168') > -1 || tab.url.indexOf('yangkeduo.com/goods') > -1) {
+				// console.log('c================', request)
+				if(tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:')>-1 || tab.url.indexOf('192.168') > -1 || tab.url.indexOf('yangkeduo.com/goods') > -1 || tab.url.indexOf('space.bilibili.com') > -1) {
 					chrome.tabs.sendMessage(
 						tabs[index].id, 
 						{

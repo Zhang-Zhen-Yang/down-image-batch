@@ -38,6 +38,7 @@ export default {
     this.$store.dispatch('init');
   },
   mounted(){
+    // alert('dddd');
   },
   watch:{
     snackbar:{
