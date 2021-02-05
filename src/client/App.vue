@@ -31,7 +31,7 @@ export default {
       ev.preventDefault();
     },
     showDialog() {
-      this.$store.state.showDialog = true;
+      this.$store.state.showDialog = !this.$store.state.showDialog;
     }
   },
   created() {

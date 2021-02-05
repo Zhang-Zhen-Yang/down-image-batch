@@ -81,6 +81,7 @@
             /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/,
             /shimo\.im\/docs/,
             /weibo\.com/,
+            /www\.baidu\.com/
         ]
         let should = false;
         list.forEach((item)=>{
@@ -117,8 +118,9 @@
             {match: /www\.1999\.co\.jp\/eng\/image/, type: 'hobby'},// hpoi手办
             {match: /www\.1999\.co\.jp\/image/, type: 'hobby'},// hpoi手办
             {match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, type: 'nyahentai'},// nyahentai
-            {match: /shimo\.im\/docs/, type: 'shimo'},// nyahentai
-            {match: /weibo\.com/, type: 'weibo'},// nyahentai
+            {match: /shimo\.im\/docs/, type: 'shimo'},//
+            {match: /weibo\.com/, type: 'weibo'},// 
+            {match: /www\.baidu\.com/, type: 'baidu'},// nyahentai
         ];
         let href = location.href;
         let urlType = '';

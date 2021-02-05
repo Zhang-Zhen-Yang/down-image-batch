@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-30 10:20:11
+ * @Last Modified time: 2021-02-05 17:28:22
  */
 
 import util from '../util.js';
@@ -21,6 +21,8 @@ const store = {
         showDialog: false,
         urlType: 'danbooru',
         pageTotal: 0,
+        toFetchPageCount: -1, //要获取的页数（-1， 0时无效）
+
         currentPage: 1,
         tags: 'tags',
         useDir: true,
@@ -31,10 +33,12 @@ const store = {
         list: data.list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
         successList: [],//data.successList,
         errorList: [],// data.errorList,
+        unfetchLit: [],
         fetchingList: [],
         isfetching: false,
         parallelNum: 1, // localStorage.getItem('parallelNum'),
         pageDataSuccess: false,
+
         gbfList: [],
         gbfImgList: [],
         arknightsList: [],
@@ -59,10 +63,20 @@ const store = {
 			state.snackbar.timeout = timeout;
 			state.snackbar.show = true;
 		},
-		
 	},
 	// -------------------------------------------------------------------------------------------------------------
 	actions: {
+        // 过滤
+        filterUnfetchList({state, commit, dispatch, getters}) {
+            let list1 = state.list.filter((item)=>{
+                return state.unFetchList.indexOf(item) < 0;
+            })
+            let list2 = state.list.filter((item)=>{
+                return state.unFetchList.indexOf(item) > -1;
+            })
+            state.list = list1;
+            state.successList = state.successList.concat(list2);
+        },
 		// 初始化 网络请求
 		init({state, commit, dispatch, getters}){
 			let href = location.href;
@@ -77,22 +91,16 @@ const store = {
                 state.urlType = 'yande.re';
             } */
             state.origin = origin;
-            state.tags = queryString.tags;
+            state.tags = queryString.tags || '';
             state.pathname = location.pathname;
 
-          
-            setTimeout(()=>{
-                /* let u = 'https://yande.re/post?page=1&tags=dishwasher1910';
-                window.fetchData && window.fetchData(u, 1000000, function(res) {
-                    console.log(res);
-                }) */
-                // window.notify('basic', '', '获取完成', `user:${state.tags}`);
-            }, 2000)
             document.body.addEventListener('drop', (e)=>{
                 e.preventDefault();
-                // console.log(e);
+                // console.log(e.target);
+                // 是否去除不下载的图片
+                let isUnFetchDropArea = e.target.id == unFetchDropArea;
                 let file = e.dataTransfer.files;
-                console.log(file);
+                // console.log(file);
                 if(file && file[0]) {
                     if(util.endWidth(file[0].name, '.json')) {
                         let fileReader = new FileReader();
@@ -102,26 +110,52 @@ const store = {
                             console.log(jsonText);
                             try{
                                 let json = JSON.parse(jsonText);
-                                state.tags = json.tags;
-                                state.list = [];
-                                state.errorList = [];
-                                state.successList = [];
-                                state.fetchingList = [];
-                                state.imgMapTag = {};
+                                
+                                if (isUnFetchDropArea) {
+                                    let allList = (json.list || json.unFetchList).concat(json.successList || []);
+                                    let unFetchList = [];
+                                    allList.forEach((item,index) => {
+                                        let key = Object.keys(item)[0]
+                                        unFetchList.push(key);
+                                    })
+                                    // 可能要多次去除
+                                    state.unFetchList = state.unFetchList.concat(unFetchList);
+                                    dispatch('filterUnfetchList');
 
-                                let toSetList = [];
-                                let toSetMap = {};
-                                json.list.forEach((item,index) => {
-                                    let key = Object.keys(item)[0]
-                                    //if(u.indexOf(key) > -1) {
-                                        toSetList.push(key);
-                                    //}
-                                    toSetMap[key] = item[key];
-                                })
-                                state.list = toSetList;
-                                state.imgMapTag = toSetMap;
-                                console.log(toSetList);
-                                console.log(toSetMap);
+                                } else {
+
+                                    state.tags = json.tags;
+                                    state.list = [];
+                                    state.errorList = [];
+                                    state.successList = [];
+                                    state.fetchingList = [];
+                                    state.imgMapTag = {};
+    
+                                    let toSetList = [];
+                                    let toSetMap = {};
+    
+                                    (json.list || json.unFetchList).forEach((item,index) => {
+                                        let key = Object.keys(item)[0]
+                                        //if(u.indexOf(key) > -1) {
+                                            toSetList.push(key);
+                                        //}
+                                        toSetMap[key] = item[key];
+                                    })
+                                    let toSetSuccessList = [];
+                                    (json.successList || []).forEach((item,index) => {
+                                        let key = Object.keys(item)[0]
+                                        //if(u.indexOf(key) > -1) {
+                                            toSetSuccessList.push(key);
+                                        //}
+                                        toSetMap[key] = item[key];
+                                    })
+    
+                                    state.list = toSetList;
+                                    state.successList = toSetSuccessList;
+                                    state.imgMapTag = toSetMap;
+                                    console.log(toSetList);
+                                    console.log(toSetMap);
+                                }
                             }catch(e){
                                 console.error(e);
                             }
@@ -338,7 +372,11 @@ const store = {
                 state.pageDataSuccess = false;
             }
             console.log([pageNo, state.pageTotal]);
-            if(pageNo <= state.pageTotal) {
+            let pTotal = state.pageTotal;
+            if(state.toFetchPageCount > 0 && state.toFetchPageCount < pTotal) {
+                pTotal = state.toFetchPageCount
+            }
+            if(pageNo <= pTotal) {
                 state.currentPage = pageNo;
                 if(state.urlType == 'acfun'){
                     dispatch('fetchPageImageUrl', {content: jQuery('body').html(), pageNo}).then(()=>{
@@ -473,10 +511,7 @@ const store = {
                 }else if(state.urlType == 'weibo') {
                     dispatch('fetchPageImageUrl', {content: '', pageNo}).then(()=>{
                         dispatch('fetchPageData', {pageNo: pageNo + 1});
-                    })
-
-
-                    
+                    })  
                 } else {
                     let url
                     if(state.pathname.indexOf('pools') > -1 ) {
@@ -485,8 +520,6 @@ const store = {
                         url = `${state.origin}${state.pathname}?page=${pageNo}&tags=${state.tags}`;
                     }
                     
-                   
-
                     console.log('url', url);
                     window.fetchData && window.fetchData(url, 1000000, function(res) {
                         // console.log(res);
@@ -504,6 +537,7 @@ const store = {
                     dispatch('saveIchiUpData');
                 }
                 state.pageDataSuccess = true;
+                dispatch('filterUnfetchList');
             }
         },
         // 通过html解析页面img
@@ -775,7 +809,6 @@ const store = {
                                         let t  = util.checkName(state.tags);
                                         fileName = t + '/' +(state.imgMapTag[url] || '')+ '.' + util.getExt(fileName);
                                         console.log('f1', fileName);
-                                        
                                         console.log('f2', fileName);
                                     } if(state.urlType == 'bing') {
                                         fileName = state.imgMapTag[url] + '.'+util.getExt(fileName);
@@ -818,11 +851,6 @@ const store = {
                                     }
                                     dispatch('downloadImage', {url, fileName, pximg});
 
-
-
-
-
-                            
 
                            /*  window.httpRequest && window.httpRequest(url, 'blob', (res)=>{
 
@@ -926,8 +954,7 @@ const store = {
                                 }
                             }); */
 
-
-                            
+   
                         } catch(e){
                             console.warn(e);
                         } 
@@ -1034,7 +1061,7 @@ const store = {
             }
 
 
-            if(pximg) {
+            if(false /*pximg*/) {
                 window.sendDownload && window.sendDownload({
                     url: pximg,
                     fileName: fileName,
@@ -1063,20 +1090,34 @@ const store = {
             }
         },
         // 保存未获取成功的列表
-        saveUnfetchList({state}){
+        saveUnfetchList({state},{all}){
             let distList = state.fetchingList.concat(state.list).concat(state.errorList);
+
             // console.log(distList);
 
-            let toSaveList = [];
+            let successList = [];
+            // let errorList = [];
+            let unFetchList = [];
+
+            // let toSaveList = [];
             distList.forEach((item)=>{
                 let listItem = {};
                 listItem[item] = state.imgMapTag[item] || '';
-                toSaveList.push(listItem);
+                unFetchList.push(listItem);
             })
+            state.successList.forEach((item)=>{
+                let listItem = {};
+                listItem[item] = state.imgMapTag[item] || '';
+                successList.push(listItem);
+            })
+
+
             let toSaveJson = {
                 href: location.href,
                 tags: state.tags,
-                list: toSaveList,
+                // list: toSaveList,
+                unFetchList,
+                successList,
             }
             let blob = new Blob([JSON.stringify(toSaveJson)], {type : 'application/json'});
             /* console.log(toSaveList);
@@ -1088,15 +1129,19 @@ const store = {
                 let webFrom = '';
                 switch (state.urlType) {
                     case 'danbooru':
-                        webFrom = 'danbooru'
+                        webFrom = 'danbooru.'
                         break;
                     case 'yande.re':
-                        webFrom = 'yandere'
+                        webFrom = 'yandere.'
                         break;
                     default:
                         break;
                 }
-                window.sendDownload && window.sendDownload({url: file.result, fileName: `${state.tags || 'unknow'}.${webFrom || '.' }json`});
+                let dir = '';
+                if(state.useDir) {
+                    dir = state.tags? (state.tags + '/') : '';
+                }
+                window.sendDownload && window.sendDownload({url: file.result, fileName: `${dir}${state.tags || 'unknow'}.${webFrom}json`});
             }
         },
         saveIchiUpData({state,}) {
@@ -1182,7 +1227,6 @@ const store = {
                     
                 }});
             }
-
         },
         // ichi-up获取页面教程截图
         saveScreenshot({dispatch}){
@@ -1338,6 +1382,22 @@ const store = {
 
                 }
             })
+        },
+        // 下载当前页面的图片
+        downloadSingl({state}) {
+            let imgUrl = '';
+            switch(state.urlType) {
+                
+                case 'danbooru':
+                    break;
+                default: break;
+            }
+            if(imgUrl) {
+                let ext = util.getExt(imgUrl);
+                window.sendDownload({url: imgUrl, fileName: Date.now()+'.'+ ext});
+            } else {
+                alert('找不到图片');
+            }
         }
 	
 	},

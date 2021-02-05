@@ -492,7 +492,7 @@ let util = {
         let href = location.href;
         let list = [
         //    /baidu.com/,
-        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /space\.bilibili\.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.hpoi\.cn\/album/, /www\.hpoi\.net\/album/, /www\.1999\.co\.jp\/eng\/image/, /www\.1999\.co\.jp\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, /shimo\.im\/docs/, /weibo\.com/];
+        /danbooru/, /yande.re\/post/, /yande.re\/pool/, /space\.bilibili\.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.hpoi\.cn\/album/, /www\.hpoi\.net\/album/, /www\.1999\.co\.jp\/eng\/image/, /www\.1999\.co\.jp\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, /shimo\.im\/docs/, /weibo\.com/, /www\.baidu\.com/];
         let should = false;
         list.forEach(item => {
             // console.log(href.match(item));
@@ -518,8 +518,9 @@ let util = {
         { match: /www\.1999\.co\.jp\/eng\/image/, type: 'hobby' }, // hpoi手办
         { match: /www\.1999\.co\.jp\/image/, type: 'hobby' }, // hpoi手办
         { match: /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, type: 'nyahentai' }, // nyahentai
-        { match: /shimo\.im\/docs/, type: 'shimo' }, // nyahentai
-        { match: /weibo\.com/, type: 'weibo' }];
+        { match: /shimo\.im\/docs/, type: 'shimo' }, //
+        { match: /weibo\.com/, type: 'weibo' }, // 
+        { match: /www\.baidu\.com/, type: 'baidu' }];
         let href = location.href;
         let urlType = '';
         list.forEach(item => {
@@ -593,7 +594,7 @@ let util = {
  * @Author: zhangzhenyang 
  * @Date: 2020-06-06 08:46:27 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-09 10:01:02
+ * @Last Modified time: 2021-02-05 11:14:37
  */
 
 
@@ -644,6 +645,9 @@ setTimeout(()=>{
   window.notify('', '', '获取完成', `user:ohisashiburi`);       
 }, 2000) 
  */
+window.pp = () => {
+  console.log(JSON.parse(JSON.stringify(window.project.$store.state)));
+};
 
 /***/ }),
 /* 6 */
@@ -685,7 +689,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       ev.preventDefault();
     },
     showDialog() {
-      this.$store.state.showDialog = true;
+      this.$store.state.showDialog = !this.$store.state.showDialog;
     }
   },
   created() {
@@ -713,6 +717,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -808,6 +820,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     pageTotal() {
       return this.$store.state.pageTotal;
     },
+    toFetchPageCount() {
+      return this.$store.state.toFetchPageCount;
+    },
     list() {
       return this.$store.state.list;
     },
@@ -860,8 +875,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     addToList() {
       this.$store.dispatch('addToList');
     },
-    saveUnfetchList() {
-      this.$store.dispatch('saveUnfetchList');
+    saveUnfetchList({ all }) {
+      this.$store.dispatch('saveUnfetchList', { all });
     },
     saveScreenshot() {
       this.$store.dispatch('saveScreenshot');
@@ -1016,7 +1031,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-30 10:20:11
+ * @Last Modified time: 2021-02-05 14:42:14
  */
 
 
@@ -1035,6 +1050,8 @@ const store = {
         showDialog: false,
         urlType: 'danbooru',
         pageTotal: 0,
+        toFetchPageCount: -1, //要获取的页数（-1， 0时无效）
+
         currentPage: 1,
         tags: 'tags',
         useDir: true,
@@ -1045,10 +1062,12 @@ const store = {
         list: __WEBPACK_IMPORTED_MODULE_1__data_js__["a" /* default */].list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
         successList: [], //data.successList,
         errorList: [], // data.errorList,
+        unfetchLit: [],
         fetchingList: [],
         isfetching: false,
         parallelNum: 1, // localStorage.getItem('parallelNum'),
         pageDataSuccess: false,
+
         gbfList: [],
         gbfImgList: [],
         arknightsList: [],
@@ -1071,10 +1090,20 @@ const store = {
             state.snackbar.timeout = timeout;
             state.snackbar.show = true;
         }
-
     },
     // -------------------------------------------------------------------------------------------------------------
     actions: {
+        // 过滤
+        filterUnfetchList({ state, commit, dispatch, getters }) {
+            let list1 = state.list.filter(item => {
+                return state.unFetchList.indexOf(item) < 0;
+            });
+            let list2 = state.list.filter(item => {
+                return state.unFetchList.indexOf(item) > -1;
+            });
+            state.list = list1;
+            state.successList = state.successList.concat(list2);
+        },
         // 初始化 网络请求
         init({ state, commit, dispatch, getters }) {
             let href = location.href;
@@ -1089,21 +1118,16 @@ const store = {
                 state.urlType = 'yande.re';
             } */
             state.origin = origin;
-            state.tags = queryString.tags;
+            state.tags = queryString.tags || '';
             state.pathname = location.pathname;
 
-            setTimeout(() => {
-                /* let u = 'https://yande.re/post?page=1&tags=dishwasher1910';
-                window.fetchData && window.fetchData(u, 1000000, function(res) {
-                    console.log(res);
-                }) */
-                // window.notify('basic', '', '获取完成', `user:${state.tags}`);
-            }, 2000);
             document.body.addEventListener('drop', e => {
                 e.preventDefault();
-                // console.log(e);
+                // console.log(e.target);
+                // 去除不下载的图片
+                let isUnFetchDropArea = e.target.id == unFetchDropArea;
                 let file = e.dataTransfer.files;
-                console.log(file);
+                // console.log(file);
                 if (file && file[0]) {
                     if (__WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].endWidth(file[0].name, '.json')) {
                         let fileReader = new FileReader();
@@ -1113,26 +1137,50 @@ const store = {
                             console.log(jsonText);
                             try {
                                 let json = JSON.parse(jsonText);
-                                state.tags = json.tags;
-                                state.list = [];
-                                state.errorList = [];
-                                state.successList = [];
-                                state.fetchingList = [];
-                                state.imgMapTag = {};
 
-                                let toSetList = [];
-                                let toSetMap = {};
-                                json.list.forEach((item, index) => {
-                                    let key = Object.keys(item)[0];
-                                    //if(u.indexOf(key) > -1) {
-                                    toSetList.push(key);
-                                    //}
-                                    toSetMap[key] = item[key];
-                                });
-                                state.list = toSetList;
-                                state.imgMapTag = toSetMap;
-                                console.log(toSetList);
-                                console.log(toSetMap);
+                                if (isUnFetchDropArea) {
+                                    let allList = (json.list || json.unFetchList).concat(json.successList || []);
+                                    let unFetchList = [];
+                                    allList.forEach((item, index) => {
+                                        let key = Object.keys(item)[0];
+                                        unFetchList.push(key);
+                                    });
+                                    state.unFetchList = unFetchList;
+                                    dispatch('filterUnfetchList');
+                                } else {
+
+                                    state.tags = json.tags;
+                                    state.list = [];
+                                    state.errorList = [];
+                                    state.successList = [];
+                                    state.fetchingList = [];
+                                    state.imgMapTag = {};
+
+                                    let toSetList = [];
+                                    let toSetMap = {};
+
+                                    (json.list || json.unFetchList).forEach((item, index) => {
+                                        let key = Object.keys(item)[0];
+                                        //if(u.indexOf(key) > -1) {
+                                        toSetList.push(key);
+                                        //}
+                                        toSetMap[key] = item[key];
+                                    });
+                                    let toSetSuccessList = [];
+                                    (json.successList || []).forEach((item, index) => {
+                                        let key = Object.keys(item)[0];
+                                        //if(u.indexOf(key) > -1) {
+                                        toSetSuccessList.push(key);
+                                        //}
+                                        toSetMap[key] = item[key];
+                                    });
+
+                                    state.list = toSetList;
+                                    state.successList = toSetSuccessList;
+                                    state.imgMapTag = toSetMap;
+                                    console.log(toSetList);
+                                    console.log(toSetMap);
+                                }
                             } catch (e) {
                                 console.error(e);
                             }
@@ -1343,7 +1391,11 @@ const store = {
                 state.pageDataSuccess = false;
             }
             console.log([pageNo, state.pageTotal]);
-            if (pageNo <= state.pageTotal) {
+            let pTotal = state.pageTotal;
+            if (state.toFetchPageCount > 0 && state.toFetchPageCount < pTotal) {
+                pTotal = state.toFetchPageCount;
+            }
+            if (pageNo <= pTotal) {
                 state.currentPage = pageNo;
                 if (state.urlType == 'acfun') {
                     dispatch('fetchPageImageUrl', { content: jQuery('body').html(), pageNo }).then(() => {
@@ -1499,6 +1551,7 @@ const store = {
                     dispatch('saveIchiUpData');
                 }
                 state.pageDataSuccess = true;
+                dispatch('filterUnfetchList');
             }
         },
         // 通过html解析页面img
@@ -1760,7 +1813,6 @@ const store = {
                                 let t = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].checkName(state.tags);
                                 fileName = t + '/' + (state.imgMapTag[url] || '') + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(fileName);
                                 console.log('f1', fileName);
-
                                 console.log('f2', fileName);
                             }if (state.urlType == 'bing') {
                                 fileName = state.imgMapTag[url] + '.' + __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(fileName);
@@ -2007,25 +2059,25 @@ const store = {
                 }
             };
 
-            if (pximg) {
-                window.sendDownload && window.sendDownload({
-                    url: pximg,
-                    fileName: fileName,
-                    callback: res => {
-                        if (res.success) {
-                            c(res);
-                        } else {
-                            window.sendDownload && window.sendDownload({
-                                url: url,
-                                fileName: fileName,
-                                callback: r => {
-                                    c(r);
-                                }
-                            });
+            if (false /*pximg*/) {
+                    window.sendDownload && window.sendDownload({
+                        url: pximg,
+                        fileName: fileName,
+                        callback: res => {
+                            if (res.success) {
+                                c(res);
+                            } else {
+                                window.sendDownload && window.sendDownload({
+                                    url: url,
+                                    fileName: fileName,
+                                    callback: r => {
+                                        c(r);
+                                    }
+                                });
+                            }
                         }
-                    }
-                });
-            } else {
+                    });
+                } else {
                 window.sendDownload && window.sendDownload({
                     url: url,
                     fileName: fileName,
@@ -2036,20 +2088,33 @@ const store = {
             }
         },
         // 保存未获取成功的列表
-        saveUnfetchList({ state }) {
+        saveUnfetchList({ state }, { all }) {
             let distList = state.fetchingList.concat(state.list).concat(state.errorList);
+
             // console.log(distList);
 
-            let toSaveList = [];
+            let successList = [];
+            // let errorList = [];
+            let unFetchList = [];
+
+            // let toSaveList = [];
             distList.forEach(item => {
                 let listItem = {};
                 listItem[item] = state.imgMapTag[item] || '';
-                toSaveList.push(listItem);
+                unFetchList.push(listItem);
             });
+            state.successList.forEach(item => {
+                let listItem = {};
+                listItem[item] = state.imgMapTag[item] || '';
+                successList.push(listItem);
+            });
+
             let toSaveJson = {
                 href: location.href,
                 tags: state.tags,
-                list: toSaveList
+                // list: toSaveList,
+                unFetchList,
+                successList
             };
             let blob = new Blob([JSON.stringify(toSaveJson)], { type: 'application/json' });
             /* console.log(toSaveList);
@@ -2061,15 +2126,19 @@ const store = {
                 let webFrom = '';
                 switch (state.urlType) {
                     case 'danbooru':
-                        webFrom = 'danbooru';
+                        webFrom = 'danbooru.';
                         break;
                     case 'yande.re':
-                        webFrom = 'yandere';
+                        webFrom = 'yandere.';
                         break;
                     default:
                         break;
                 }
-                window.sendDownload && window.sendDownload({ url: file.result, fileName: `${state.tags || 'unknow'}.${webFrom || '.'}json` });
+                let dir = '';
+                if (state.useDir) {
+                    dir = state.tags ? state.tags + '/' : '';
+                }
+                window.sendDownload && window.sendDownload({ url: file.result, fileName: `${dir}${state.tags || 'unknow'}.${webFrom}json` });
             };
         },
         saveIchiUpData({ state }) {
@@ -3892,7 +3961,7 @@ exports = module.exports = __webpack_require__(0)();
 
 
 // module
-exports.push([module.i, ".download-dialog{width:780px;height:500px;position:fixed;left:50%;top:50%;text-align:left;background-color:#fff;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,.3);border-radius:3px;z-index:100}.e-dialog-diss{float:right;cursor:pointer;font-size:30px;margin:0 6px 0 0}.e-dialog-diss:hover{color:red}.download-dialog div,.download-dialog h3,.download-dialog span{color:rgba(0,0,0,.9)}.list-block{min-height:20px;max-height:100px;overflow:auto;border:1px solid #eee;word-break:keep-all}.success-thumbnial{width:100px;height:100px;border:1px solid #efefef;object-fit:contain;object-position:center;margin:10px}.download-dialog button{border:none;outline:none;background-color:#007acc;padding:5px 10px;color:#fff;cursor:pointer}.download-dialog input{line-height:2.2em;border:1px solid #aaa;height:29px}.download-dialog .btn-fetching{background-color:#2dcb6f}.download-dialog .btn-stoped{background-color:#ffa000}", ""]);
+exports.push([module.i, ".download-dialog{width:780px;height:500px;position:fixed;left:50%;top:50%;text-align:left;background-color:#fff;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,0,0,.3);border-radius:3px;z-index:100}.e-dialog-diss{float:right;cursor:pointer;font-size:30px;margin:0 6px 0 0}.e-dialog-diss:hover{color:red}.download-dialog div,.download-dialog h3,.download-dialog span{color:rgba(0,0,0,.9)}.list-block{min-height:20px;max-height:100px;overflow:auto;border:1px solid #eee;word-break:keep-all}.success-thumbnial{width:100px;height:100px;border:1px solid #efefef;object-fit:contain;object-position:center;margin:10px}.download-dialog button{border:none;outline:none;background-color:#007acc;padding:5px 10px;color:#fff;cursor:pointer}.download-dialog input{line-height:2.2em;border:1px solid #aaa;height:29px;vertical-align:middle}.download-dialog .btn-fetching{background-color:#2dcb6f}.download-dialog .btn-stoped{background-color:#ffa000}", ""]);
 
 // exports
 
@@ -11609,7 +11678,19 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "padding": "10px 0 10px 10px",
       "width": "99%"
     }
-  }, [_c('h3', [_vm._v("1.通过httpRequest 获取 图片")]), _vm._v(" "), _c('button', {
+  }, [_c('div', {
+    staticStyle: {
+      "width": "180px",
+      "height": "105px",
+      "border": "1px dashed red",
+      "float": "right",
+      "text-align": "center",
+      "line-height": "105px"
+    },
+    attrs: {
+      "id": "unFetchDropArea"
+    }
+  }, [_vm._v("\n      去重\n    ")]), _vm._v(" "), _c('h3', [_vm._v("1.通过httpRequest 获取 图片")]), _vm._v(" "), _c('button', {
     staticClass: "btn",
     attrs: {
       "id": "btn-fetch-data"
@@ -11625,7 +11706,33 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     on: {
       "click": _vm.startFetchPageDataWithNoPixiv
     }
-  }, [_vm._v("获取非pixiv图片")]), _vm._v(" "), _c('br'), _vm._v(" "), _c('div', [_vm._v("\n        过程："), (!_vm.pageDataSuccess) ? _c('span', [_vm._v("共" + _vm._s(_vm.pageTotal) + "页 正在获取第" + _vm._s(_vm.currentPage) + "页")]) : _vm._e(), _vm._v(" "), (_vm.pageDataSuccess) ? _c('span', [_vm._v("获取完成")]) : _vm._e()]), _vm._v(" "), _c('div', [_c('label', {
+  }, [_vm._v("获取非pixiv图片")]), _vm._v(" "), _c('br'), _vm._v(" "), _c('div', [_vm._v("\n        过程："), (!_vm.pageDataSuccess) ? _c('span', [_vm._v("共" + _vm._s(_vm.pageTotal) + "页 正在获取第" + _vm._s(_vm.currentPage) + "页")]) : _vm._e(), _vm._v(" "), (_vm.pageDataSuccess) ? _c('span', [_vm._v("获取完成")]) : _vm._e(), _vm._v(" "), _c('span', {
+    staticStyle: {
+      "margin-left": "50px"
+    }
+  }, [_vm._v("只获取")]), _vm._v(" "), _c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.toFetchPageCount),
+      expression: "toFetchPageCount"
+    }],
+    staticStyle: {
+      "width": "50px"
+    },
+    attrs: {
+      "type": "number"
+    },
+    domProps: {
+      "value": (_vm.toFetchPageCount)
+    },
+    on: {
+      "input": function($event) {
+        if ($event.target.composing) { return; }
+        _vm.toFetchPageCount = $event.target.value
+      }
+    }
+  }), _vm._v("\n        页\n    ")]), _vm._v(" "), _c('div', [_c('label', {
     staticStyle: {
       "cursor": "pointer"
     }
@@ -11660,7 +11767,26 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
         }
       }
     }
-  }), _vm._v(" " + _vm._s(_vm.tags) + "\n      ")])]), _vm._v(" "), _c('br'), _vm._v(" "), _c('button', {
+  }), _vm._v(" "), _c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.tags),
+      expression: "tags"
+    }],
+    attrs: {
+      "type": "text"
+    },
+    domProps: {
+      "value": (_vm.tags)
+    },
+    on: {
+      "input": function($event) {
+        if ($event.target.composing) { return; }
+        _vm.tags = $event.target.value
+      }
+    }
+  })])]), _vm._v(" "), _c('br'), _vm._v(" "), _c('button', {
     class: 'btn ' + (_vm.isfetching ? 'btn-fetching' : 'btn-stoped'),
     attrs: {
       "id": "fetImage"
@@ -11772,7 +11898,11 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "id": ""
     },
     on: {
-      "click": _vm.saveUnfetchList
+      "click": function($event) {
+        return _vm.saveUnfetchList({
+          all: false
+        })
+      }
     }
   }, [_vm._v("保存")]), _vm._v(" "), (_vm.urlType == 'ichi-up') ? _c('button', {
     staticClass: "btn",

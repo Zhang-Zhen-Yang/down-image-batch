@@ -1,6 +1,10 @@
 # down-image-batch
 浏览器扩展
 
+git fetch --all
+git reset --hard origin/master
+git pull //可以省略
+
 // 支持下载以下网站的图片
 
 // 列表页

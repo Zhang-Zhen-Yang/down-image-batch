@@ -7,6 +7,9 @@
       </div>
       <!--内容区-->
       <div style="height: 420px;overflow:auto;box-sizing: border-box;padding:10px 0 10px 10px;width: 99%;">
+        <div id="unFetchDropArea" style="width: 180px;height:105px;border:1px dashed red;float:right;text-align:center;line-height: 105px">
+          去重
+        </div>
         <h3>1.通过httpRequest 获取 图片</h3>
         <button class="btn" id="btn-fetch-data" @click="startFetchPageData">获取</button>
         <button class="btn" id="btn-fetch-data" @click="startFetchPageDataWithNoPixiv">获取非pixiv图片</button>
@@ -14,10 +17,14 @@
         <div>
             过程：<span v-if="!pageDataSuccess">共{{pageTotal}}页 正在获取第{{currentPage}}页</span>
             <span v-if="pageDataSuccess">获取完成</span>
+
+            <span style="margin-left:50px;">只获取</span>
+            <input type="number" v-model="toFetchPageCount" style="width:50px;">
+            页
         </div>
         <div>
           <label style="cursor:pointer;">
-            <input type="checkbox" v-model="useDir">&emsp;{{ tags }}
+            <input type="checkbox" v-model="useDir">&emsp;<input type="text" v-model="tags">
           </label>
         </div>
         <br>
@@ -54,7 +61,8 @@
         </p>
       </div>
       <div style="height:50px;padding:10px 0 0 10px;border-top:1px solid #efefef;">
-        <button class="btn" id="" @click="saveUnfetchList">保存</button>
+        <button class="btn" id="" @click="saveUnfetchList({all: false})">保存</button>
+        <!-- <button class="btn" id="" @click="saveUnfetchList({all: true})">保存all</button> -->
         <button v-if="urlType == 'ichi-up'" class="btn" id="" @click="saveScreenshot"> 保存ichi-up教程</button>
         <button v-if="urlType == 'ichi-up'" class="btn" id="" @click="openTab">打开tab</button>
       </div>
@@ -95,6 +103,9 @@ export default {
     },
     pageTotal() {
       return this.$store.state.pageTotal;
+    },
+    toFetchPageCount() {
+      return this.$store.state.toFetchPageCount;
     },
     list() {
       return this.$store.state.list;
@@ -148,8 +159,8 @@ export default {
     addToList(){
       this.$store.dispatch('addToList');
     },
-    saveUnfetchList() {
-      this.$store.dispatch('saveUnfetchList');
+    saveUnfetchList({all}) {
+      this.$store.dispatch('saveUnfetchList', {all});
     },
     saveScreenshot() {
       this.$store.dispatch('saveScreenshot');
@@ -222,6 +233,7 @@ export default {
    line-height:2.2em;
    border: 1px solid #aaaaaa;
    height: 29px;
+   vertical-align: middle;
   }
   .download-dialog .btn-fetching{
     background-color: rgb(45,203,111);

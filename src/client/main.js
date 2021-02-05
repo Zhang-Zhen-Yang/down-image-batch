@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-06 08:46:27 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2020-06-09 10:01:02
+ * @Last Modified time: 2021-02-05 11:14:37
  */
 import Vue from 'vue'
 import App from './App.vue'
@@ -44,9 +44,6 @@ if(util.shouldInjectDom()) {
     }, 1000)
 
   }
-  
-  
-
 } else {
   console.log('no');
 }
@@ -57,3 +54,6 @@ setTimeout(()=>{
   window.notify('', '', '获取完成', `user:ohisashiburi`);       
 }, 2000) 
  */
+window.pp = ()=>{
+  console.log(JSON.parse(JSON.stringify(window.project.$store.state)));
+}
