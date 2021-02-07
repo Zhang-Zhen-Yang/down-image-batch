@@ -10,7 +10,7 @@ module.exports = {
         'devtools': './src/devtools.js',
         'inject': './src/inject.js',
         'mypanel': './src/mypanel.js',
-        'options': './src/popup.js',
+        'popup': './src/popup.js',
     },
     output: {
         path: path.resolve(__dirname, './main/js'),

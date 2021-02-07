@@ -820,8 +820,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     pageTotal() {
       return this.$store.state.pageTotal;
     },
-    toFetchPageCount() {
-      return this.$store.state.toFetchPageCount;
+    toFetchPageCount: {
+      get() {
+        return this.$store.state.toFetchPageCount;
+      },
+      set(val) {
+        console.log('val==================================', val);
+        this.$store.state.toFetchPageCount = val;
+      }
     },
     list() {
       return this.$store.state.list;
@@ -1031,7 +1037,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2021-02-05 14:42:14
+ * @Last Modified time: 2021-02-07 17:39:49
  */
 
 
@@ -1062,7 +1068,7 @@ const store = {
         list: __WEBPACK_IMPORTED_MODULE_1__data_js__["a" /* default */].list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
         successList: [], //data.successList,
         errorList: [], // data.errorList,
-        unfetchLit: [],
+        unFetchList: [],
         fetchingList: [],
         isfetching: false,
         parallelNum: 1, // localStorage.getItem('parallelNum'),
@@ -1124,7 +1130,7 @@ const store = {
             document.body.addEventListener('drop', e => {
                 e.preventDefault();
                 // console.log(e.target);
-                // 去除不下载的图片
+                // 是否去除不下载的图片
                 let isUnFetchDropArea = e.target.id == unFetchDropArea;
                 let file = e.dataTransfer.files;
                 // console.log(file);
@@ -1145,7 +1151,8 @@ const store = {
                                         let key = Object.keys(item)[0];
                                         unFetchList.push(key);
                                     });
-                                    state.unFetchList = unFetchList;
+                                    // 可能要多次去除
+                                    state.unFetchList = state.unFetchList.concat(unFetchList);
                                     dispatch('filterUnfetchList');
                                 } else {
 
@@ -2371,6 +2378,23 @@ const store = {
                     });
                 };
             });
+        },
+        // 下载当前页面的图片
+        downloadSingl({ state }) {
+            let imgUrl = '';
+            switch (state.urlType) {
+
+                case 'danbooru':
+                    break;
+                default:
+                    break;
+            }
+            if (imgUrl) {
+                let ext = __WEBPACK_IMPORTED_MODULE_0__util_js__["a" /* default */].getExt(imgUrl);
+                window.sendDownload({ url: imgUrl, fileName: Date.now() + '.' + ext });
+            } else {
+                alert('找不到图片');
+            }
         }
 
     },

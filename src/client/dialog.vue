@@ -104,8 +104,14 @@ export default {
     pageTotal() {
       return this.$store.state.pageTotal;
     },
-    toFetchPageCount() {
-      return this.$store.state.toFetchPageCount;
+    toFetchPageCount: {
+      get() {
+        return this.$store.state.toFetchPageCount;
+      },
+      set(val) {
+        console.log('val==================================', val);
+        this.$store.state.toFetchPageCount = val;
+      }
     },
     list() {
       return this.$store.state.list;

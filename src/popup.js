@@ -1,4 +1,4 @@
-$(function() {
+jq(function() {
 
 	// 加载设置
 	var defaultConfig = {color: 'white'}; // 默认配置
@@ -7,19 +7,19 @@ $(function() {
 	});
 
 	// 初始化国际化
-	$('#test_i18n').html(chrome.i18n.getMessage("helloWorld"));
+	jq('#test_i18n').html(chrome.i18n.getMessage("helloWorld"));
 	// alert('ddddddd');
 
-	$('#back-url').val('55555');
+	jq('#back-url').val('55555');
 	chrome.storage.sync.get({url: 'http://localhost:3000/receive',node: 'body'}, function(res){
-		$('#back-url').val(res.url);
-		$('#node').val(res.node);
+		jq('#back-url').val(res.url);
+		jq('#node').val(res.node);
 	});
 })
 
-$('#save-btn').on('click', function() {
-	var url = $('#back-url').val();
-	var node = $('#node').val();
+jq('#save-btn').on('click', function() {
+	var url = jq('#back-url').val();
+	var node = jq('#node').val();
 	
 	chrome.storage.sync.set({url: url, node: node}, function(){
 		chrome.notifications.create(null, {
@@ -33,30 +33,30 @@ $('#save-btn').on('click', function() {
 
 
 // 打开后台页
-$('#open_background').click(function(e){
+jq('#open_background').click(function(e){
 	window.open(chrome.extension.getURL('background.html'));
 });
 
 
 chrome.storage.sync.get({ver: '1'}, function(res) {
-	$('#ver').text(res.ver);
+	jq('#ver').text(res.ver);
 	// alert(res.ver);
 });
 /* 
 // 调用后台JS
-$('#invoke_background_js').click(e => {
+jq('#invoke_background_js').click(e => {
 	var bg = chrome.extension.getBackgroundPage();
 	bg.testBackground();
 });
 
 // 获取后台页标题
-$('#get_background_title').click(e => {
+jq('#get_background_title').click(e => {
 	var bg = chrome.extension.getBackgroundPage();
 	alert(bg.document.title);
 });
 
 // 设置后台页标题
-$('#set_background_title').click(e => {
+jq('#set_background_title').click(e => {
 	var title = prompt('请输入background的新标题：', '这是新标题');
 	var bg = chrome.extension.getBackgroundPage();
 	bg.document.title = title;
@@ -64,7 +64,7 @@ $('#set_background_title').click(e => {
 });
 
 // 自定义窗体大小
-$('#custom_window_size').click(() => {
+jq('#custom_window_size').click(() => {
 	chrome.windows.getCurrent({}, (currentWindow) => {
 		var startLeft = 10;
 		chrome.windows.update(currentWindow.id, 
@@ -82,7 +82,7 @@ $('#custom_window_size').click(() => {
 });
 
 // 最大化窗口
-$('#max_current_window').click(() => {
+jq('#max_current_window').click(() => {
 	chrome.windows.getCurrent({}, (currentWindow) => {
 		// state: 可选 'minimized', 'maximized' and 'fullscreen' 
 		chrome.windows.update(currentWindow.id, {state: 'maximized'});
@@ -91,7 +91,7 @@ $('#max_current_window').click(() => {
 
 
 // 最小化窗口
-$('#min_current_window').click(() => {
+jq('#min_current_window').click(() => {
 	chrome.windows.getCurrent({}, (currentWindow) => {
 		// state: 可选 'minimized', 'maximized' and 'fullscreen' 
 		chrome.windows.update(currentWindow.id, {state: 'minimized'});
@@ -99,43 +99,43 @@ $('#min_current_window').click(() => {
 });
 
 // 打开新窗口
-$('#open_new_window').click(() => {
+jq('#open_new_window').click(() => {
 	chrome.windows.create({state: 'maximized'});
 });
 
 // 关闭全部
-$('#close_current_window').click(() => {
+jq('#close_current_window').click(() => {
 	chrome.windows.getCurrent({}, (currentWindow) => {
 		chrome.windows.remove(currentWindow.id);
 	});
 });
 
 // 新标签打开网页
-$('#open_url_new_tab').click(() => {
+jq('#open_url_new_tab').click(() => {
 	chrome.tabs.create({url: 'https://www.baidu.com'});
 });
 
 // 当前标签打开网页
-$('#open_url_current_tab').click(() => {
+jq('#open_url_current_tab').click(() => {
 	getCurrentTabId(tabId => {
 		chrome.tabs.update(tabId, {url: 'http://www.so.com'});
 	});
 });
 
 // 获取当前标签ID
-$('#get_current_tab_id').click(() => {
+jq('#get_current_tab_id').click(() => {
 	getCurrentTabId(tabId => {
 		alert('当前标签ID：' + tabId);
 	});
 });
 
 // 高亮tab
-$('#highlight_tab').click(() => {
+jq('#highlight_tab').click(() => {
 	chrome.tabs.highlight({tabs: 0});
 });
 
 // popup主动发消息给content-script
-$('#send_message_to_content_script').click(() => {
+jq('#send_message_to_content_script').click(() => {
 	sendMessageToContentScript('你好，我是popup！', (response) => {
 		if(response) alert('收到来自content-script的回复：'+response);
 	});
@@ -150,7 +150,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 });
 
 // popup与content-script建立长连接
-$('#connect_to_content_script').click(() => {
+jq('#connect_to_content_script').click(() => {
 	getCurrentTabId((tabId) => {
 		var port = chrome.tabs.connect(tabId, {name: 'test-connect'});
 		port.postMessage({question: '你是谁啊？'});
@@ -210,29 +210,29 @@ function executeScriptToCurrentTab(code)
 // 演示2种方式操作DOM
 
 // 修改背景色
-$('#update_bg_color').click(() => {
+jq('#update_bg_color').click(() => {
 	executeScriptToCurrentTab('document.body.style.backgroundColor="red";')
 });
 
 // 修改字体大小
-$('#update_font_size').click(() => {
+jq('#update_font_size').click(() => {
 	sendMessageToContentScript({cmd:'update_font_size', size: 42}, function(response){});
 });
 
 // 显示badge
-$('#show_badge').click(() => {
+jq('#show_badge').click(() => {
 	chrome.browserAction.setBadgeText({text: 'New'});
 	chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]});
 });
 
 // 隐藏badge
-$('#hide_badge').click(() => {
+jq('#hide_badge').click(() => {
 	chrome.browserAction.setBadgeText({text: ''});
 	chrome.browserAction.setBadgeBackgroundColor({color: [0, 0, 0, 0]});
 });
 
 // 显示桌面通知
-$('#show_notification').click(e => {
+jq('#show_notification').click(e => {
 	chrome.notifications.create(null, {
 		type: 'image',
 		iconUrl: 'img/icon.png',
@@ -242,7 +242,7 @@ $('#show_notification').click(e => {
 	});
 });
 
-$('#check_media').click(e => {
+jq('#check_media').click(e => {
 	alert('即将打开一个有视频的网站，届时将自动检测是否存在视频！');
 	chrome.tabs.create({url: 'http://www.w3school.com.cn/tiy/t.asp?f=html5_video'});
 }); */

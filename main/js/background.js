@@ -258,7 +258,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 			sendResponse();
 		} else if (request.cmd == 'fetchData') {
 			// 跨域获取数据
-			$.ajax({
+			jq.ajax({
 				type: "GET",
 				url: request.url,
 				timeout: request.timeout,
@@ -436,14 +436,14 @@ function sendFetchDataToContentScript(data, cmd) {
 	});
 }
 
-$('#test_cors').click(function (e) {
+jq('#test_cors').click(function (e) {
 	/* $.get('https://www.baidu.com', function(html){
  	console.log( html);
  	alert('跨域调用成功！');
  }); */
 	// var url = 'https://detail.1688.com/offer/577545270423.html';
 	var url = 'https://ai.taobao.com/search/index.htm?source_id=search&key=%E5%90%95';
-	$.ajax({
+	jq.ajax({
 		type: "GET",
 		url: url,
 		timeout: 10000000,
@@ -461,7 +461,7 @@ $('#test_cors').click(function (e) {
 	});
 });
 
-$('#get_popup_title').click(function (e) {
+jq('#get_popup_title').click(function (e) {
 	var views = chrome.extension.getViews({ type: 'popup' });
 	if (views.length > 0) {
 		alert(views[0].document.title);
@@ -516,6 +516,35 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
 		});
 	}
 }, {urls: ["<all_urls>"]}, ["blocking"]); */
+
+jq('#drop-area').on('dragover', e => {
+	e.preventDefault();
+});
+
+jq('#drop-area').on('drop', e => {
+	e.preventDefault();
+	console.log(e);
+
+	let files = e.originalEvent.dataTransfer.files || [];
+
+	Array.from(files).forEach(file => {
+
+		let fileReader = new FileReader();
+		fileReader.readAsText(file);
+
+		fileReader.onload = () => {
+			let jsonText = fileReader.result;
+			console.log(jsonText);
+			try {
+				let json = JSON.parse(jsonText);
+				if (json.href) {
+					let tab = chrome.tabs.create({ url: json.href });
+					console.log(tab);
+				}
+			} catch (e) {}
+		};
+	});
+});
 
 /***/ })
 

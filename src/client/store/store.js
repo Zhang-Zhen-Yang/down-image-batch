@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2021-02-05 17:28:22
+ * @Last Modified time: 2021-02-07 17:39:49
  */
 
 import util from '../util.js';
@@ -33,7 +33,7 @@ const store = {
         list: data.list, // ['https://imgs.aixifan.com/FobKgtlLYWR5EMmd2NKD3lU5raZK', 'https://imgs.aixifan.com/FppAAoc87oY9Q34qmH0j0IOlF_W_'],// ['list1', 'list2', 'list3'],
         successList: [],//data.successList,
         errorList: [],// data.errorList,
-        unfetchLit: [],
+        unFetchList: [],
         fetchingList: [],
         isfetching: false,
         parallelNum: 1, // localStorage.getItem('parallelNum'),
@@ -374,7 +374,7 @@ const store = {
             console.log([pageNo, state.pageTotal]);
             let pTotal = state.pageTotal;
             if(state.toFetchPageCount > 0 && state.toFetchPageCount < pTotal) {
-                pTotal = state.toFetchPageCount
+               pTotal = state.toFetchPageCount;
             }
             if(pageNo <= pTotal) {
                 state.currentPage = pageNo;
