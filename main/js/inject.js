@@ -594,7 +594,7 @@ let util = {
  * @Author: zhangzhenyang 
  * @Date: 2020-06-06 08:46:27 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2021-02-05 11:14:37
+ * @Last Modified time: 2021-02-08 13:02:41
  */
 
 
@@ -614,8 +614,8 @@ if (__WEBPACK_IMPORTED_MODULE_4__util__["a" /* default */].shouldInjectDom()) {
 
   // alert('https://ichi-up.net/2016/006'.match(/ichi\-up\.net\//)); 
 
-  if ($) {
-    $('body').prepend('<div id="e-app"></div>');
+  if (jq) {
+    jq('body').prepend('<div id="e-app"></div>');
     window.project = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
       el: '#e-app',
       store,
@@ -1037,7 +1037,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2021-02-07 17:39:49
+ * @Last Modified time: 2021-02-08 09:22:01
  */
 
 
@@ -2096,6 +2096,7 @@ const store = {
         },
         // 保存未获取成功的列表
         saveUnfetchList({ state }, { all }) {
+            // alert(1111);
             let distList = state.fetchingList.concat(state.list).concat(state.errorList);
 
             // console.log(distList);

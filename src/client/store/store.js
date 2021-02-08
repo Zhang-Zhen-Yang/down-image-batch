@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-08 11:26:04 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2021-02-07 17:39:49
+ * @Last Modified time: 2021-02-08 09:22:01
  */
 
 import util from '../util.js';
@@ -1091,6 +1091,7 @@ const store = {
         },
         // 保存未获取成功的列表
         saveUnfetchList({state},{all}){
+            alert(1111);
             let distList = state.fetchingList.concat(state.list).concat(state.errorList);
 
             // console.log(distList);

@@ -2,7 +2,7 @@
  * @Author: zhangzhenyang 
  * @Date: 2020-06-06 08:46:27 
  * @Last Modified by: zhangzhenyang
- * @Last Modified time: 2021-02-05 11:14:37
+ * @Last Modified time: 2021-02-08 13:02:41
  */
 import Vue from 'vue'
 import App from './App.vue'
@@ -22,8 +22,8 @@ if(util.shouldInjectDom()) {
 
   // alert('https://ichi-up.net/2016/006'.match(/ichi\-up\.net\//)); 
 
-  if($) {
-    $('body').prepend('<div id="e-app"></div>')
+  if(jq) {
+    jq('body').prepend('<div id="e-app"></div>')
     window.project = new Vue({
       el: '#e-app',
       store,
