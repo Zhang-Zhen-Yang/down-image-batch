@@ -26,6 +26,7 @@ const store = {
         currentPage: 1,
         tags: 'tags',
         useDir: true,
+        useRename: true,
 
         imgMapTag: {},//{list1: 'tag1', list2: 'tag2', list3: 'tag3', list4: 'tag4'},
         imgMapThumbnail: {},
@@ -150,8 +151,19 @@ const store = {
                                         toSetMap[key] = item[key];
                                     })
     
+                                    let toSetErrorList = [];
+                                    (json.errorList || []).forEach((item,index) => {
+                                        let key = Object.keys(item)[0]
+                                        //if(u.indexOf(key) > -1) {
+                                            toSetErrorList.push(key);
+                                        //}
+                                        toSetMap[key] = item[key];
+                                    })
+
+
                                     state.list = toSetList;
                                     state.successList = toSetSuccessList;
+                                    state.errorList = toSetErrorList;
                                     state.imgMapTag = toSetMap;
                                     console.log(toSetList);
                                     console.log(toSetMap);
@@ -234,11 +246,12 @@ const store = {
             let pageNo = 0;
             let pageTotal = 1;
             if(state.urlType == 'danbooru') {
-                let numberedPage = dom.find('.numbered-page a');
+                let numberedPage = dom.find('.numbered-page a,.paginator .paginator-page');
                 numberedPage.each((index, pItem)=>{
                     console.log(index, pItem);
                     console.log(pItem);
                     let p = parseInt(jQuery(pItem).html());
+                    // alert(p);
                     if(p > pageNo) {
                         pageTotal = p
                     }
@@ -329,9 +342,12 @@ const store = {
                 pageTotal = 1;
                 let pointer = jq('.user-name .c-pointer').html();
                 state.tags = pointer;
-            } else if(state.urlType == 'ichi-up') {
+            } else if(state.urlType == 'bilibiliAlbum'){
+                alert('bilibiliAlbum');
+            }else if(state.urlType == 'ichi-up') {
 
             } else if(state.urlType == 'bilibiliSpace') { // biblibilib图片空间
+                alert(1);
                 let c= jq('#page-dynamic .card').not('li');
                 console.log('c count', c.length);
                 pageTotal = c.length;
@@ -348,7 +364,7 @@ const store = {
                 state.tags = document.title.trim();
             } else if(state.urlType == 'nyahentai') {
                 pageTotal = 1;
-                state.tags = util.checkName(jq('#info-block #info h2').html());
+                state.tags = util.checkName(jq('#info-block #info h1,#info-block #info h2').html());
                 console.log(state.tags);
             } else if(state.urlType == 'shimo') {
                 pageTotal = 1;
@@ -358,6 +374,12 @@ const store = {
                 pageTotal = 1;
                 state.tags = document.title;
                 console.log(state.tags);
+            } else if(state.urlType == 'dmzj'){
+                pageTotal = 1;
+                state.tags = document.title;
+            } else if(state.urlType == 'kgm'){
+                pageTotal = 1;
+                state.tags = document.title;
             }
             state.pageTotal = pageTotal;
         },
@@ -487,14 +509,21 @@ const store = {
                     /* https://search.pstatic.net/common?src=https://mt.404cdn.com/galleries/1557596/1t.jpg
                     https://search.pstatic.net/common?src=https://mi.404cdn.com/galleries/1557596/1.jpg */
 
-
-                    jq('.container .thumb-container img.lazyloaded').each((index, item)=>{
+                    // alert('dd');
+                    jq('.container .thumb-container img').each((index, item)=>{
                         let img = (jq(item).attr('src'));
                         console.log('img', img);
-                        img = img.replace('t.404', 'i.404').replace('t.', '.');
-                        img = img.replace('t1', 'i0').replace('t.', '.');
+                        /* img = img.replace('t.404', 'i.404').replace('t.', '.');
+                        img = img.replace('t1', 'i0').replace('t.', '.'); */
+                        let splitData = img.split('/');
+                        img =  `https://i1.mspcdn5.xyz/galleries/${splitData[4]}/${parseInt(splitData[5])}.`+ 'jpg';//(img.indexOf('png') > 0? ('png'): ('jpg'));
+                        img =  `https://i1.mspcdn2.xyz/galleries/${splitData[4]}/${parseInt(splitData[5])}.`+ 'jpg';//(img.indexOf('png') > 0? ('png'): ('jpg'));
+                        img =  `https://i1.mspcdn4.xyz/galleries/${splitData[4]}/${parseInt(splitData[5])}.`+ 'jpg';//(img.indexOf('png') > 0? ('png'): ('jpg'));https://i1.othcdn.xyz/galleries/1923364/222.jpg
+                        
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
+                        console.log(img);
+                        //https://i1.mspcdn5.xyz/galleries/1786348/1.jpg
                     })
                 } else if(state.urlType == 'shimo') {
                     jq('#editor img').each((index ,item)=>{
@@ -512,7 +541,34 @@ const store = {
                     dispatch('fetchPageImageUrl', {content: '', pageNo}).then(()=>{
                         dispatch('fetchPageData', {pageNo: pageNo + 1});
                     })  
-                } else {
+                } else if(state.urlType == 'dmzj') {
+                    jq('#page_select').children().each((index, item)=>{
+                        let img = 'http:'+$(item).attr('value');
+                        state.list.push(img);
+                        state.imgMapTag[img] = index + 1;
+                        $('body').append(`<img src="${img}">`);
+                    })
+                } else if(state.urlType == 'kgm') {
+                    let f = ()=>{
+                        /* dispatch('fetchPageImageUrl', {content: '', pageNo}).then(()=>{
+                            dispatch('fetchPageData', {pageNo: pageNo + 1});
+                        }) */ 
+
+
+                        document.documentElement.scrollTop = jq('body').height() + 5000;
+                        if(jq('.dropload-down').css('display') == 'none') {
+                            dispatch('fetchPageImageUrl', {content: '', pageNo}).then(()=>{
+                                dispatch('fetchPageData', {pageNo: pageNo + 1});
+                            }) 
+                        } else {
+                            setTimeout(()=>{
+                                f();
+                            }, 100)
+                        }
+                    }
+                    f();
+                    
+                } else{
                     let url
                     if(state.pathname.indexOf('pools') > -1 ) {
                         url = `${state.origin}${state.pathname}?page=${pageNo}`;
@@ -762,6 +818,14 @@ const store = {
                     
                 } else if(state.urlType == 'shimo') {
 
+                } else if(state.urlType == 'kgm'){
+                    let items = jq('.comicimg');
+                    items.each((index, item)=>{
+                        let img = jq(item).attr('src');
+                        state.imgMapTag[img] = (index + 1);
+                        state.list.push(img);
+                    })
+                    console.log(state.list);
                 }
                 resolve();
             })
@@ -792,7 +856,9 @@ const store = {
 
                             let fileName = url.split('/');
                                     fileName = fileName[fileName.length - 1];
-                                    fileName = state.tags +'-'+ (state.imgMapTag[url] || '')+ '.' + util.getExt(fileName);
+                                    if(state.useRename){
+                                        fileName = state.tags +'-'+ (state.imgMapTag[url] || '')+ '.' + util.getExt(fileName);
+                                    }
                                     if(fileName.indexOf('.') < 0){
                                         fileName += '.jpg';
                                     }
@@ -839,6 +905,10 @@ const store = {
                                         fileName = state.imgMapTag[url];
                                     } else if(state.urlType == 'danbooru' || state.urlType == 'yande.re') {
                                         fileName = (state.useDir ? (state.tags +'/') : '' ) + fileName
+                                    } else if(state.urlType == 'dmzj') {
+                                        fileName = (state.useDir ? (state.tags +'/') : '' ) + fileName
+                                    }else if(state.urlType == 'kgm'){
+                                        fileName = (state.useDir ? (state.tags +'/') : '' ) + ((state.imgMapTag[url] || '')+ '.' + util.getExt(fileName));
                                     }
                                     /* fileName = util.checkName(fileName)
                                    console.log('fileName', fileName);
@@ -1091,14 +1161,16 @@ const store = {
         },
         // 保存未获取成功的列表
         saveUnfetchList({state},{all}){
-            alert(1111);
-            let distList = state.fetchingList.concat(state.list).concat(state.errorList);
+            // alert(1111);
+            let distList = state.fetchingList.concat(state.list) //.concat(state.errorList);
 
             // console.log(distList);
 
             let successList = [];
             // let errorList = [];
             let unFetchList = [];
+
+            let errorList = [];
 
             // let toSaveList = [];
             distList.forEach((item)=>{
@@ -1112,6 +1184,11 @@ const store = {
                 successList.push(listItem);
             })
 
+            state.errorList.forEach((item)=>{
+                let listItem = {};
+                listItem[item] = state.imgMapTag[item] || '';
+                errorList.push(listItem);
+            })
 
             let toSaveJson = {
                 href: location.href,
@@ -1119,6 +1196,7 @@ const store = {
                 // list: toSaveList,
                 unFetchList,
                 successList,
+                errorList,
             }
             let blob = new Blob([JSON.stringify(toSaveJson)], {type : 'application/json'});
             /* console.log(toSaveList);

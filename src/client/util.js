@@ -66,6 +66,7 @@
             /yande.re\/post/,
             /yande.re\/pool/,
             /space\.bilibili\.com/,
+            /space\.bilibili\/[0-1]+?\/album/,
             /www.acfun.cn\/a\//,
             /localhost/,
             /ichi\-up\.net\//,
@@ -81,7 +82,9 @@
             /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/,
             /shimo\.im\/docs/,
             /weibo\.com/,
-            /www\.baidu\.com/
+            /www\.baidu\.com/,
+            /dmzj\.com/,
+            /kanguoman\.net/, // https://www.kanguoman.net/gf/maoxianmanyoudao/1946223.html
         ]
         let should = false;
         list.forEach((item)=>{
@@ -112,6 +115,8 @@
             {match:/arknights\.huijiwiki\.com\/wiki/, type: 'arknights'},// arknights维基
             {match: /t\.bilibili\.com/, type: 'bilibili'},// bilibili空动态
             {match:/space\.bilibili.com/, type: 'bilibiliSpace'}, // 未用
+            {match:/space\.bilibili\.com\/[0-9]+?\/album/, type: 'bilibiliAlbum'}, 
+            
             {match: /www\.hpoi\.net\/hobby/, type: 'hpoi'},// hpoi手办
             {match: /www\.hpoi\.cn\/album/, type: 'hpoi'},// hpoi手办
             {match: /www\.hpoi\.net\/album/, type: 'hpoi'},// hpoi手办
@@ -121,12 +126,14 @@
             {match: /shimo\.im\/docs/, type: 'shimo'},//
             {match: /weibo\.com/, type: 'weibo'},// 
             {match: /www\.baidu\.com/, type: 'baidu'},// nyahentai
+            {match: /dmzj\.com/, type: 'dmzj'},// nyahentai
+            {match:/kanguoman\.net/,type: 'kgm'}, // https://www.kanguoman.net/gf/maoxianmanyoudao/1946223.html
         ];
         let href = location.href;
         let urlType = '';
         list.forEach((item)=>{
-            /* console.log(href)
-            console.log(href.match(item.match)); */
+            console.log(href)
+            console.log(href.match(item.match));
             if(href.match(item.match)) {
                 urlType = item.type;
             }
@@ -172,7 +179,25 @@
     // 将特殊符号改成其他
     checkName(str) {
         return str.replace(/(\\)|(\:)|(\*)|(\?)|(\")|(\<)|(\>)|(\|)|(\~)/mig, '-');
-    }
+    },
+    // 下载图片
+    openDownloadDialog: function(url, saveName) {
+        if(typeof url == 'object' && url instanceof Blob)
+        {
+            url = URL.createObjectURL(url); // 创建blob地址
+        }
+        var aLink = document.createElement('a');
+        aLink.href = url;
+        aLink.download = saveName || ''; // HTML5新增的属性，指定保存文件名，可以不要后缀，注意，file:///模式下不会生效
+        var event;
+        if(window.MouseEvent) event = new MouseEvent('click');
+        else
+        {
+            event = document.createEvent('MouseEvents');
+            event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        }
+        aLink.dispatchEvent(event);
+    },
 
 }
 

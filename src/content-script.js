@@ -174,7 +174,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 		)
 		injectCustomJs(codeURL, true); 
 	} else if(request.cmd == 'downloadComplete') {
-		console.log('downloadComplete -------------------');
+		console.log('content 下载通知 --- downloadComplete -------------------');
 		var result = {
 			url: request.url,
 			uuid: request.uuid,

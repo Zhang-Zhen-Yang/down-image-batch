@@ -10,6 +10,7 @@ export default ({state, commit, dispatch, getters})=>{
             console.log(index, pItem);
             console.log(pItem);
             let p = parseInt(jq(pItem).html());
+            alert(p)
             if(p > pageNo) {
                 pageTotal = p
             }

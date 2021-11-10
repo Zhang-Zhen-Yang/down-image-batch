@@ -74,7 +74,7 @@
 //-------------------- 右键菜单演示 ------------------------//
 function shouldSendToTab(url) {
 	// tab.url.indexOf('danbooru') > -1 || tab.url.indexOf('yande.re') > -1  ||tab.url.indexOf('localhost') > -1 || tab.url.indexOf('wonbao') > -1 || tab.url.indexOf('file:') > -1 || tab.url.indexOf('192.168') > -1
-	let list = [/danbooru/, /yande.re/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /space\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.hpoi\.net\/album/, /www\.1999\.co\.jp\/eng\/image/, /www\.1999\.co\.jp\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, /shimo\.im\/docs/, /weibo\.com/, /www\.hpoi\.cn\/album/];
+	var list = [/danbooru/, /yande.re/, /baidu.com/, /bilibili.com/, /www.acfun.cn\/a\//, /localhost/, /ichi\-up\.net\//, /bing\.ioliu\.cn/, /gbf\.huijiwiki\.com\/wiki/, /arknights\.huijiwiki\.com\/wiki/, /t\.bilibili\.com/, /space\.bilibili\.com/, /www\.hpoi\.net\/hobby/, /www\.hpoi\.net\/album/, /www\.1999\.co\.jp\/eng\/image/, /www\.1999\.co\.jp\/image/, /(nyahentai\.co\/g)|(nyahentai\.club)|(ja\.cathentai)|(hentai.com)/, /shimo\.im\/docs/, /weibo\.com/, /www\.hpoi\.cn\/album/, /dmzj\.com/, /kanguoman\.net/];
 	let should = false;
 	list.forEach(item => {
 		if (url.match(item)) {
@@ -385,6 +385,7 @@ chrome.downloads.onChanged.addListener(function (detail) {
 	console.log(detail);
 	const data = dlData[detail.id];
 	if (data) {
+		console.log('=======', data);
 		let msg = '';
 		let err = '';
 		// 判断当前文件名是否正常。下载时必定会有一次 detail.filename.current 有值
@@ -399,6 +400,7 @@ chrome.downloads.onChanged.addListener(function (detail) {
   	}
   } */
 		if (detail.state && detail.state.current === 'complete') {
+			console.log('下载完成监听  ');
 			msg = 'downloaded';
 			sendFetchDataToContentScript(data, 'downloadComplete');
 			dlData[detail.id] = '';
@@ -411,11 +413,11 @@ chrome.downloads.onChanged.addListener(function (detail) {
 			dlData[detail.id] = '';
 		}
 		// 返回信息
-		if (msg) {
-			chrome.tabs.sendMessage(data.tabId, { msg, data, err });
-			// 清除这个任务的数据
-			dlData[detail.id] = null;
-		}
+		/* if (msg) {
+  	chrome.tabs.sendMessage(data.tabId, { msg, data, err })
+  	// 清除这个任务的数据
+  	dlData[detail.id] = null
+  } */
 	}
 });
 
@@ -424,6 +426,7 @@ function sendFetchDataToContentScript(data, cmd) {
 	chrome.tabs.query({}, function (tabs) {
 		tabs.forEach(function (tab, index) {
 			if (shouldSendToTab(tab.url)) {
+				console.log('好耶');
 				chrome.tabs.sendMessage(tabs[index].id, {
 					index: index,
 					cmd: cmd,

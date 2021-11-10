@@ -26,6 +26,9 @@
           <label style="cursor:pointer;">
             <input type="checkbox" v-model="useDir">&emsp;<input type="text" v-model="tags">
           </label>
+          <label>
+            <input type="checkbox" v-model="useRename">使用排序名
+          </label>
         </div>
         <br>
         <!-- 获取到的列表 -->
@@ -89,7 +92,15 @@ export default {
         return this.$store.state.useDir;
       },
       set(val) {
-        this.$store.state.useDir.val;
+        this.$store.state.useDir = val;
+      }
+    },
+    useRename: {
+      get() {
+        return this.$store.state.useRename;
+      },
+      set(val) {
+        this.$store.state.useRename = val;
       }
     },
     urlType() {
