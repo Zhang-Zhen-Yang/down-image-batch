@@ -543,7 +543,7 @@ const store = {
                     })  
                 } else if(state.urlType == 'dmzj') {
                     jq('#page_select').children().each((index, item)=>{
-                        let img = 'http:'+$(item).attr('value');
+                        let img = 'https:'+$(item).attr('value');
                         state.list.push(img);
                         state.imgMapTag[img] = index + 1;
                         $('body').append(`<img src="${img}">`);
@@ -1150,6 +1150,18 @@ const store = {
                     }
                 });
             } else {
+                if(state.urlType == 'dmzj') {
+                    url = url.replace('http:', 'https:');
+                    url = decodeURIComponent(url);
+                   /*  util.openDownloadDialog(decodeURIComponent(url), fileName);
+                    setTimeout(() => {
+                        c({success: true});
+                    }, 100); */
+                } else {
+
+                }
+                // alert(url);
+                // return
                 window.sendDownload && window.sendDownload({
                     url: url,
                     fileName: fileName,
